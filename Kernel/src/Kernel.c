@@ -8,10 +8,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdbool.h>
-#include <time.h>
-#include <commons/log.h>
-#include <commons/string.h>
-#include <commons/log.h>
+#include<time.h>
+#include<commons/log.h>
+#include<commons/string.h>
 
 #include "ServerManager.h"
 

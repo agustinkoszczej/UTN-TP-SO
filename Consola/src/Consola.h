@@ -19,6 +19,4 @@ typedef struct {
 Config_Consola consola_config;
 char* path = "Consola.cfg";
 
-int socketConsola;
-
 #endif /* CONSOLA_H_ */
