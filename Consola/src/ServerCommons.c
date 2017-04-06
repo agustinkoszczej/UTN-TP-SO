@@ -44,10 +44,9 @@ void enviarMensaje(int socketCliente, char* msg, int tamanio) {
 }
 
 //VER VIDEO SOCKETS DE UTN.SO PARTE 2 PARA ENTENDER ESTA FUNCION
-void permitirReutilizar(int servidor, int* activado)
-{
-	(*activado)=1;
-	setsockopt(servidor, SOL_SOCKET, SO_REUSEADDR, activado, sizeof(*activado));
+void permitirReutilizar(int servidor) {
+	int activado = 1;
+	setsockopt(servidor, SOL_SOCKET, SO_REUSEADDR, &activado, sizeof(activado));
 }
 
 char* recibirMensaje(int cliente, int tamanioMsj, int criterio) {
@@ -75,11 +74,9 @@ void hacerListen(int servidor) {
 	listen(servidor, CANT_CONEXIONES);
 }
 
-void hacerBindeo(int servidor, struct sockaddr_in* direccionServidor) {
-	puts("Hola");
+void hacerBindeo(int* servidor, struct sockaddr_in* direccionServidor) {
 	if (bind(servidor, (void*) direccionServidor, sizeof(*direccionServidor))
 			!= 0) {
-		printf("xd = %d\n", direccionServidor->sin_addr);
 		perror("Fallo el bind");
 		exit(1);
 	}
@@ -89,19 +86,10 @@ void configurarServidor(struct sockaddr_in* direccion, int* socketServidor,
 		unsigned short PUERTO) {
 	(*direccion) = crearDireccionServidor(PUERTO);
 	(*socketServidor) = crearSocket();
-	//permitirReutilizar((*socketServidor), &activado);
+	permitirReutilizar(*socketServidor);
 	//Recordar regla memotecnica
 	//BLAB: Bind-Listen-Accept-Begin to Communicate
-	//hacerBindeo((*socketServidor), direccion);
-
-	int act = 1;
-	setsockopt(socketServidor, SOL_SOCKET, SO_REUSEADDR, act, sizeof(act));
-	if (bind(socketServidor, (void*) direccion, sizeof(*direccion))
-				!= 0) {
-			printf("xd = %d\n", direccion->sin_addr);
-			perror("Fallo el bind");
-			exit(1);
-		}
+	hacerBindeo((*socketServidor), direccion);
 	hacerListen((*socketServidor));
 }
 
@@ -124,8 +112,8 @@ void quitarCliente(int indice) {
 void hacerAccept(t_cliente* Cliente, int* socketServidor) {
 	int socketNuevoCliente;
 	unsigned int tamanioDireccion;
-	Cliente->socket = accept((*socketServidor), (void*) &(Cliente->direccion),
-			&tamanioDireccion);
+	Cliente->socket = accept((*socketServidor),
+			(void*) &(Cliente->direccion), &tamanioDireccion);
 	agregarCliente(Cliente);
 }
 
@@ -145,9 +133,9 @@ void recibirClientes(int* socketServidor) {
 	hacerHandshake(Cliente);
 }
 
-int charToInt(char *c) {
-	return ((int) (*c));
+int charToInt(char *c){
+	return ((int)(*c));
 }
-char* intToChar(int i) {
-	return string_from_format("%c", i);
+char* intToChar(int i){
+	return string_from_format("%c",i);
 }
