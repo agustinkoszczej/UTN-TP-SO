@@ -16,9 +16,13 @@
 
 #include "FileSystem.h"
 
+int activar_logger = 0; //Cambiar a 1 cuando no lo estemos probando. Esto es para que no nos llenemos de archivos cada vez que lo probamos.
+
 t_log* 	archivo_logger;
 
 void logger (char * accion, char * tipo){
+
+	if(activar_logger == 1){
 
 	t_log_level nivel;
 	nivel = log_level_from_string(tipo);
@@ -50,7 +54,7 @@ void logger (char * accion, char * tipo){
 			log_error(archivo_logger, accion);
 				break;
 	}
-
+	}
 }
 
 
