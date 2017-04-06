@@ -1,0 +1,2 @@
+[INFO] 00:34:53:680 Consola/(9457:9457): Iniciando Consola
+[INFO] 00:34:53:680 Consola/(9457:9457): Archivo de configuracion de Consola cargado exitosamente

@@ -9,6 +9,8 @@
 #define KERNEL_H_
 
 #include <commons/config.h>
+#include<commons/log.h>
+#include<commons/string.h>
 
 typedef struct {
 	int PUERTO_PROG;
@@ -30,6 +32,7 @@ typedef struct {
 Config_Kernel kernel_config;
 char* path = "Kernel.cfg";
 
-
+struct sockaddr_in direccionServidorKernel;
+int socketServidorKernel;
 
 #endif /* KERNEL_H_ */

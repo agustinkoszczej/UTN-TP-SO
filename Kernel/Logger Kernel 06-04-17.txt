@@ -1,0 +1,75 @@
+[INFO] 00:00:31:503 Kernel/(7526:7526): Iniciando Kernel
+[INFO] 00:00:31:503 Kernel/(7526:7526): Archivo de configuracion cargado exitosamente!
+[INFO] 00:09:56:331 Kernel/(7861:7861): Iniciando Kernel
+[INFO] 00:09:56:331 Kernel/(7861:7861): Archivo de configuracion cargado exitosamente!
+[INFO] 00:10:17:724 Kernel/(7900:7900): Iniciando Kernel
+[INFO] 00:10:17:726 Kernel/(7900:7900): Archivo de configuracion cargado exitosamente!
+[INFO] 00:10:31:323 Kernel/(7938:7938): Iniciando Kernel
+[INFO] 00:10:31:324 Kernel/(7938:7938): Archivo de configuracion cargado exitosamente!
+[INFO] 00:12:39:941 Kernel/(7976:7976): Iniciando Kernel
+[INFO] 00:12:39:942 Kernel/(7976:7976): Archivo de configuracion cargado exitosamente!
+[INFO] 00:13:46:985 Kernel/(8024:8024): Iniciando Kernel
+[INFO] 00:13:46:985 Kernel/(8024:8024): Archivo de configuracion cargado exitosamente!
+[INFO] 00:15:15:980 Kernel/(8072:8072): Iniciando Kernel
+[INFO] 00:15:15:981 Kernel/(8072:8072): Archivo de configuracion cargado exitosamente!
+[INFO] 00:16:50:14 Kernel/(8123:8123): Iniciando Kernel
+[INFO] 00:16:50:14 Kernel/(8123:8123): Archivo de configuracion cargado exitosamente!
+[INFO] 00:16:57:159 Kernel/(8159:8159): Iniciando Kernel
+[INFO] 00:16:57:159 Kernel/(8159:8159): Archivo de configuracion cargado exitosamente!
+[INFO] 00:17:58:499 Kernel/(8216:8216): Iniciando Kernel
+[INFO] 00:17:58:499 Kernel/(8216:8216): Archivo de configuracion cargado exitosamente!
+[INFO] 00:19:26:24 Kernel/(8313:8313): Iniciando Kernel
+[INFO] 00:19:26:28 Kernel/(8313:8313): Archivo de configuracion cargado exitosamente!
+[INFO] 00:20:20:952 Kernel/(8395:8395): Iniciando Kernel
+[INFO] 00:20:20:952 Kernel/(8395:8395): Archivo de configuracion cargado exitosamente!
+[INFO] 00:20:44:331 Kernel/(8438:8438): Iniciando Kernel
+[INFO] 00:20:44:332 Kernel/(8438:8438): Archivo de configuracion cargado exitosamente!
+[INFO] 00:21:21:6 Kernel/(8485:8485): Iniciando Kernel
+[INFO] 00:21:21:6 Kernel/(8485:8485): Archivo de configuracion cargado exitosamente!
+[INFO] 00:21:36:0 Kernel/(8525:8525): Iniciando Kernel
+[INFO] 00:21:36:2 Kernel/(8525:8525): Archivo de configuracion cargado exitosamente!
+[INFO] 00:21:50:773 Kernel/(8561:8561): Iniciando Kernel
+[INFO] 00:21:50:775 Kernel/(8561:8561): Archivo de configuracion cargado exitosamente!
+[INFO] 00:22:01:906 Kernel/(8598:8598): Iniciando Kernel
+[INFO] 00:22:01:907 Kernel/(8598:8598): Archivo de configuracion cargado exitosamente!
+[INFO] 00:22:59:238 Kernel/(8688:8688): Iniciando Kernel
+[INFO] 00:22:59:242 Kernel/(8688:8688): Archivo de configuracion cargado exitosamente!
+[INFO] 00:23:09:509 Kernel/(8724:8724): Iniciando Kernel
+[INFO] 00:23:09:510 Kernel/(8724:8724): Archivo de configuracion cargado exitosamente!
+[INFO] 00:23:38:837 Kernel/(8763:8763): Iniciando Kernel
+[INFO] 00:23:38:839 Kernel/(8763:8763): Archivo de configuracion cargado exitosamente!
+[INFO] 00:25:38:422 Kernel/(8792:8792): Iniciando Kernel
+[INFO] 00:25:38:422 Kernel/(8792:8792): Archivo de configuracion cargado exitosamente!
+[INFO] 00:33:57:745 Kernel/(9357:9357): Archivo de configuracion cargado exitosamente!
+[INFO] 00:34:22:235 Kernel/(9410:9410): Archivo de configuracion cargado exitosamente!
+[INFO] 00:34:32:23 Kernel/(9445:9445): Archivo de configuracion cargado exitosamente!
+[INFO] 00:36:05:822 Kernel/(9492:9492): Archivo de configuracion cargado exitosamente!
+[INFO] 00:36:33:989 Kernel/(9510:9510): Archivo de configuracion cargado exitosamente!
+[INFO] 00:37:08:767 Kernel/(9557:9557): Archivo de configuracion cargado exitosamente!
+[INFO] 00:37:49:524 Kernel/(9598:9598): Archivo de configuracion cargado exitosamente!
+[INFO] 00:38:34:269 Kernel/(9672:9672): Archivo de configuracion cargado exitosamente!
+[INFO] 00:38:42:486 Kernel/(9708:9708): Archivo de configuracion cargado exitosamente!
+[INFO] 00:38:59:824 Kernel/(9747:9747): Archivo de configuracion cargado exitosamente!
+[INFO] 00:39:11:876 Kernel/(9791:9791): Archivo de configuracion cargado exitosamente!
+[INFO] 00:39:22:976 Kernel/(9830:9830): Archivo de configuracion cargado exitosamente!
+[INFO] 00:39:32:883 Kernel/(9867:9867): Archivo de configuracion cargado exitosamente!
+[INFO] 00:39:40:640 Kernel/(9902:9902): Archivo de configuracion cargado exitosamente!
+[INFO] 00:39:51:492 Kernel/(9943:9943): Archivo de configuracion cargado exitosamente!
+[INFO] 00:40:42:952 Kernel/(10029:10029): Archivo de configuracion cargado exitosamente!
+[INFO] 00:43:28:657 Kernel/(10237:10237): Archivo de configuracion cargado exitosamente!
+[INFO] 00:44:16:624 Kernel/(10291:10291): Archivo de configuracion cargado exitosamente!
+[INFO] 00:44:34:902 Kernel/(10330:10330): Archivo de configuracion cargado exitosamente!
+[INFO] 00:45:40:862 Kernel/(10395:10395): Archivo de configuracion cargado exitosamente!
+[INFO] 00:48:57:819 Kernel/(10484:10484): Archivo de configuracion cargado exitosamente!
+[INFO] 00:49:32:252 Kernel/(10529:10529): Archivo de configuracion cargado exitosamente!
+[INFO] 00:50:03:518 Kernel/(10591:10591): Archivo de configuracion cargado exitosamente!
+[INFO] 00:52:35:128 Kernel/(10695:10695): Archivo de configuracion cargado exitosamente!
+[INFO] 00:54:02:192 Kernel/(10755:10755): Archivo de configuracion cargado exitosamente!
+[INFO] 00:54:16:169 Kernel/(10794:10794): Archivo de configuracion cargado exitosamente!
+[INFO] 00:54:40:80 Kernel/(10836:10836): Archivo de configuracion cargado exitosamente!
+[INFO] 00:55:33:6 Kernel/(10862:10862): Archivo de configuracion cargado exitosamente!
+[INFO] 01:05:39:267 Kernel/(11306:11306): Archivo de configuracion cargado exitosamente!
+[INFO] 01:06:21:164 Kernel/(11350:11350): Archivo de configuracion cargado exitosamente!
+[INFO] 01:08:31:664 Kernel/(11451:11451): Archivo de configuracion cargado exitosamente!
+[INFO] 01:10:20:772 Kernel/(11509:11509): Archivo de configuracion cargado exitosamente!
+[INFO] 01:12:44:337 Kernel/(11564:11564): Archivo de configuracion cargado exitosamente!
