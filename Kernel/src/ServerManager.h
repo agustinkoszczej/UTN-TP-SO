@@ -7,7 +7,8 @@
 
 #ifndef SERVERMANAGER_H_
 #define SERVERMANAGER_H_
+#include "Results.h"
 
-void SetupServer(void);
+Result SetupServer(void);
 
 #endif /* SERVERMANAGER_H_ */
