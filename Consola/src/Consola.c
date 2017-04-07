@@ -17,8 +17,13 @@
 #include<commons/log.h>
 #include<commons/string.h>
 
-int activar_logger = 0; //Cambiar a 1 cuando no lo estemos probando. Esto es para que no nos llenemos de archivos cada vez que lo probamos.
+#include <arpa/inet.h>
+#include<sys/socket.h>
+
+int activar_logger = 1; //Cambiar a 1 cuando no lo estemos probando. Esto es para que no nos llenemos de archivos cada vez que lo probamos.
 t_log* 	archivo_logger;
+
+int socketConsola; //Pruebo, no estoy seguro si lo necesito como global
 
 void logger (char * accion, char * tipo){
 	if(activar_logger == 1){
@@ -62,8 +67,7 @@ void cargarConfigConsola() {
 
 	consola_config.IP_KERNEL = config_get_string_value(configConsola,
 			"IP_KERNEL");
-	consola_config.PUERTO_KERNEL = config_get_int_value(configConsola,
-			"PUERTO_KERNEL");
+	consola_config.PUERTO_KERNEL = 5500;//config_get_int_value(configConsola,"PUERTO_KERNEL"); Temporal, se me buguea el .cfg
 
 	printf("Archivo de configuracion de Consola cargado exitosamente!\n");
 	logger("Archivo de configuracion de Consola cargado exitosamente", "INFO");
@@ -74,6 +78,39 @@ void mostrarConfigConsola() {
 	printf("PUERTO_KERNEL=%d\n", consola_config.PUERTO_KERNEL);
 }
 
+struct sockaddr_in *direccionServidor(){
+	struct sockaddr_in *retorno = malloc(sizeof(struct sockaddr_in));
+
+	retorno->sin_family = AF_INET;
+	retorno->sin_addr.s_addr = inet_addr(consola_config.IP_KERNEL);
+	retorno->sin_port = htons(consola_config.PUERTO_KERNEL);
+
+	return retorno;
+}
+
+int getSocket(){
+	return socket(AF_INET, SOCK_STREAM,0);
+}
+
+void conectarAKernel(){
+
+	socketConsola = getSocket();
+
+	struct sockaddr_in *VdireccionServidor = direccionServidor();
+	if(connect(socketConsola,(struct sockaddr*) VdireccionServidor, sizeof(*VdireccionServidor)) != 0){
+		perror("Error en el connect");																		//ERROR
+	}
+}
+
+void enviarMensajeDePruebaDeConexion()
+{
+	char* mensajeAEnviar = "Hola Kernel"; //Esto va cambiar por el handshake
+	int tamanoAEnviar = strlen(mensajeAEnviar);
+	send(socketConsola, &tamanoAEnviar , 4, 0);
+
+	send(socketConsola, mensajeAEnviar, strlen(mensajeAEnviar),0);
+}
+
 int main() {
 	printf("Iniciando Consola...\n\n");
 	logger("Iniciando Consola", "INFO");
@@ -81,6 +118,10 @@ int main() {
 	cargarConfigConsola();
 	//MOSTRAR ARCHIVO DE CONFIGURACIÓN
 	mostrarConfigConsola();
+
+	conectarAKernel();
+
+	enviarMensajeDePruebaDeConexion();
 
 	return EXIT_SUCCESS;
 }
