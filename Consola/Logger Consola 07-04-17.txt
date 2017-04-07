@@ -1,0 +1,10 @@
+[INFO] 15:41:18:938 Consola/(3679:3679): Iniciando Consola
+[INFO] 15:41:18:953 Consola/(3679:3679): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 15:44:49:47 Consola/(3795:3795): Iniciando Consola
+[INFO] 15:44:49:139 Consola/(3795:3795): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 15:45:08:339 Consola/(3819:3819): Iniciando Consola
+[INFO] 15:45:08:341 Consola/(3819:3819): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 15:45:22:543 Consola/(3842:3842): Iniciando Consola
+[INFO] 15:45:22:556 Consola/(3842:3842): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 15:51:28:475 Consola/(4018:4018): Iniciando Consola
+[INFO] 15:51:28:508 Consola/(4018:4018): Archivo de configuracion de Consola cargado exitosamente

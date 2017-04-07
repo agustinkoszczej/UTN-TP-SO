@@ -67,7 +67,8 @@ void cargarConfigConsola() {
 
 	consola_config.IP_KERNEL = config_get_string_value(configConsola,
 			"IP_KERNEL");
-	consola_config.PUERTO_KERNEL = 5500;//config_get_int_value(configConsola,"PUERTO_KERNEL"); Temporal, se me buguea el .cfg
+	consola_config.PUERTO_KERNEL = config_get_int_value(configConsola,
+			"PUERTO_KERNEL");
 
 	printf("Archivo de configuracion de Consola cargado exitosamente!\n");
 	logger("Archivo de configuracion de Consola cargado exitosamente", "INFO");
