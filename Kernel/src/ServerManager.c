@@ -27,7 +27,7 @@ struct sockaddr_in CrearDireccionServer(){
 	struct sockaddr_in direccionServidor;
 	direccionServidor.sin_family = AF_INET;
 	direccionServidor.sin_addr.s_addr = INADDR_ANY;
-	direccionServidor.sin_port = htons(5500); //Lo cambie por un problema, estaba el puerto 8080
+	direccionServidor.sin_port = htons(8080);
 	return direccionServidor;
 }
 
