@@ -14,9 +14,13 @@
 #include<commons/log.h>
 #include<commons/string.h>
 
-int activar_logger = 0; //Cambiar a 1 cuando no lo estemos probando. Esto es para que no nos llenemos de archivos cada vez que lo probamos.
-
 #include "Memoria.h"
+#include "Results.h"
+#include "ServerManager.h"
+
+int activar_logger = 1; //Cambiar a 1 cuando no lo estemos probando. Esto es para que no nos llenemos de archivos cada vez que lo probamos.
+
+
 
 t_log* 	archivo_logger;
 
@@ -95,6 +99,13 @@ int main(void) {
 	cargarConfigMemoria();
 	//MOSTRAR ARCHIVO DE CONFIGURACIÓN
 	mostrarConfigMemoria();
+
+	Result r = SetupServer();
+
+	printf("\n");
+
+	puts(r.msg);
+
 
 	return EXIT_SUCCESS;
 }

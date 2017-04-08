@@ -35,4 +35,7 @@ char* path = "Kernel.cfg";
 struct sockaddr_in direccionServidorKernel;
 int socketServidorKernel;
 
+int socketKernelMemoria;
+int socketKernelFyleSistem;	//Hacen falta 3?
+
 #endif /* KERNEL_H_ */

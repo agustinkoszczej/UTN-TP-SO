@@ -1,11 +1,9 @@
 /*
- * ServerManager2.c
+ * ServerManager.c
  *
- *  Created on: 6/4/2017
+ *  Created on: 8/4/2017
  *      Author: utnso
  */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,21 +15,17 @@
 #include <netdb.h>
 #include <stdbool.h>
 #include "Results.h"
-#include "Multiplexor.h"
-
 
 //TODOS ESTOS VAN AL ARCHIVO DE CONFIGURACION
 #define PORT "9034"   // port we're listening on
 #define IP
 //
 
-
-
 struct sockaddr_in CrearDireccionServer(){
 	struct sockaddr_in direccionServidor;
 	direccionServidor.sin_family = AF_INET;
 	direccionServidor.sin_addr.s_addr = INADDR_ANY;
-	direccionServidor.sin_port = htons(8080);
+	direccionServidor.sin_port = htons(5003);		//5003, lo saque del archivo Kernel/Kernel.cfg
 	return direccionServidor;
 }
 
@@ -42,8 +36,8 @@ void permitirReutilizarPuerto(int servidor) {
 
 void AlAceptarConexion(int cliente){
 	printf("Recibí una conexión en %d!!\n", cliente);
-	//send(cliente, "Hola NetCat!", 13, 0);
-	//send(cliente, ":)\n", 4, 0);
+	send(cliente, "Hola NetCat!", 13, 0);
+	send(cliente, ":)\n", 4, 0);
 }
 
 ResultWithValue AceptarConexion(int servidor){
@@ -60,7 +54,12 @@ ResultWithValue AceptarConexion(int servidor){
 	return OkWithValue(cliente);
 }
 
-/*ResultWithValue RecibirMensaje(int cliente){
+void AlRecibirMensaje(char* buffer, int bytesRecibidos){
+	buffer[bytesRecibidos] = '\0';
+	printf("Me llegaron %d bytes con %s", bytesRecibidos, buffer);
+}
+
+ResultWithValue RecibirMensaje(int cliente){
 	uint32_t tamanio;
 	recv(cliente, &tamanio, 4, 0);
 
@@ -78,28 +77,37 @@ ResultWithValue AceptarConexion(int servidor){
 	free(buffer);
 
 	return OkWithValue(NULL);
-}*/
+}
+
+int getSocket(){
+	return socket(AF_INET, SOCK_STREAM,0);
+}
 
 Result SetupServer(){
-	int servidor = socket(AF_INET, SOCK_STREAM, 0);
+	int servidorFS = getSocket();
 
 	struct sockaddr_in direccionServer = CrearDireccionServer();
-	permitirReutilizarPuerto(servidor);
+	permitirReutilizarPuerto(servidorFS);
 
-	if (bind(servidor, (void*) &direccionServer, sizeof(direccionServer)) != 0) {
+	if (bind(servidorFS, (void*) &direccionServer, sizeof(direccionServer)) != 0) {
 		return Error("Fallo el bind");
 	}
 
 	printf("Estoy escuchando\n");
-	 	listen(servidor, 100);
+	 	listen(servidorFS, 100);
 
-	Multiplexar(servidor);
+	//------------------------------
+
+	 ResultWithValue r = AceptarConexion(servidorFS);
+
+	//------------------------------
+
+	 if(r.value != NULL)
+		 RecibirMensaje(r.value);
+	 else
+		 return r.result;
 
 	return Ok();
 
 }
-
-
-
-
 
