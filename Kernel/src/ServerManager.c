@@ -17,6 +17,7 @@
 #include <netdb.h>
 #include <stdbool.h>
 #include "Results.h"
+#include "Multiplexor.h"
 
 //TODOS ESTOS VAN AL ARCHIVO DE CONFIGURACION
 #define PORT "9034"   // port we're listening on
@@ -56,12 +57,7 @@ ResultWithValue AceptarConexion(int servidor){
 	return OkWithValue(cliente);
 }
 
-void AlRecibirMensaje(char* buffer, int bytesRecibidos){
-	buffer[bytesRecibidos] = '\0';
-	printf("Me llegaron %d bytes con %s", bytesRecibidos, buffer);
-}
-
-ResultWithValue RecibirMensaje(int cliente){
+/*ResultWithValue RecibirMensaje(int cliente){
 	uint32_t tamanio;
 	recv(cliente, &tamanio, 4, 0);
 
@@ -79,7 +75,7 @@ ResultWithValue RecibirMensaje(int cliente){
 	free(buffer);
 
 	return OkWithValue(NULL);
-}
+}*/
 
 Result SetupServer(){
 	int servidor = socket(AF_INET, SOCK_STREAM, 0);
@@ -94,16 +90,7 @@ Result SetupServer(){
 	printf("Estoy escuchando\n");
 	 	listen(servidor, 100);
 
-	//------------------------------
-
-	 ResultWithValue r = AceptarConexion(servidor);
-
-	//------------------------------
-
-	 if(r.value != NULL)
-		 RecibirMensaje(r.value);
-	 else
-		 return r.result;
+	Multiplexar(servidor);
 
 	return Ok();
 
