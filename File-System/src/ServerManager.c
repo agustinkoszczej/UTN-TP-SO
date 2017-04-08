@@ -1,11 +1,9 @@
 /*
- * ServerManager2.c
+ * ServerManager.c
  *
- *  Created on: 6/4/2017
+ *  Created on: 8/4/2017
  *      Author: utnso
  */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,19 +16,16 @@
 #include <stdbool.h>
 #include "Results.h"
 
-
 //TODOS ESTOS VAN AL ARCHIVO DE CONFIGURACION
 #define PORT "9034"   // port we're listening on
 #define IP
 //
 
-
-
 struct sockaddr_in CrearDireccionServer(){
 	struct sockaddr_in direccionServidor;
 	direccionServidor.sin_family = AF_INET;
 	direccionServidor.sin_addr.s_addr = INADDR_ANY;
-	direccionServidor.sin_port = htons(8080);
+	direccionServidor.sin_port = htons(5003);		//5003, lo saque del archivo Kernel/Kernel.cfg
 	return direccionServidor;
 }
 
@@ -41,8 +36,8 @@ void permitirReutilizarPuerto(int servidor) {
 
 void AlAceptarConexion(int cliente){
 	printf("Recibí una conexión en %d!!\n", cliente);
-	//send(cliente, "Hola NetCat!", 13, 0);
-	//send(cliente, ":)\n", 4, 0);
+	send(cliente, "Hola NetCat!", 13, 0);
+	send(cliente, ":)\n", 4, 0);
 }
 
 ResultWithValue AceptarConexion(int servidor){
@@ -84,22 +79,26 @@ ResultWithValue RecibirMensaje(int cliente){
 	return OkWithValue(NULL);
 }
 
+int getSocket(){
+	return socket(AF_INET, SOCK_STREAM,0);
+}
+
 Result SetupServer(){
-	int servidor = socket(AF_INET, SOCK_STREAM, 0);
+	int servidorFS = getSocket();
 
 	struct sockaddr_in direccionServer = CrearDireccionServer();
-	permitirReutilizarPuerto(servidor);
+	permitirReutilizarPuerto(servidorFS);
 
-	if (bind(servidor, (void*) &direccionServer, sizeof(direccionServer)) != 0) {
+	if (bind(servidorFS, (void*) &direccionServer, sizeof(direccionServer)) != 0) {
 		return Error("Fallo el bind");
 	}
 
 	printf("Estoy escuchando\n");
-	 	listen(servidor, 100);
+	 	listen(servidorFS, 100);
 
 	//------------------------------
 
-	 ResultWithValue r = AceptarConexion(servidor);
+	 ResultWithValue r = AceptarConexion(servidorFS);
 
 	//------------------------------
 
@@ -111,8 +110,4 @@ Result SetupServer(){
 	return Ok();
 
 }
-
-
-
-
 

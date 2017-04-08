@@ -101,6 +101,8 @@ void conectarAKernel(){
 	if(connect(socketConsola,(struct sockaddr*) VdireccionServidor, sizeof(*VdireccionServidor)) != 0){
 		perror("Error en el connect");																		//ERROR
 	}
+
+	enviarMensajeDePruebaDeConexion();
 }
 
 void enviarMensajeDePruebaDeConexion()
@@ -122,7 +124,7 @@ int main() {
 
 	conectarAKernel();
 
-	enviarMensajeDePruebaDeConexion();
+
 
 	return EXIT_SUCCESS;
 }
