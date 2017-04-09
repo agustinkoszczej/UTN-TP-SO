@@ -9,7 +9,7 @@
 #define SHAREDLIBRARY_HANDSHAKE_H_
 
 typedef enum {
-	NUCLEO, //0
+	KERNEL, //0
 	FILE_SYSTEM, //1
 	MEMORIA, //2
 	CPU, //3
