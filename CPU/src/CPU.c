@@ -1,10 +1,11 @@
 /*
- * cpu.c
+ * CPU.c
  *
- *  Created on: 2/4/2017
+ *
  *      Author: utnso
  */
 
+#include "CPU.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,6 +58,6 @@ void logger (char * accion, char * tipo){
 }
 
 int main (void){
-	printf("Iniciando CPU \n");
+	printf("Iniciando CPU...\n\n");
 	return EXIT_SUCCESS;
 }

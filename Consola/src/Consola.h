@@ -10,6 +10,8 @@
 
 #include <commons/config.h>
 
+#include "Handshake.h"
+#include "Headers.h"
 
 typedef struct {
 	char* IP_KERNEL;	//Después usar esta funcion para transformarlo inet_addr(IP_KERNEL)

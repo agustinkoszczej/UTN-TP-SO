@@ -196,6 +196,7 @@ int main(void) {
 
 	conectarAMemoria();	//Es en este orden?
 
+
 	Result r = SetupServer();
 	printf("\n");
 	puts(r.msg);

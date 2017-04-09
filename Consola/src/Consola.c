@@ -117,6 +117,7 @@ void enviarMensajeDePruebaDeConexion()
 int main() {
 	printf("Iniciando Consola...\n\n");
 	logger("Iniciando Consola", "INFO");
+
 	//CARGAR ARCHIVO DE CONFIGURACIÓN
 	cargarConfigConsola();
 	//MOSTRAR ARCHIVO DE CONFIGURACIÓN

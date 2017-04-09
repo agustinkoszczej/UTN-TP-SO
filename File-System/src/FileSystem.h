@@ -10,6 +10,9 @@
 
 #include <commons/config.h>
 
+#include "Handshake.h"
+#include "Headers.h"
+
 typedef struct {
 	int PUERTO;
 	char* PUNTO_MONTAJE;
