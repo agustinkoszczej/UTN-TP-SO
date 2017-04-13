@@ -28,7 +28,8 @@ ResultWithValue RecibirMensaje(int cliente, void AlRecibirMensaje(int,char*,int)
 
 	if (bytesRecibidos <= 0) {
 		free(buffer);
-		return ErrorWithValue(strerror("recv"), NULL);
+		printf("El cliente %d se desconecto!\n",cliente);
+		return OkWithValue(NULL);
 	}
 
 	AlRecibirMensaje(cliente, buffer, bytesRecibidos);
