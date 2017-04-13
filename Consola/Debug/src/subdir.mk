@@ -4,13 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/Consola.c 
+../src/Consola.c \
+../src/logger.c 
 
 OBJS += \
-./src/Consola.o 
+./src/Consola.o \
+./src/logger.o 
 
 C_DEPS += \
-./src/Consola.d 
+./src/Consola.d \
+./src/logger.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

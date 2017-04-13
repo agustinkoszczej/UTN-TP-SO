@@ -18,46 +18,6 @@
 
 #include "Kernel.h"
 
-int activar_logger = 1; //Cambiar a 1 cuando no lo estemos probando. Esto es para que no nos llenemos de archivos cada vez que lo probamos.
-
-t_log* 	archivo_logger;
-
-void logger (char * accion, char * tipo){
-	if(activar_logger == 1){
-
-	t_log_level nivel;
-	nivel = log_level_from_string(tipo);
-
-	time_t tiempo = time(0);
-		struct tm * timeinfo = localtime(&tiempo);
-		char fecha [128];
-		strftime(fecha, 128, "%d/%m/%y", timeinfo);
-	char * archivo_nombre = "Kernel";
-	char * archivo_fecha = string_new();
-	string_append_with_format(&archivo_fecha, "Logger %s %c%c-%c%c-%c%c.txt", archivo_nombre, fecha[0], fecha[1], fecha[3], fecha[4], fecha[6], fecha[7]);
-	printf("%s", archivo_fecha);
-
-	archivo_logger = log_create(archivo_fecha, archivo_nombre, 0, nivel);
-	switch(tipo[0]){
-	case 'T':
-			log_trace(archivo_logger, accion);
-			break;
-	case 'D':
-			log_debug(archivo_logger, accion);
-			break;
-	case 'I':
-			log_info(archivo_logger, accion);
-			break;
-	case 'W':
-			log_warning(archivo_logger, accion);
-			break;
-	case 'E':
-			log_error(archivo_logger, accion);
-				break;
-	}
-	}
-}
-
 
 
 void cargarConfigKernel() {
@@ -67,26 +27,39 @@ void cargarConfigKernel() {
 
 	kernel_config.PUERTO_PROG = config_get_int_value(configKernel,
 			"PUERTO_PROG");
+	logger("Configurado Puerto PROG", "INFO");
 	kernel_config.PUERTO_CPU = config_get_int_value(configKernel, "PUERTO_CPU");
+	logger("Configurado Puerto CPU", "INFO");
 	kernel_config.IP_MEMORIA = config_get_string_value(configKernel,
 			"IP_MEMORIA");
+	logger("Configurado IP_MEMORIA", "INFO");
 	kernel_config.PUERTO_MEMORIA = config_get_int_value(configKernel,
 			"PUERTO_MEMORIA");
+	logger("Configurado Puerto de Memoria", "INFO");
 	kernel_config.IP_FS = config_get_string_value(configKernel, "IP_FS");
+	logger("Configurado IP de Fyle System", "INFO");
 	kernel_config.PUERTO_FS = config_get_int_value(configKernel, "PUERTO_FS");
+	logger("Configurado Puerto de File System")
 	kernel_config.QUANTUM = config_get_int_value(configKernel, "QUANTUM");
+	logger("Configurado Quantum", "INFO");
 	kernel_config.QUANTUM_SLEEP = config_get_int_value(configKernel,
 			"QUANTUM_SLEEP");
+	logger("Configurado Quantum Sleep", "INFO");
 	kernel_config.ALGORITMO = config_get_string_value(configKernel,
 			"ALGORITMO");
+	logger("Configurado Algoritmo", "INFO");
 	kernel_config.GRADO_MULTIPROG = config_get_int_value(configKernel,
 			"GRADO_MULTIPROG");
+	logger("Configurado Grado Multiprog.", "INFO");
 	kernel_config.SEM_IDS = config_get_array_value(configKernel, "SEM_IDS");
+	logger("Configurado SEM. IDS.", "INFO");
 	kernel_config.SEM_INIT = config_get_array_value(configKernel, "SEM_INIT");
+	logger("Configurado Iniciandor SEM.", "INFO");
 	kernel_config.SHARED_VARS = config_get_array_value(configKernel,
 			"SHARED_VARS");
+	logger("Configurado Shared Vars.", "INFO");
 	kernel_config.STACK_SIZE = config_get_int_value(configKernel, "STACK_SIZE");
-
+	logger("Configurado Stack Size", "INFO");
 	printf("Archivo de configuracion de Kernel cargado exitosamente!\n");
 	logger("Archivo de configuracion cargado exitosamente", "INFO");
 }
@@ -163,9 +136,11 @@ void conectarAFileSystem(){
 	struct sockaddr_in *VdireccionServidor = direccionServidorFileSystem();
 	if(connect(socketKernelFyleSistem,(struct sockaddr*) VdireccionServidor, sizeof(*VdireccionServidor)) != 0){
 		perror("Error en el connect");																		//ERROR
+		logger("Error al conectar a Fyle Sistem", "ERROR");
 	}
 
 	enviarMensajeDePruebaDeConexion(socketKernelFyleSistem);
+	logger("Enviado mensaje de prueba de conexion a Fyle Sistem", "TRACE");
 }
 
 void conectarAMemoria(){
@@ -175,9 +150,11 @@ void conectarAMemoria(){
 	struct sockaddr_in *VdireccionServidor = direccionServidorMemoria();
 	if(connect(socketKernelMemoria,(struct sockaddr*) VdireccionServidor, sizeof(*VdireccionServidor)) != 0){
 		perror("Error en el connect");																		//ERROR
+		logger("Error al conectar a Memoria", "ERROR");
 	}
 
 	enviarMensajeDePruebaDeConexion(socketKernelMemoria);
+	logger("Enviado mensaje de prueba de conexion a Memoria", "TRACE");
 }
 
 //Codigo repetido. Podria hacerse una funcion que arregle eso

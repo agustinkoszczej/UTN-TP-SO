@@ -10,5 +10,6 @@
 
 #include "Handshake.h"
 #include "Headers.h"
+#include "logger.h"
 
 #endif /* CPU_H_ */

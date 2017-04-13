@@ -12,7 +12,7 @@
 
 #include "Handshake.h"
 #include "Headers.h"
-
+#include "logger.h"
 typedef struct {
 	char* IP_KERNEL;	//Después usar esta funcion para transformarlo inet_addr(IP_KERNEL)
 	int PUERTO_KERNEL;

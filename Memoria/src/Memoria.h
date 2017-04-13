@@ -12,6 +12,7 @@
 
 #include "Handshake.h"
 #include "Headers.h"
+#include "logger.h"
 
 typedef struct {
 	int PUERTO;
