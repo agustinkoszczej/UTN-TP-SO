@@ -1,0 +1,6 @@
+[INFO] 14:28:42:345 Consola/(5609:5609): Iniciando Consola
+[INFO] 14:28:42:353 Consola/(5609:5609): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 14:28:42:373 Consola/(5609:5609): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 14:31:45:805 Consola/(5742:5742): Iniciando Consola
+[INFO] 14:31:45:821 Consola/(5742:5742): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 14:31:45:850 Consola/(5742:5742): Enviado mensaje de prueba de conexion al Kernel

@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 #include "Consola.h"
-
+#include "Handshake.h"
 #include<stdbool.h>
 #include<sys/types.h>
 #include<time.h>
@@ -18,7 +18,7 @@
 
 #include <arpa/inet.h>
 #include<sys/socket.h>
-
+#define MSJ_DINAMICO 50
 
 int socketConsola; //Pruebo, no estoy seguro si lo necesito como global
 
@@ -56,6 +56,68 @@ int getSocket(){
 	return socket(AF_INET, SOCK_STREAM,0);
 }
 
+char* intToString(int nro) {
+ return string_from_format("%d", nro);
+}
+int stringToInt(char* string) {
+ return atoi(string);
+}
+
+char* recibirMensaje(int socket,int tamanioMsj,int criterio) {
+	char* buffer = malloc(tamanioMsj);
+
+	int bytesRecibidos = recv(socket, buffer, tamanioMsj, criterio);
+
+	if(bytesRecibidos <= 0) {
+		printf("El Cliente %d se desconecto\n",socket);
+	}
+	buffer[tamanioMsj] = '\0';
+	return buffer;
+
+}
+
+int obtenerHandshake(int socketAlQueMeconecte) {
+	char* headerHandshake = recibirMensaje(socketAlQueMeconecte, 4, MSG_WAITALL);
+
+	if(stringToInt(headerHandshake) == HEADER_HANDSHAKE) {
+		return stringToInt(recibirMensaje(socketAlQueMeconecte, 1, MSG_WAITALL));
+	}
+	else {
+		return 1; //Error
+	}
+}
+
+void enviarMensaje(int socketCliente, char* msg, int tamanio) {
+ send(socketCliente, msg, tamanio, 0);
+}
+
+void enviarHeader(int socket,int header) {
+	char* head = intToString(header);
+
+	send(socket, head, 4, 0);
+}
+
+void iniciarHandshake(t_handshake QuienIniciaElHandshake, t_handshake QuienDevuelveHandshake, int socket) {
+
+	enviarHeader(socket, HEADER_HANDSHAKE);  //ENVIO EL HEADER DEL HANDSHAKE PARA QUE EL PROCESO QUE LO RECIBE VERIFIQUE SI ES UN HANDSHAKE LO QUE LE ENVIO O NO
+	logger("Enviado mensaje de prueba de conexion al Kernel", "TRACE");
+	char* handshake = intToString(QuienIniciaElHandshake);
+	enviarMensaje(socket, handshake, 1);		//ENVIO AL SOCKET QUE ME CONECTO EL VALOR DE QUIEN INICIA EL HANDSHAKE (EN ESTE CASO ES UN 4 QUE REPRESENTA A LA CONSOLA)
+
+	if(obtenerHandshake(socket) == QuienDevuelveHandshake) {   //OBTENGO EL HANDSHAKE DEL PROCESO AL QUE LE ENVIE ANTERIORMENTE EL HANDSHAKE (KERNEL) Y LO COMPARO
+		printf("\nSe conecto satisfactoriamente al Kernel\n");
+	}
+
+}
+
+void enviarMensajeConTamanioDinamico(int socketCliente, char* msj) {
+ char* longitudMensaje = string_new();
+ longitudMensaje = intToString(strlen(msj));
+
+ enviarMensaje(socketCliente, longitudMensaje, MSJ_DINAMICO); //LE ENVIO PRIMERO EL TAMAÑO DEL MENSAJE A ENVIAR
+ enviarMensaje(socketCliente, msj, strlen(msj)); //LE ENVIO EL MENSAJE DE ESE TAMAÑO
+}
+
 void conectarAKernel(){
 
 	socketConsola = getSocket();
@@ -66,16 +128,14 @@ void conectarAKernel(){
 		logger("Error en el connect", "ERROR");
 	}
 
-	enviarMensajeDePruebaDeConexion();
-}
+	iniciarHandshake(CONSOLA,KERNEL,socketConsola); //INICIO EL HANDSHAKE
 
-void enviarMensajeDePruebaDeConexion()
-{
-	char* mensajeAEnviar = "Hola Kernel"; //Esto va cambiar por el handshake
-	int tamanoAEnviar = strlen(mensajeAEnviar);
-	send(socketConsola, &tamanoAEnviar , 4, 0);
-	send(socketConsola, mensajeAEnviar, strlen(mensajeAEnviar),0);
-	logger("Enviado mensaje de prueba de conexion al Kernel", "TRACE");
+		 while(1){
+		  char* mensaje;
+		  puts("Consola: Ingrese mensaje a enviar Kernel:");
+		  scanf("%s", mensaje);
+		  enviarMensajeConTamanioDinamico(socketConsola, mensaje);
+		 }
 }
 
 int main() {
