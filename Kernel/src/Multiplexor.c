@@ -11,6 +11,8 @@
 #include "Results.h"
 #include <commons/collections/list.h>
 #include "CustomCommons.h"
+#include "Handshake.h"
+#include "Headers.h"
 
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -112,11 +114,58 @@ ResultWithValue GetNewConnection(int listener){
     return OkWithValue(NULL);
 }
 
-
-void AlRecibirMensaje(char* buffer, int bytesRecibidos){
-	buffer[bytesRecibidos] = '\0';
-	printf("Me llegaron %d bytes con %s", bytesRecibidos, buffer);
+char* intToString(int nro) {
+ return string_from_format("%d", nro);
 }
+int stringToInt(char* string) {
+ return atoi(string);
+}
+
+void enviarMensaje(int socketCliente, char* msg, int tamanio) {
+ send(socketCliente, msg, tamanio, 0);
+}
+
+void enviarHeader(int socket,int header) {
+	char* head = intToString(header);
+
+	send(socket, head, 4, 0);
+}
+
+void devolverHandshake(int socketCliente, t_handshake QuienDevuelveElHandshake) {
+	 enviarHeader(socketCliente, HEADER_HANDSHAKE);
+
+	 enviarMensaje(socketCliente, intToString(QuienDevuelveElHandshake), 1);
+}
+
+void AlRecibirMensaje(int cliente, char* buffer, int bytesRecibidos){
+	buffer[bytesRecibidos] = '\0';
+
+		char* headerHandshake = buffer;
+
+		if(stringToInt(headerHandshake) == HEADER_HANDSHAKE) {
+			int tamanio = 1;
+			char* handshake = malloc(tamanio);
+
+			int bytesRecibidos = recv(cliente, handshake , tamanio, MSG_WAITALL);
+
+				if (bytesRecibidos <= 0) {
+				    free(buffer);
+					printf("El cliente %d se desconecto\n",cliente);
+				}
+				else {
+					if(stringToInt(handshake) == CONSOLA) {
+						printf("Se conecto la consola %d\n",cliente);
+					}
+					if(stringToInt(handshake) == CPU) {
+						printf("Se conecto la CPU %d\n",cliente);
+					}
+
+					devolverHandshake(cliente, KERNEL);
+
+				}
+		}
+
+	}
 
 
 ResultWithValue CheckForIncomingData(){

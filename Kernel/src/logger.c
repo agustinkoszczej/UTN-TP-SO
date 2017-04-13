@@ -30,7 +30,7 @@ void logger (char * accion, char * tipo){
 	char * archivo_nombre = "Kernel";
 	char * archivo_fecha = string_new();
 	string_append_with_format(&archivo_fecha, "Logger %s %c%c-%c%c-%c%c.txt", archivo_nombre, fecha[0], fecha[1], fecha[3], fecha[4], fecha[6], fecha[7]);
-	printf("%s", archivo_fecha);
+	printf("%s\n", archivo_fecha);
 
 	archivo_logger = log_create(archivo_fecha, archivo_nombre, 0, nivel);
 	switch(tipo[0]){

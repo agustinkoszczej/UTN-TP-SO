@@ -39,7 +39,7 @@ void cargarConfigKernel() {
 	kernel_config.IP_FS = config_get_string_value(configKernel, "IP_FS");
 	logger("Configurado IP de Fyle System", "INFO");
 	kernel_config.PUERTO_FS = config_get_int_value(configKernel, "PUERTO_FS");
-	logger("Configurado Puerto de File System")
+	logger("Configurado Puerto de File System", "INFO");
 	kernel_config.QUANTUM = config_get_int_value(configKernel, "QUANTUM");
 	logger("Configurado Quantum", "INFO");
 	kernel_config.QUANTUM_SLEEP = config_get_int_value(configKernel,
@@ -122,7 +122,7 @@ int getSocket(){
 
 void enviarMensajeDePruebaDeConexion(int servidorDestino)
 {
-	char* mensajeAEnviar = "Hola Servidor, soy el Kernel"; //Esto va cambiar por el handshake
+	char* mensajeAEnviar = "Hola Servidor\n"; //Esto va cambiar por el handshake
 	int tamanoAEnviar = strlen(mensajeAEnviar);
 	send(servidorDestino, &tamanoAEnviar , 4, 0);
 

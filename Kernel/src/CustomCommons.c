@@ -19,20 +19,19 @@
 #include "Results.h"
 
 
-ResultWithValue RecibirMensaje(int cliente, void AlRecibirMensaje(char*,int)){
-	uint32_t tamanio;
-	recv(cliente, &tamanio, 4, 0);
+ResultWithValue RecibirMensaje(int cliente, void AlRecibirMensaje(int,char*,int)){
+	int tamanio = 4;
 
 	char* buffer = malloc(tamanio);
 
 	int bytesRecibidos = recv(cliente, buffer, tamanio, MSG_WAITALL);
 
-	if (bytesRecibidos < 0) {
+	if (bytesRecibidos <= 0) {
 		free(buffer);
 		return ErrorWithValue(strerror("recv"), NULL);
 	}
 
-	AlRecibirMensaje(buffer, bytesRecibidos);
+	AlRecibirMensaje(cliente, buffer, bytesRecibidos);
 
 	free(buffer);
 
