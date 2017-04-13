@@ -129,6 +129,7 @@ void enviarMensajeDePruebaDeConexion(int servidorDestino)
 	send(servidorDestino, mensajeAEnviar, strlen(mensajeAEnviar),0);
 }
 
+/*
 void conectarAFileSystem(){
 
 	socketKernelFyleSistem = getSocket();
@@ -158,7 +159,7 @@ void conectarAMemoria(){
 }
 
 //Codigo repetido. Podria hacerse una funcion que arregle eso
-
+*/
 
 int main(void) {
 	printf("Iniciando Kernel...\n\n");
@@ -169,9 +170,8 @@ int main(void) {
 	//MOSTRAR ARCHIVO DE CONFIGURACIÓN
 	mostrarConfigKernel();
 
-	conectarAFileSystem();
-
-	conectarAMemoria();	//Es en este orden?
+	//conectarAFileSystem();
+	//conectarAMemoria();	//No los hacemos en este check
 
 
 	Result r = SetupServer();

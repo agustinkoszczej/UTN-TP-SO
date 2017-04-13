@@ -137,6 +137,29 @@ void devolverHandshake(int socketCliente, t_handshake QuienDevuelveElHandshake) 
 	 enviarMensaje(socketCliente, intToString(QuienDevuelveElHandshake), 1);
 }
 
+char* textonombreProceso(t_handshake Id_Proceso){
+	switch(Id_Proceso){
+		case KERNEL:
+			return "Kernel";
+		break;
+		case FILE_SYSTEM:
+			return "File System";
+		break;
+		case MEMORIA:
+			return "Memoria";
+		break;
+		case CPU:
+			return "CPU";
+		break;
+		case CONSOLA:
+			return "Consola";
+		break;
+		default:
+			return "?";
+		break;
+	}
+}
+
 void AlRecibirMensaje(int cliente, char* buffer, int bytesRecibidos){
 	buffer[bytesRecibidos] = '\0';
 
@@ -153,13 +176,8 @@ void AlRecibirMensaje(int cliente, char* buffer, int bytesRecibidos){
 					printf("El cliente %d se desconecto\n",cliente);
 				}
 				else {
-					if(stringToInt(handshake) == CONSOLA) {
-						printf("Se conecto la consola %d\n",cliente);
-					}
-					if(stringToInt(handshake) == CPU) {
-						printf("Se conecto la CPU %d\n",cliente);
-					}
 
+					printf("Se conecto %s socket %d\n",textonombreProceso(stringToInt(handshake)), cliente);
 					devolverHandshake(cliente, KERNEL);
 
 				}
