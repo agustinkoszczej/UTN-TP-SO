@@ -1,0 +1,2 @@
+[INFO] 14:51:24:98 CPU/(6542:6542): Iniciando CPU
+[INFO] 14:51:24:111 CPU/(6542:6542): Archivo de configuracion de Consola cargado exitosamente
