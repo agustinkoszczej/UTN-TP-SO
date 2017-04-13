@@ -1,0 +1,4 @@
+[INFO] 14:28:26:274 FileSystem/(5576:5576): Inicinado File System
+[INFO] 14:28:26:284 FileSystem/(5576:5576): Archivo de configuracion cargado exitosamente
+[INFO] 14:31:35:553 FileSystem/(5710:5710): Inicinado File System
+[INFO] 14:31:35:570 FileSystem/(5710:5710): Archivo de configuracion cargado exitosamente
