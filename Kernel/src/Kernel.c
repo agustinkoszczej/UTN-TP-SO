@@ -22,40 +22,25 @@ void cargarConfigKernel() {
 
 	kernel_config.PUERTO_PROG = config_get_int_value(configKernel,
 			"PUERTO_PROG");
-	logger("Configurado Puerto PROG", "INFO");
 	kernel_config.PUERTO_CPU = config_get_int_value(configKernel, "PUERTO_CPU");
-	logger("Configurado Puerto CPU", "INFO");
 	kernel_config.IP_MEMORIA = config_get_string_value(configKernel,
 			"IP_MEMORIA");
-	logger("Configurado IP_MEMORIA", "INFO");
 	kernel_config.PUERTO_MEMORIA = config_get_int_value(configKernel,
 			"PUERTO_MEMORIA");
-	logger("Configurado Puerto de Memoria", "INFO");
 	kernel_config.IP_FS = config_get_string_value(configKernel, "IP_FS");
-	logger("Configurado IP de Fyle System", "INFO");
 	kernel_config.PUERTO_FS = config_get_int_value(configKernel, "PUERTO_FS");
-	logger("Configurado Puerto de File System", "INFO");
 	kernel_config.QUANTUM = config_get_int_value(configKernel, "QUANTUM");
-	logger("Configurado Quantum", "INFO");
 	kernel_config.QUANTUM_SLEEP = config_get_int_value(configKernel,
 			"QUANTUM_SLEEP");
-	logger("Configurado Quantum Sleep", "INFO");
 	kernel_config.ALGORITMO = config_get_string_value(configKernel,
 			"ALGORITMO");
-	logger("Configurado Algoritmo", "INFO");
 	kernel_config.GRADO_MULTIPROG = config_get_int_value(configKernel,
 			"GRADO_MULTIPROG");
-	logger("Configurado Grado Multiprog.", "INFO");
 	kernel_config.SEM_IDS = config_get_array_value(configKernel, "SEM_IDS");
-	logger("Configurado SEM. IDS.", "INFO");
 	kernel_config.SEM_INIT = config_get_array_value(configKernel, "SEM_INIT");
-	logger("Configurado Iniciandor SEM.", "INFO");
 	kernel_config.SHARED_VARS = config_get_array_value(configKernel,
 			"SHARED_VARS");
-	logger("Configurado Shared Vars.", "INFO");
 	kernel_config.STACK_SIZE = config_get_int_value(configKernel, "STACK_SIZE");
-	logger("Configurado Stack Size", "INFO");
-	printf("Archivo de configuracion de Kernel cargado exitosamente!\n");
 	logger("Archivo de configuracion cargado exitosamente", "INFO");
 }
 
@@ -72,7 +57,7 @@ void mostrarArrayDinamico(char** array) {
 	}
 }
 void mostrarConfigKernel() {
-	printf("PUERTO_PROG=%d\n", kernel_config.PUERTO_PROG);
+	/*printf("PUERTO_PROG=%d\n", kernel_config.PUERTO_PROG);
 	printf("PUERTO_CPU=%d\n", kernel_config.PUERTO_CPU);
 	printf("IP_MEMORIA=%s\n", kernel_config.IP_MEMORIA);
 	printf("PUERTO_MEMORIA=%d\n", kernel_config.PUERTO_MEMORIA);
@@ -88,7 +73,7 @@ void mostrarConfigKernel() {
 	mostrarArrayDinamico(kernel_config.SEM_INIT);
 	printf("SHARED_VARS=");
 	mostrarArrayDinamico(kernel_config.SHARED_VARS);
-	printf("STACK_SIZE=%d\n", kernel_config.STACK_SIZE);
+	printf("STACK_SIZE=%d\n", kernel_config.STACK_SIZE);*/
 }
 																//Estas funciones de conexion irian en ServerManager.c pero tira ese error en la carpeta Debug que no se entiende
 /*struct sockaddr_in *direccionServidorFileSystem(){

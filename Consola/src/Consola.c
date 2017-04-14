@@ -114,8 +114,9 @@ void enviarMensajeConTamanioDinamico(int socketCliente, char* msj) {
  char* longitudMensaje = string_new();
  longitudMensaje = intToString(strlen(msj));
 
- enviarMensaje(socketCliente, longitudMensaje, MSJ_DINAMICO); //LE ENVIO PRIMERO EL TAMAÑO DEL MENSAJE A ENVIAR
- enviarMensaje(socketCliente, msj, strlen(msj)); //LE ENVIO EL MENSAJE DE ESE TAMAÑO
+ //enviarMensaje(socketCliente, longitudMensaje, MSJ_DINAMICO); //LE ENVIO PRIMERO EL TAMAÑO DEL MENSAJE A ENVIAR
+ enviarHeader(socketCliente, 1);
+ enviarMensaje(socketCliente, msj, 50); //LE ENVIO EL MENSAJE DE ESE TAMAÑO
 }
 
 void conectarAKernel(){

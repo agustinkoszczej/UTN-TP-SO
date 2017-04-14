@@ -54,30 +54,12 @@ ResultWithValue SelectReaders(){
 		return OkWithValue(retval);
 }
 
-bool contains(t_list* list, void* value){
-
-	bool equals(void* item) {
-		return item == value;
-	}
-
-	return list_any_satisfy(list, equals);
-}
-
 bool isListener(int fd){
 	return contains(listeners, fd);
 }
 
 bool isClient(int fd){
 	return contains(clients, fd);
-}
-
-void PrintClientData(struct sockaddr_storage remoteaddr,int newfd,char remoteIP[INET6_ADDRSTRLEN]){
-	printf("selectserver: new connection from %s on "
-			"socket %d\n",
-			inet_ntop(remoteaddr.ss_family,
-				get_in_addr((struct sockaddr*)&remoteaddr),
-				remoteIP, INET6_ADDRSTRLEN),
-			newfd);
 }
 
 ResultWithValue GetNewConnection(int listener){
@@ -106,7 +88,7 @@ ResultWithValue GetNewConnection(int listener){
 }
 
 void AlRecibirHandshake(int cliente, char* buffer) {
-	int tamanio = 1;
+	int tamanio = sizeof(char);
 	char* handshake = malloc(tamanio);
 
 	int bytesRecibidos = recv(cliente, handshake, tamanio, MSG_WAITALL);
@@ -127,9 +109,13 @@ void AlRecibirHandshake(int cliente, char* buffer) {
 	}
 }
 
-void AlRecibirPasamanos(char* buffer){
+void AlRecibirPasamanos(int cliente, char* buffer){
+	char* msg = malloc(50);
+
+	int bytesRecibidos = recv(cliente, msg, 50, 0);
+
 	void ReplicarPasamanos(int cliente){
-			enviarPasamanos(cliente, buffer);
+			enviarPasamanos(cliente, msg);
 	};
 
 	list_iterate(clients, ReplicarPasamanos);
@@ -146,7 +132,7 @@ void AlRecibirMensaje(int cliente, char* buffer, int bytesRecibidos) {
 			AlRecibirHandshake(cliente, buffer);
 			break;
 		case HEADER_PASAMANOS:
-			AlRecibirPasamanos(buffer);
+			AlRecibirPasamanos(cliente, buffer);
 			break;
 	}
 

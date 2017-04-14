@@ -21,7 +21,7 @@
 
 
 ResultWithValue RecibirMensaje(int cliente, void AlRecibirMensaje(int,char*,int)){
-	int tamanio = 50;
+	int tamanio = 4;
 
 	char* buffer = malloc(tamanio);
 
