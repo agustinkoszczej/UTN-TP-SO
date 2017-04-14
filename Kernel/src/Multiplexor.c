@@ -119,6 +119,8 @@ void AlRecibirPasamanos(int cliente, char* buffer){
 	};
 
 	list_iterate(clients, ReplicarPasamanos);
+
+	printf("Mensaje recibido: %s", msg);
 }
 
 void AlRecibirMensaje(int cliente, char* buffer, int bytesRecibidos) {
