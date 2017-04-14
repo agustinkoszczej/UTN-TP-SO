@@ -123,7 +123,19 @@ void mostrarConfigFileSystem() {
 }
 
 void esperarMensaje(){
-	while(1);
+	while(1){
+		char* buffer = malloc(4);
+
+			while(1){
+				recv(socketFileSystem, buffer, 4, MSG_WAITALL);
+				if(stringToInt(buffer) == HEADER_PASAMANOS){
+						char* msg = malloc(50);
+						recv(socketFileSystem, msg, 50, 0);
+						puts(msg);
+						free(msg);
+				}
+			}
+	}
 }
 
 int main(void) {

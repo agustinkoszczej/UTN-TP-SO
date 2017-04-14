@@ -54,31 +54,6 @@ char* recibirMensaje(int socket,int tamanioMsj,int criterio) {
 
 }
 
-int recibirTamanioMensaje(int socketCliente) {
- return stringToInt(recibirMensaje(socketCliente, MSJ_DINAMICO, MSG_WAITALL));
-}
-
-char* recibirMensajeConTamanioDinamico(int socket) {
- int tamanioProxMsj = recibirTamanioMensaje(socket);
- if(tamanioProxMsj != 0){
-  return recibirMensaje(socket, tamanioProxMsj, MSG_WAITALL);
- }
-  return "ERROR";
-}
-
-void quedarEsperaRecibirMensajes(int socketCliente, t_handshake quienReciboMsjs, t_handshake quienSoy) {
-	while(1){
-		char* msj = recibirMensajeConTamanioDinamico(socketCliente);
-		if(msj != -1){//SI EL CLIENTE NO SE DESCONECTO
-
-			printf("Socket %d dice =  %s\n", socketCliente, msj);
-			}
-			else{
-				break;
-				}
-			}
-}
-
 struct sockaddr_in *direccionServidor(){
   struct sockaddr_in *retorno = malloc(sizeof(struct sockaddr_in));
 
@@ -144,9 +119,24 @@ void conectarAKernel(){
   }
 
   iniciarHandshake(CPU,KERNEL,socketCPU);
-
-  quedarEsperaRecibirMensajes(socketCPU, KERNEL, CPU);
 }
+
+void esperarMensaje(){
+	while(1){
+		char* buffer = malloc(4);
+
+			while(1){
+				recv(socketCPU, buffer, 4, MSG_WAITALL);
+				if(stringToInt(buffer) == HEADER_PASAMANOS){
+						char* msg = malloc(50);
+						recv(socketCPU, msg, 50, 0);
+						puts(msg);
+						free(msg);
+				}
+			}
+	}
+}
+
 
 int main (void){
 	printf("Iniciando CPU...\n\n");
@@ -158,6 +148,7 @@ int main (void){
 
 
 	 conectarAKernel();
+	 esperarMensaje();
 
 	return EXIT_SUCCESS;
 }

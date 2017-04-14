@@ -1,0 +1,6 @@
+[INFO] 20:35:24:158 FileSystem/(5802:5802): Inicinado File System
+[INFO] 20:35:24:158 FileSystem/(5802:5802): Archivo de configuracion cargado exitosamente
+[TRACE] 20:35:24:158 FileSystem/(5802:5802): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 20:37:06:807 FileSystem/(5901:5901): Inicinado File System
+[INFO] 20:37:06:807 FileSystem/(5901:5901): Archivo de configuracion cargado exitosamente
+[TRACE] 20:37:06:807 FileSystem/(5901:5901): Enviado mensaje de prueba de conexion al Kernel

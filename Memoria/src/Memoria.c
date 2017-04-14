@@ -102,6 +102,22 @@ void conectarAKernel(){
 	iniciarHandshake(MEMORIA,KERNEL,socketMemoria); //INICIO EL HANDSHAKE
 }
 
+void esperarMensaje(){
+	while(1){
+		char* buffer = malloc(4);
+
+			while(1){
+				recv(socketMemoria, buffer, 4, MSG_WAITALL);
+				if(stringToInt(buffer) == HEADER_PASAMANOS){
+						char* msg = malloc(50);
+						recv(socketMemoria, msg, 50, 0);
+						puts(msg);
+						free(msg);
+				}
+			}
+	}
+}
+
 
 //-----------------------------------------------------------------------------------------------------
 
@@ -138,10 +154,6 @@ void mostrarConfigMemoria() {
 	printf("ENTRADAS_CACHE=%d\n", memoria_config.ENTRADAS_CACHE);
 	printf("CACHE_X_PROC=%d\n", memoria_config.CACHE_X_PROC);
 	printf("RETARDO_MEMORIA=%d\n", memoria_config.RETARDO_MEMORIA);
-}
-
-void esperarMensaje(){
-	while(1);
 }
 
 int main(void) {

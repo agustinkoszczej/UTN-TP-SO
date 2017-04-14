@@ -27,5 +27,5 @@ void devolverHandshake(int socketCliente, t_handshake QuienDevuelveElHandshake) 
 void enviarPasamanos(int socketCliente, char* msg){
 	enviarHeader(socketCliente, HEADER_PASAMANOS);
 
-	enviarMensaje(socketCliente, intToString(msg), 1);
+	enviarMensaje(socketCliente, msg, 50);
 }
