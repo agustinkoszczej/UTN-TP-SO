@@ -1,0 +1,63 @@
+[INFO] 18:23:36:544 Consola/(3003:3003): Iniciando Consola
+[INFO] 18:23:36:545 Consola/(3003:3003): Archivo de configuracion de Consola cargado exitosamente
+[ERROR] 18:23:36:547 Consola/(3003:3003): Error en el connect
+[INFO] 18:24:46:736 Consola/(3019:3019): Iniciando Consola
+[INFO] 18:24:46:737 Consola/(3019:3019): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:24:46:739 Consola/(3019:3019): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:25:31:146 Consola/(3022:3022): Iniciando Consola
+[INFO] 18:25:31:146 Consola/(3022:3022): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:25:31:148 Consola/(3022:3022): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:25:47:39 Consola/(3024:3024): Iniciando Consola
+[INFO] 18:25:47:39 Consola/(3024:3024): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:25:47:41 Consola/(3024:3024): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:32:23:723 Consola/(4115:4115): Iniciando Consola
+[INFO] 18:32:23:724 Consola/(4115:4115): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:32:23:726 Consola/(4115:4115): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:37:19:692 Consola/(4247:4247): Iniciando Consola
+[INFO] 18:37:19:693 Consola/(4247:4247): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:37:19:699 Consola/(4247:4247): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:39:08:633 Consola/(4395:4395): Iniciando Consola
+[INFO] 18:39:08:637 Consola/(4395:4395): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:39:08:650 Consola/(4395:4395): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:43:13:465 Consola/(4553:4553): Iniciando Consola
+[INFO] 18:43:13:467 Consola/(4553:4553): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:43:13:479 Consola/(4553:4553): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:44:08:937 Consola/(4627:4627): Iniciando Consola
+[INFO] 18:44:08:939 Consola/(4627:4627): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:44:08:946 Consola/(4627:4627): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:45:58:761 Consola/(4755:4755): Iniciando Consola
+[INFO] 18:45:58:763 Consola/(4755:4755): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:45:58:770 Consola/(4755:4755): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:46:57:909 Consola/(4818:4818): Iniciando Consola
+[INFO] 18:46:57:910 Consola/(4818:4818): Archivo de configuracion de Consola cargado exitosamente
+[ERROR] 18:46:57:915 Consola/(4818:4818): Error en el connect
+[INFO] 18:47:06:81 Consola/(4822:4822): Iniciando Consola
+[INFO] 18:47:06:83 Consola/(4822:4822): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:47:06:94 Consola/(4822:4822): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:47:36:585 Consola/(4881:4881): Iniciando Consola
+[INFO] 18:47:36:587 Consola/(4881:4881): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:47:36:594 Consola/(4881:4881): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:49:19:522 Consola/(5014:5014): Iniciando Consola
+[INFO] 18:49:19:524 Consola/(5014:5014): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:49:19:531 Consola/(5014:5014): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:54:04:220 Consola/(5216:5216): Iniciando Consola
+[INFO] 18:54:04:221 Consola/(5216:5216): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:54:04:233 Consola/(5216:5216): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 18:57:39:316 Consola/(5319:5319): Iniciando Consola
+[INFO] 18:57:39:317 Consola/(5319:5319): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 18:57:39:323 Consola/(5319:5319): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 19:06:21:933 Consola/(5740:5740): Iniciando Consola
+[INFO] 19:06:21:935 Consola/(5740:5740): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 19:06:21:945 Consola/(5740:5740): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 19:07:37:47 Consola/(5907:5907): Iniciando Consola
+[INFO] 19:07:37:48 Consola/(5907:5907): Archivo de configuracion de Consola cargado exitosamente
+[ERROR] 19:07:37:50 Consola/(5907:5907): Error en el connect
+[INFO] 19:07:42:921 Consola/(5913:5913): Iniciando Consola
+[INFO] 19:07:42:922 Consola/(5913:5913): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 19:07:42:928 Consola/(5913:5913): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 19:09:37:165 Consola/(6107:6107): Iniciando Consola
+[INFO] 19:09:37:166 Consola/(6107:6107): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 19:09:37:171 Consola/(6107:6107): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 19:10:51:631 Consola/(6165:6165): Iniciando Consola
+[INFO] 19:10:51:632 Consola/(6165:6165): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 19:10:51:638 Consola/(6165:6165): Enviado mensaje de prueba de conexion al Kernel
