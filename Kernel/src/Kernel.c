@@ -12,16 +12,10 @@
 #include <commons/log.h>
 #include <commons/string.h>
 #include <commons/log.h>
-
-#include "ServerManager.h"
-
-
-#include "Kernel.h"
-
-
+#include "./Utilities/ServerManager.h"
+#include "./Utilities/Kernel.h"
 
 void cargarConfigKernel() {
-
 	t_config* configKernel;
 	configKernel = config_create(path);
 
@@ -76,6 +70,7 @@ void mostrarArrayDinamico(char** array) {
 		i++;
 	}
 }
+
 void mostrarConfigKernel() {
 	printf("PUERTO_PROG=%d\n", kernel_config.PUERTO_PROG);
 	printf("PUERTO_CPU=%d\n", kernel_config.PUERTO_CPU);
@@ -95,70 +90,6 @@ void mostrarConfigKernel() {
 	mostrarArrayDinamico(kernel_config.SHARED_VARS);
 	printf("STACK_SIZE=%d\n", kernel_config.STACK_SIZE);
 }
-																//Estas funciones de conexion irian en ServerManager.c pero tira ese error en la carpeta Debug que no se entiende
-struct sockaddr_in *direccionServidorFileSystem(){
-	struct sockaddr_in *retorno = malloc(sizeof(struct sockaddr_in));
-
-	retorno->sin_family = AF_INET;
-	retorno->sin_addr.s_addr = inet_addr(kernel_config.IP_FS);
-	retorno->sin_port = htons(kernel_config.PUERTO_FS);
-
-	return retorno;
-}
-
-struct sockaddr_in *direccionServidorMemoria(){
-	struct sockaddr_in *retorno = malloc(sizeof(struct sockaddr_in));
-
-	retorno->sin_family = AF_INET;
-	retorno->sin_addr.s_addr = inet_addr(kernel_config.IP_MEMORIA);
-	retorno->sin_port = htons(kernel_config.PUERTO_MEMORIA);
-
-	return retorno;
-}
-
-int getSocket(){
-	return socket(AF_INET, SOCK_STREAM,0);
-}
-
-void enviarMensajeDePruebaDeConexion(int servidorDestino)
-{
-	char* mensajeAEnviar = "Hola Servidor\n"; //Esto va cambiar por el handshake
-	int tamanoAEnviar = strlen(mensajeAEnviar);
-	send(servidorDestino, &tamanoAEnviar , 4, 0);
-
-	send(servidorDestino, mensajeAEnviar, strlen(mensajeAEnviar),0);
-}
-
-void conectarAFileSystem(){
-
-	socketKernelFyleSistem = getSocket();
-
-	struct sockaddr_in *VdireccionServidor = direccionServidorFileSystem();
-	if(connect(socketKernelFyleSistem,(struct sockaddr*) VdireccionServidor, sizeof(*VdireccionServidor)) != 0){
-		perror("Error en el connect");																		//ERROR
-		logger("Error al conectar a Fyle Sistem", "ERROR");
-	}
-
-	enviarMensajeDePruebaDeConexion(socketKernelFyleSistem);
-	logger("Enviado mensaje de prueba de conexion a Fyle Sistem", "TRACE");
-}
-
-void conectarAMemoria(){
-
-	socketKernelMemoria = getSocket();
-
-	struct sockaddr_in *VdireccionServidor = direccionServidorMemoria();
-	if(connect(socketKernelMemoria,(struct sockaddr*) VdireccionServidor, sizeof(*VdireccionServidor)) != 0){
-		perror("Error en el connect");																		//ERROR
-		logger("Error al conectar a Memoria", "ERROR");
-	}
-
-	enviarMensajeDePruebaDeConexion(socketKernelMemoria);
-	logger("Enviado mensaje de prueba de conexion a Memoria", "TRACE");
-}
-
-//Codigo repetido. Podria hacerse una funcion que arregle eso
-
 
 int main(void) {
 	printf("Iniciando Kernel...\n\n");
@@ -168,11 +99,6 @@ int main(void) {
 	cargarConfigKernel();
 	//MOSTRAR ARCHIVO DE CONFIGURACIÓN
 	mostrarConfigKernel();
-
-	conectarAFileSystem();
-
-	conectarAMemoria();	//Es en este orden?
-
 
 	Result r = SetupServer();
 	printf("\n");

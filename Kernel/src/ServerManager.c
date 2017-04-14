@@ -16,8 +16,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdbool.h>
-#include "Results.h"
-#include "Multiplexor.h"
+#include "./Utilities/Results.h"
+#include "./Utilities/Multiplexor.h"
 
 
 //TODOS ESTOS VAN AL ARCHIVO DE CONFIGURACION
@@ -42,8 +42,6 @@ void permitirReutilizarPuerto(int servidor) {
 
 void AlAceptarConexion(int cliente){
 	printf("Recibí una conexión en %d!!\n", cliente);
-	//send(cliente, "Hola NetCat!", 13, 0);
-	//send(cliente, ":)\n", 4, 0);
 }
 
 ResultWithValue AceptarConexion(int servidor){
@@ -59,26 +57,6 @@ ResultWithValue AceptarConexion(int servidor){
 
 	return OkWithValue(cliente);
 }
-
-/*ResultWithValue RecibirMensaje(int cliente){
-	uint32_t tamanio;
-	recv(cliente, &tamanio, 4, 0);
-
-	char* buffer = malloc(tamanio);
-
-	int bytesRecibidos = recv(cliente, buffer, tamanio, MSG_WAITALL);
-
-	if (bytesRecibidos < 0) {
-		free(buffer);
-		return ErrorWithValue(strerror("recv"), NULL);
-	}
-
-	AlRecibirMensaje(buffer, bytesRecibidos);
-
-	free(buffer);
-
-	return OkWithValue(NULL);
-}*/
 
 Result SetupServer(){
 	int servidor = socket(AF_INET, SOCK_STREAM, 0);

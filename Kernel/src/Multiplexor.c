@@ -8,20 +8,11 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdbool.h>
-#include "Results.h"
+#include "./Utilities/Results.h"
 #include <commons/collections/list.h>
-#include "CustomCommons.h"
+#include "./Utilities/CustomCommons.h"
 #include "Handshake.h"
-#include "Headers.h"
-
-void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
+#include "./Utilities/Headers.h"
 
 t_list* listeners;
 t_list* clients;
@@ -63,30 +54,12 @@ ResultWithValue SelectReaders(){
 		return OkWithValue(retval);
 }
 
-bool contains(t_list* list, void* value){
-
-	bool equals(void* item) {
-		return item == value;
-	}
-
-	return list_any_satisfy(list, equals);
-}
-
 bool isListener(int fd){
 	return contains(listeners, fd);
 }
 
 bool isClient(int fd){
 	return contains(clients, fd);
-}
-
-void PrintClientData(struct sockaddr_storage remoteaddr,int newfd,char remoteIP[INET6_ADDRSTRLEN]){
-	printf("selectserver: new connection from %s on "
-			"socket %d\n",
-			inet_ntop(remoteaddr.ss_family,
-				get_in_addr((struct sockaddr*)&remoteaddr),
-				remoteIP, INET6_ADDRSTRLEN),
-			newfd);
 }
 
 ResultWithValue GetNewConnection(int listener){
@@ -111,61 +84,55 @@ ResultWithValue GetNewConnection(int listener){
     AddClientToMaster(newfd);
     PrintClientData(remoteaddr,newfd,remoteIP);
 
-    return OkWithValue(NULL);
+	return OkWithValue(NULL);
 }
 
-char* intToString(int nro) {
- return string_from_format("%d", nro);
-}
-int stringToInt(char* string) {
- return atoi(string);
-}
+void AlRecibirHandshake(int cliente, char* buffer) {
+	int tamanio = 1;
+	char* handshake = malloc(tamanio);
 
-void enviarMensaje(int socketCliente, char* msg, int tamanio) {
- send(socketCliente, msg, tamanio, 0);
-}
+	int bytesRecibidos = recv(cliente, handshake, tamanio, MSG_WAITALL);
 
-void enviarHeader(int socket,int header) {
-	char* head = intToString(header);
-
-	send(socket, head, 4, 0);
-}
-
-void devolverHandshake(int socketCliente, t_handshake QuienDevuelveElHandshake) {
-	 enviarHeader(socketCliente, HEADER_HANDSHAKE);
-
-	 enviarMensaje(socketCliente, intToString(QuienDevuelveElHandshake), 1);
-}
-
-void AlRecibirMensaje(int cliente, char* buffer, int bytesRecibidos){
-	buffer[bytesRecibidos] = '\0';
-
-		char* headerHandshake = buffer;
-
-		if(stringToInt(headerHandshake) == HEADER_HANDSHAKE) {
-			int tamanio = 1;
-			char* handshake = malloc(tamanio);
-
-			int bytesRecibidos = recv(cliente, handshake , tamanio, MSG_WAITALL);
-
-				if (bytesRecibidos <= 0) {
-				    free(buffer);
-					printf("El cliente %d se desconecto\n",cliente);
-				}
-				else {
-					if(stringToInt(handshake) == CONSOLA) {
-						printf("Se conecto la consola %d\n",cliente);
-					}
-					if(stringToInt(handshake) == CPU) {
-						printf("Se conecto la CPU %d\n",cliente);
-					}
-
-					devolverHandshake(cliente, KERNEL);
-
-				}
+	if (bytesRecibidos <= 0) {
+		free(buffer);
+		printf("El cliente %d se desconecto\n", cliente);
+	} else {
+		if (stringToInt(handshake) == CONSOLA) {
+			printf("Se conecto la consola %d\n", cliente);
+		}
+		if (stringToInt(handshake) == CPU) {
+			printf("Se conecto la CPU %d\n", cliente);
 		}
 
+		devolverHandshake(cliente, KERNEL);
+
 	}
+}
+
+void AlRecibirPasamanos(char* buffer){
+	void ReplicarPasamanos(int cliente){
+			enviarPasamanos(cliente, buffer);
+	};
+
+	list_iterate(clients, ReplicarPasamanos);
+}
+
+void AlRecibirMensaje(int cliente, char* buffer, int bytesRecibidos) {
+	buffer[bytesRecibidos] = '\0';
+
+	char* header = buffer;
+	int headerCode = stringToInt(header);
+
+	switch (headerCode) {
+		case HEADER_HANDSHAKE:
+			AlRecibirHandshake(cliente, buffer);
+			break;
+		case HEADER_PASAMANOS:
+			AlRecibirPasamanos(buffer);
+			break;
+	}
+
+}
 
 
 ResultWithValue CheckForIncomingData(){
