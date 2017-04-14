@@ -73,3 +73,6 @@
 [INFO] 19:56:09:694 Consola/(8427:8427): Iniciando Consola
 [INFO] 19:56:09:695 Consola/(8427:8427): Archivo de configuracion de Consola cargado exitosamente
 [TRACE] 19:56:09:706 Consola/(8427:8427): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 19:58:41:357 Consola/(8650:8650): Iniciando Consola
+[INFO] 19:58:41:358 Consola/(8650:8650): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 19:58:41:361 Consola/(8650:8650): Enviado mensaje de prueba de conexion al Kernel

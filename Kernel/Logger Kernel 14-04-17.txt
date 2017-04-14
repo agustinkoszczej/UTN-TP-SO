@@ -40,3 +40,5 @@
 [INFO] 19:54:51:778 Kernel/(7637:7637): Archivo de configuracion cargado exitosamente
 [INFO] 19:55:45:736 Kernel/(8295:8295): Iniciando Kernel
 [INFO] 19:55:45:737 Kernel/(8295:8295): Archivo de configuracion cargado exitosamente
+[INFO] 19:58:36:233 Kernel/(8644:8644): Iniciando Kernel
+[INFO] 19:58:36:237 Kernel/(8644:8644): Archivo de configuracion cargado exitosamente
