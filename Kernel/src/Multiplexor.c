@@ -54,12 +54,30 @@ ResultWithValue SelectReaders(){
 		return OkWithValue(retval);
 }
 
+bool contains(t_list* list, void* value){
+
+	bool equals(void* item) {
+		return item == value;
+	}
+
+	return list_any_satisfy(list, equals);
+}
+
 bool isListener(int fd){
 	return contains(listeners, fd);
 }
 
 bool isClient(int fd){
 	return contains(clients, fd);
+}
+
+void PrintClientData(struct sockaddr_storage remoteaddr,int newfd,char remoteIP[INET6_ADDRSTRLEN]){
+	printf("selectserver: new connection from %s on "
+			"socket %d\n",
+			inet_ntop(remoteaddr.ss_family,
+				get_in_addr((struct sockaddr*)&remoteaddr),
+				remoteIP, INET6_ADDRSTRLEN),
+			newfd);
 }
 
 ResultWithValue GetNewConnection(int listener){
