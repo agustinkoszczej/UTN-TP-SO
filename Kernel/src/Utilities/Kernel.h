@@ -12,8 +12,8 @@
 #include<commons/log.h>
 #include<commons/string.h>
 
-#include "../Handshake.h"
-#include "../Headers.h"
+#include "Handshake.h"
+#include "Headers.h"
 
 typedef struct {
 	int PUERTO_PROG;

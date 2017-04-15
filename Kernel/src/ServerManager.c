@@ -16,7 +16,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdbool.h>
-#include "../Results.h"
+#include "Results.h"
 #include "./Utilities/Multiplexor.h"
 
 struct sockaddr_in CrearDireccionServer(int puerto){ //Direccion local Kernel

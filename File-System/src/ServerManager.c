@@ -44,7 +44,6 @@ ResultWithValue AceptarConexion(int servidor){ //Comun
 	if(cliente == -1)
 		return ErrorWithValue(strerror("accept"), NULL);
 
-	AlAceptarConexion(cliente);
 
 	return OkWithValue(cliente);
 }

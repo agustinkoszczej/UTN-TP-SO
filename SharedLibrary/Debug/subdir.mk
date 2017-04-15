@@ -4,20 +4,32 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/Consola.c 
+../Conversor.c \
+../CustomCommons.c \
+../Results.c \
+../Sender.c \
+../logger.c 
 
 OBJS += \
-./src/Consola.o 
+./Conversor.o \
+./CustomCommons.o \
+./Results.o \
+./Sender.o \
+./logger.o 
 
 C_DEPS += \
-./src/Consola.d 
+./Conversor.d \
+./CustomCommons.d \
+./Results.d \
+./Sender.d \
+./logger.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-src/%.o: ../src/%.c
+%.o: ../%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
-	gcc -I"/home/utnso/workspace/SharedLibrary" -I../../SharedLibrary/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	gcc -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

@@ -9,11 +9,11 @@
 #include <netdb.h>
 #include <stdbool.h>
 
-#include "../Results.h"
+#include "Results.h"
 #include <commons/collections/list.h>
-#include "../CustomCommons.h"
-#include "../Handshake.h"
-#include "../Headers.h"
+#include "CustomCommons.h"
+#include "Handshake.h"
+#include "Headers.h"
 
 t_list* listeners;
 t_list* clients;

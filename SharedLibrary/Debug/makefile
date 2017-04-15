@@ -8,7 +8,6 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include src/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -23,26 +22,22 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: Consola
-
-dependents:
-	-cd /home/utnso/workspace/SharedLibrary/Debug && $(MAKE) all
+all: libSharedLibrary.so
 
 # Tool invocations
-Consola: $(OBJS) $(USER_OBJS) /home/utnso/workspace/SharedLibrary/Debug/libSharedLibrary.so
+libSharedLibrary.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L"/home/utnso/workspace/SharedLibrary/Debug" -L../../SharedLibrary/ -o "Consola" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -shared -o "libSharedLibrary.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) Consola
+	-$(RM) $(OBJS)$(C_DEPS)$(LIBRARIES) libSharedLibrary.so
 	-@echo ' '
 
 .PHONY: all clean dependents
 .SECONDARY:
-/home/utnso/workspace/SharedLibrary/Debug/libSharedLibrary.so:
 
 -include ../makefile.targets
