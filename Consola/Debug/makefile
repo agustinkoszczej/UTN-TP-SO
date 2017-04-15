@@ -26,6 +26,7 @@ endif
 all: Consola
 
 dependents:
+<<<<<<< HEAD
 	-cd /home/utnso/git/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) all
 
 # Tool invocations
@@ -33,6 +34,15 @@ Consola: $(OBJS) $(USER_OBJS) /home/utnso/git/tp-2017-1c-Lords-of-the-Strings/Sh
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
 	gcc -L../../SharedLibrary/ -L"/home/utnso/git/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug" -o "Consola" $(OBJS) $(USER_OBJS) $(LIBS)
+=======
+	-cd /home/utnso/Escritorio/ELSagrado/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) all
+
+# Tool invocations
+Consola: $(OBJS) $(USER_OBJS) /home/utnso/Escritorio/ELSagrado/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so
+	@echo 'Building target: $@'
+	@echo 'Invoking: GCC C Linker'
+	gcc -L../../SharedLibrary/ -L"/home/utnso/Escritorio/ELSagrado/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug" -o "Consola" $(OBJS) $(USER_OBJS) $(LIBS)
+>>>>>>> df0efe9ea00b56c1fb95d47c7813ff53d43ec3a8
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -43,6 +53,10 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
+<<<<<<< HEAD
 /home/utnso/git/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so:
+=======
+/home/utnso/Escritorio/ELSagrado/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so:
+>>>>>>> df0efe9ea00b56c1fb95d47c7813ff53d43ec3a8
 
 -include ../makefile.targets
