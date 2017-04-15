@@ -44,3 +44,9 @@
 [INFO] 19:58:36:237 Kernel/(8644:8644): Archivo de configuracion cargado exitosamente
 [INFO] 21:16:41:704 Kernel/(9054:9054): Iniciando Kernel
 [INFO] 21:16:41:715 Kernel/(9054:9054): Archivo de configuracion cargado exitosamente
+[INFO] 21:32:56:591 Kernel/(9258:9258): Iniciando Kernel
+[INFO] 21:32:56:592 Kernel/(9258:9258): Archivo de configuracion cargado exitosamente
+[INFO] 21:35:23:488 Kernel/(9428:9428): Iniciando Kernel
+[INFO] 21:35:23:489 Kernel/(9428:9428): Archivo de configuracion cargado exitosamente
+[INFO] 21:39:49:686 Kernel/(9638:9638): Iniciando Kernel
+[INFO] 21:39:49:687 Kernel/(9638:9638): Archivo de configuracion cargado exitosamente

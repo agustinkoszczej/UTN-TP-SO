@@ -157,7 +157,10 @@ ResultWithValue CheckForIncomingData() {
 				if (r.result.noError != true)
 					return r;
 			} else if (isClient(i)) {
-				RecibirMensaje(i, AlRecibirMensaje);
+				r = RecibirMensaje(i, AlRecibirMensaje);
+
+				if(r.value == -1)
+					FD_CLR(i, &rfds);
 			}
 		}
 	}
