@@ -8,7 +8,7 @@
 #ifndef SERVERMANAGER_H_
 #define SERVERMANAGER_H_
 
-#include "../Results.h"
+#include "Results.h"
 
 Result SetupServer(int, Result AlLevantarServidor(int));
 
