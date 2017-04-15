@@ -10,6 +10,8 @@
 
 #include "Consola.h"
 #include "Handshake.h"
+#include "logger.h"
+
 #include<stdbool.h>
 #include<sys/types.h>
 #include<time.h>
@@ -54,13 +56,6 @@ struct sockaddr_in *direccionServidor(){
 
 int getSocket(){
 	return socket(AF_INET, SOCK_STREAM,0);
-}
-
-char* intToString(int nro) {
- return string_from_format("%d", nro);
-}
-int stringToInt(char* string) {
- return atoi(string);
 }
 
 char* recibirMensaje(int socket,int tamanioMsj,int criterio) {

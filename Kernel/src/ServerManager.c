@@ -16,7 +16,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdbool.h>
-#include "./Utilities/Results.h"
+#include "../Results.h"
 #include "./Utilities/Multiplexor.h"
 
 
@@ -71,9 +71,9 @@ Result SetupServer(){
 	printf("Estoy escuchando\n");
 	 	listen(servidor, 100);
 
-	Multiplexar(servidor);
+	Result r = Multiplexar(servidor);
 
-	return Ok();
+	return r;
 
 }
 
