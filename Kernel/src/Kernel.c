@@ -75,7 +75,6 @@ void mostrarConfigKernel() {
 	mostrarArrayDinamico(kernel_config.SHARED_VARS);
 	printf("STACK_SIZE=%d\n", kernel_config.STACK_SIZE);
 }
-																//Estas funciones de conexion irian en ServerManager.c pero tira ese error en la carpeta Debug que no se entiende
 
 
 int main(void) {
@@ -87,9 +86,7 @@ int main(void) {
 	//MOSTRAR ARCHIVO DE CONFIGURACIÓN
 	mostrarConfigKernel();
 
-	//conectarAFileSystem();
 
-	//conectarAMemoria();	//Es en este orden?
 
 
 	Result r = SetupServer(8080);
