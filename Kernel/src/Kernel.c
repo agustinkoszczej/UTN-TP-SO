@@ -16,6 +16,8 @@
 #include "./Utilities/Kernel.h"
 #include "./Utilities/Multiplexor.h"
 
+char * name = "Kernel";
+
 void cargarConfigKernel() {
 
 	t_config* configKernel;
@@ -42,7 +44,7 @@ void cargarConfigKernel() {
 	kernel_config.SHARED_VARS = config_get_array_value(configKernel,
 			"SHARED_VARS");
 	kernel_config.STACK_SIZE = config_get_int_value(configKernel, "STACK_SIZE");
-	logger("Archivo de configuracion cargado exitosamente", "INFO");
+	logger("Archivo de configuracion cargado exitosamente", "INFO", name);
 }
 
 void mostrarArrayDinamico(char** array) {
@@ -80,7 +82,7 @@ void mostrarConfigKernel() {
 
 int main(void) {
 	printf("Iniciando Kernel...\n\n");
-	logger("Iniciando Kernel", "INFO");
+	logger("Iniciando Kernel", "INFO", name);
 
 	//CARGAR ARCHIVO DE CONFIGURACIÓN
 	cargarConfigKernel();
@@ -94,9 +96,9 @@ int main(void) {
 	printf("\n");
 	//logger por ok o error total
 	if(r.noError != true)
-		logger(r.msg, "ERROR");
+		logger(r.msg, "ERROR", name);
 	else
-		logger(r.msg, "INFO");
+		logger(r.msg, "INFO", name);
 
 
 	puts(r.msg);

@@ -8,7 +8,7 @@
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
-void logger(char*, char*);
+void logger(char*, char*, char*);
 
 
 #endif /* LOGGER_H_ */
