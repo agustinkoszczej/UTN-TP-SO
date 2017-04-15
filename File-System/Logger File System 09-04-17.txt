@@ -1,4 +1,0 @@
-[INFO] 14:02:31:960 File System/(6019:6019): Inicinado File System
-[INFO] 14:02:31:960 File System/(6019:6019): Archivo de configuracion cargado exitosamente
-[INFO] 14:02:47:828 File System/(6056:6056): Inicinado File System
-[INFO] 14:02:47:828 File System/(6056:6056): Archivo de configuracion cargado exitosamente
