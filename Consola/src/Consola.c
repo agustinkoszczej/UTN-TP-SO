@@ -24,7 +24,7 @@
 
 int socketConsola; //Pruebo, no estoy seguro si lo necesito como global
 
-
+char * name = "Consola";
 void cargarConfigConsola() {
 
 	t_config* configConsola;
@@ -36,7 +36,7 @@ void cargarConfigConsola() {
 			"PUERTO_KERNEL");
 
 	printf("Archivo de configuracion de Consola cargado exitosamente!\n");
-	logger("Archivo de configuracion de Consola cargado exitosamente", "INFO");
+	logger("Archivo de configuracion de Consola cargado exitosamente", "INFO", name);
 }
 
 void mostrarConfigConsola() {
@@ -95,7 +95,7 @@ void enviarHeader(int socket,int header) {
 void iniciarHandshake(t_handshake QuienIniciaElHandshake, t_handshake QuienDevuelveHandshake, int socket) {
 
 	enviarHeader(socket, HEADER_HANDSHAKE);  //ENVIO EL HEADER DEL HANDSHAKE PARA QUE EL PROCESO QUE LO RECIBE VERIFIQUE SI ES UN HANDSHAKE LO QUE LE ENVIO O NO
-	logger("Enviado mensaje de prueba de conexion al Kernel", "TRACE");
+	logger("Enviado mensaje de prueba de conexion al Kernel", "TRACE", name);
 	char* handshake = intToString(QuienIniciaElHandshake);
 	enviarMensaje(socket, handshake, 1);		//ENVIO AL SOCKET QUE ME CONECTO EL VALOR DE QUIEN INICIA EL HANDSHAKE (EN ESTE CASO ES UN 4 QUE REPRESENTA A LA CONSOLA)
 
@@ -121,7 +121,7 @@ void conectarAKernel(){
 	struct sockaddr_in *VdireccionServidor = direccionServidor();
 	if(connect(socketConsola,(struct sockaddr*) VdireccionServidor, sizeof(*VdireccionServidor)) != 0){
 		perror("Error en el connect");																		//ERROR
-		logger("Error en el connect", "ERROR");
+		logger("Error en el connect", "ERROR", name);
 	}
 
 	iniciarHandshake(CONSOLA,KERNEL,socketConsola); //INICIO EL HANDSHAKE
@@ -136,7 +136,7 @@ void conectarAKernel(){
 
 int main() {
 	printf("Iniciando Consola...\n\n");
-	logger("Iniciando Consola", "INFO");
+	logger("Iniciando Consola", "INFO", name);
 
 	//CARGAR ARCHIVO DE CONFIGURACIÓN
 	cargarConfigConsola();
