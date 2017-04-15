@@ -14,42 +14,31 @@
 #include "../CustomCommons.h"
 #include "../Handshake.h"
 #include "../Headers.h"
+#include "../Conversor.h"
 
 t_list* listeners;
 t_list* clients;
 int fdmax;
+int lastMax = 0;
 fd_set rfds;
 fd_set rfdsTemp;
-
-char* textonombreProceso(t_handshake Id_Proceso){
-	switch(Id_Proceso){
-		case KERNEL:
-			return "Kernel";
-		break;
-		case FILE_SYSTEM:
-			return "File System";
-		break;
-		case MEMORIA:
-			return "Memoria";
-		break;
-		case CPU:
-			return "CPU";
-		break;
-		case CONSOLA:
-			return "Consola";
-		break;
-		default:
-			return "?";
-		break;
-	}
-}
 
 
 void AddFdToMaster(int fd) {
 	FD_SET(fd, &rfds);
 
 	if (fd > fdmax) {    // keep track of the max
+		lastMax = fdmax;
 		fdmax = fd;
+	}
+}
+
+
+void RemoveFdFromMaster(int fd) {
+	FD_CLR(fd, &rfds);
+
+	if (fd == fdmax) {    // keep track of the max
+		fdmax = lastMax;
 	}
 }
 
@@ -65,6 +54,12 @@ void AddClientToMaster(int fd) {
 	list_add(clients, fd);
 }
 
+void RemoveClientFromMaster(int fd){
+	RemoveFdFromMaster(fd);
+
+	list_remove(clients,fd);
+}
+
 void ResetSet(int listener) {
 	FD_ZERO(&rfds);
 	AddListenerToMaster(listener);
@@ -74,7 +69,7 @@ ResultWithValue SelectReaders() {
 	int retval = select(fdmax + 1, &rfdsTemp, NULL, NULL, NULL);
 
 	if (retval == -1)
-		return ErrorWithValue(strerror("select()"), NULL);
+		return ErrorWithValue(strerror("select"), NULL);
 	else
 		return OkWithValue(retval);
 }
@@ -121,12 +116,6 @@ void AlRecibirHandshake(int cliente, char* buffer) {
 		printf("El cliente %d se desconecto\n", cliente);
 		close(cliente);
 	} else {
-		/*if (stringToInt(handshake) == CONSOLA) {
-			printf("Se conecto la consola %d\n", cliente);
-		}
-		if (stringToInt(handshake) == CPU) {
-			printf("Se conecto la CPU %d\n", cliente);
-		}*/
 		printf("Se conecto %s socket %d\n",textonombreProceso(stringToInt(handshake)), cliente);
 
 		devolverHandshake(cliente, KERNEL);
@@ -186,8 +175,9 @@ ResultWithValue CheckForIncomingData() {
 			} else if (isClient(i)) {
 				r = RecibirMensaje(i, AlRecibirMensaje);
 
-				if(r.value == -1)
-					FD_CLR(i, &rfds);
+				if(r.value == -1){
+					RemoveClientFromMaster(i);
+				}
 			}
 		}
 	}

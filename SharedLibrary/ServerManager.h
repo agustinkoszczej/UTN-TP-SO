@@ -10,6 +10,6 @@
 
 #include "../Results.h"
 
-Result SetupServer(void);
+Result SetupServer(int, Result AlLevantarServidor(int));
 
 #endif /* SERVERMANAGER_H_ */

@@ -16,8 +16,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdbool.h>
-#include "../Results.h"
-#include "./Utilities/Multiplexor.h"
+#include "Results.h"
 
 struct sockaddr_in CrearDireccionServer(int puerto){ //Direccion local Kernel
 	struct sockaddr_in direccionServidor;
@@ -33,7 +32,7 @@ void permitirReutilizarPuerto(int servidor) { //Comun
 }
 
 
-Result SetupServer(int puerto){			//Comun
+Result SetupServer(int puerto, Result AlLevantarServidor(int)){			//Comun
 	int servidor = socket(AF_INET, SOCK_STREAM, 0);
 
 	struct sockaddr_in direccionServer = CrearDireccionServer(puerto);
@@ -50,7 +49,7 @@ Result SetupServer(int puerto){			//Comun
 	listen(servidor, 100);
 	printf("Estoy escuchando\n");
 
-	Result r = Multiplexar(servidor);
+	Result r = AlLevantarServidor(servidor);
 
 	return r;
 

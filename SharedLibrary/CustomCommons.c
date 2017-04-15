@@ -16,10 +16,10 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdbool.h>
-#include "Results.h"
+
 #include <commons/collections/list.h>
 #include "Handshake.h"
-
+#include "Results.h"
 
 ResultWithValue RecibirMensaje(int cliente, void AlRecibirMensaje(int,char*,int)){
 	int tamanio = sizeof(t_handshake);
