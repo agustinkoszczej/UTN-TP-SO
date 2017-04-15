@@ -15,6 +15,10 @@
 #include "Handshake.h"
 #include "Headers.h"
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+#include "Conversor.h"
+>>>>>>> 56f25fd472e122186364e4e6cae8af86c720a38b
 =======
 #include "Conversor.h"
 >>>>>>> 56f25fd472e122186364e4e6cae8af86c720a38b
