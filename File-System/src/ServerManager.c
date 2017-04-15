@@ -16,11 +16,6 @@
 #include <stdbool.h>
 #include "Results.h"
 
-//TODOS ESTOS VAN AL ARCHIVO DE CONFIGURACION
-#define PORT "9034"   // port we're listening on
-#define IP
-//
-
 struct sockaddr_in CrearDireccionServer(){
 	struct sockaddr_in direccionServidor;
 	direccionServidor.sin_family = AF_INET;
