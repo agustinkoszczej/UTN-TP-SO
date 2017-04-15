@@ -33,7 +33,7 @@ void permitirReutilizarPuerto(int servidor) { //Comun
 }
 
 
-Result SetupServer(int puerto){			//Comun
+Result SetupServer(int puerto, Result AlLevantarServidor(int)){			//Comun
 	int servidor = socket(AF_INET, SOCK_STREAM, 0);
 
 	struct sockaddr_in direccionServer = CrearDireccionServer(puerto);
@@ -50,13 +50,12 @@ Result SetupServer(int puerto){			//Comun
 	listen(servidor, 100);
 	printf("Estoy escuchando\n");
 
-	Result r = Multiplexar(servidor);
+	Result r = AlLevantarServidor(servidor);
 
 	return r;
 
 }
 
-
-
-
-
+int getSocket(){
+	return socket(AF_INET, SOCK_STREAM,0);
+}

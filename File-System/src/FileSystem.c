@@ -22,6 +22,7 @@
 #include<sys/socket.h>
 
 int socketFileSystem;
+char * name = "File System";
 
 //-----------------------------------------------------------------------------------
 
@@ -79,7 +80,7 @@ void enviarHeader(int socket,int header) {
 void iniciarHandshake(t_handshake QuienIniciaElHandshake, t_handshake QuienDevuelveHandshake, int socket) {
 
 	enviarHeader(socket, HEADER_HANDSHAKE);  //ENVIO EL HEADER DEL HANDSHAKE PARA QUE EL PROCESO QUE LO RECIBE VERIFIQUE SI ES UN HANDSHAKE LO QUE LE ENVIO O NO
-	logger("Enviado mensaje de prueba de conexion al Kernel", "TRACE");
+	logger("Enviado mensaje de prueba de conexion al Kernel", "TRACE", name);
 	char* handshake = intToString(QuienIniciaElHandshake);
 	enviarMensaje(socket, handshake, 1);		//ENVIO AL SOCKET QUE ME CONECTO EL VALOR DE QUIEN INICIA EL HANDSHAKE (EN ESTE CASO ES UN 4 QUE REPRESENTA A LA CONSOLA)
 
@@ -96,7 +97,7 @@ void conectarAKernel(){
 	struct sockaddr_in *VdireccionServidor = direccionServidor();
 	if(connect(socketFileSystem,(struct sockaddr*) VdireccionServidor, sizeof(*VdireccionServidor)) != 0){
 		perror("Error en el connect");																		//ERROR
-		logger("Error en el connect", "ERROR");
+		logger("Error en el connect", "ERROR", name);
 	}
 
 	iniciarHandshake(FILE_SYSTEM,KERNEL,socketFileSystem); //INICIO EL HANDSHAKE
@@ -114,7 +115,7 @@ void cargarConfigFileSystem() {
 			"PUNTO_MONTAJE");
 
 	printf("Archivo de configuracion de File System cargado exitosamente!\n");
-	logger("Archivo de configuracion cargado exitosamente", "INFO");
+	logger("Archivo de configuracion cargado exitosamente", "INFO", name);
 }
 
 void mostrarConfigFileSystem() {
@@ -138,9 +139,29 @@ void esperarMensaje(){
 	}
 }
 
+
+
+/*Result AlLevantarServer(int servidor){
+	//------------------------------
+
+		 ResultWithValue r = AceptarConexion(servidor);
+
+		//------------------------------
+
+		 if(r.value != NULL)
+			 RecibirMensaje(r.value);
+		 else
+			 return r.result;
+}
+
+Falta codear AceptarConexion y RecibirMensaje
+
+*/
+
+
 int main(void) {
 	printf("Iniciando File System...\n\n");
-	logger("Inicinado File System", "INFO");
+	logger("Inicinado File System", "INFO", name);
 
 	//CARGAR ARCHIVO DE CONFIGURACIÓN
 	cargarConfigFileSystem();
@@ -153,6 +174,8 @@ int main(void) {
 
 	printf("\n");
 
+
+	//Result r = SetupServer(8080,AlLevantarServer);
 	//puts(r.msg);
 
 	esperarMensaje();

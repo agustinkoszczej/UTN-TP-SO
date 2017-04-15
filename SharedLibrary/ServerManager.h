@@ -10,6 +10,9 @@
 
 #include "Results.h"
 
-Result SetupServer(int);
+Result SetupServer(int, Result AlLevantarServidor(int));
+void permitirReutilizarPuerto(int);
+struct sockaddr_in CrearDireccionServer(int);
+int getSocket(void);
 
 #endif /* SERVERMANAGER_H_ */
