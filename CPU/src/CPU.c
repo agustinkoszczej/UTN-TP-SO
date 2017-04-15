@@ -21,6 +21,7 @@
 #define MSJ_DINAMICO 50
 
 int socketCPU;
+char * name = "CPU";
 
 void cargarConfigCPU() {
 
@@ -33,7 +34,7 @@ void cargarConfigCPU() {
       "PUERTO_KERNEL");
 
   printf("Archivo de configuracion de Consola cargado exitosamente!\n");
-  logger("Archivo de configuracion de Consola cargado exitosamente", "INFO");
+  logger("Archivo de configuracion de Consola cargado exitosamente", "INFO", name);
 }
 
 void mostrarConfigCPU() {
@@ -140,7 +141,7 @@ void esperarMensaje(){
 
 int main (void){
 	printf("Iniciando CPU...\n\n");
-	logger("Iniciando CPU", "INFO");
+	logger("Iniciando CPU", "INFO", name);
 	//CARGAR ARCHIVO DE CONFIGURACIÓN
 	 cargarConfigCPU();
 	//MOSTRAR ARCHIVO DE CONFIGURACIÓN
