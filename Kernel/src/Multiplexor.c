@@ -20,7 +20,7 @@ int fdmax;
 fd_set rfds;
 fd_set rfdsTemp;
 
-void AddFdToMaster(int fd){
+void AddFdToMaster(int fd) {
 	FD_SET(fd, &rfds);
 
 	if (fd > fdmax) {    // keep track of the max
@@ -28,61 +28,58 @@ void AddFdToMaster(int fd){
 	}
 }
 
-void AddListenerToMaster(int fd){
+void AddListenerToMaster(int fd) {
 	AddFdToMaster(fd);
 
 	list_add(listeners, fd);
 }
 
-void AddClientToMaster(int fd){
+void AddClientToMaster(int fd) {
 	AddFdToMaster(fd);
 
 	list_add(clients, fd);
 }
 
-void ResetSet(int listener){
+void ResetSet(int listener) {
 	FD_ZERO(&rfds);
 	AddListenerToMaster(listener);
 }
 
-ResultWithValue SelectReaders(){
-	int retval = select(fdmax+1, &rfdsTemp, NULL, NULL, NULL);
+ResultWithValue SelectReaders() {
+	int retval = select(fdmax + 1, &rfdsTemp, NULL, NULL, NULL);
 
-	if(retval == -1)
-		return ErrorWithValue(strerror("select()"),NULL);
+	if (retval == -1)
+		return ErrorWithValue(strerror("select()"), NULL);
 	else
 		return OkWithValue(retval);
 }
 
-bool isListener(int fd){
+bool isListener(int fd) {
 	return contains(listeners, fd);
 }
 
-bool isClient(int fd){
+bool isClient(int fd) {
 	return contains(clients, fd);
 }
 
-ResultWithValue GetNewConnection(int listener){
+ResultWithValue GetNewConnection(int listener) {
 	int newfd;        // newly accept()ed socket descriptor
 	struct sockaddr_storage remoteaddr; // client address
 
 	char remoteIP[INET6_ADDRSTRLEN];
 
-    // handle new connections
+	// handle new connections
 	socklen_t addrlen;
 
 	addrlen = sizeof remoteaddr;
 
-	newfd = accept(listener,
-			(struct sockaddr *)&remoteaddr,
-			&addrlen);
+	newfd = accept(listener, (struct sockaddr *) &remoteaddr, &addrlen);
 
-    if (newfd == -1)
-        return ErrorWithValue(strerror("accept"),NULL);
+	if (newfd == -1)
+		return ErrorWithValue(strerror("accept"), NULL);
 
-
-    AddClientToMaster(newfd);
-    PrintClientData(remoteaddr,newfd,remoteIP);
+	AddClientToMaster(newfd);
+	PrintClientData(remoteaddr, newfd, remoteIP);
 
 	return OkWithValue(NULL);
 }
@@ -96,6 +93,7 @@ void AlRecibirHandshake(int cliente, char* buffer) {
 	if (bytesRecibidos <= 0) {
 		free(buffer);
 		printf("El cliente %d se desconecto\n", cliente);
+		close(cliente);
 	} else {
 		if (stringToInt(handshake) == CONSOLA) {
 			printf("Se conecto la consola %d\n", cliente);
@@ -109,18 +107,25 @@ void AlRecibirHandshake(int cliente, char* buffer) {
 	}
 }
 
-void AlRecibirPasamanos(int cliente, char* buffer){
+void AlRecibirPasamanos(int cliente, char* buffer) {
 	char* msg = malloc(50);
 
 	int bytesRecibidos = recv(cliente, msg, 50, 0);
 
-	void ReplicarPasamanos(int cliente){
+	if (bytesRecibidos <= 0) {
+		free(buffer);
+		printf("El cliente %d se desconecto\n", cliente);
+		close(cliente);
+	} else {
+
+		void ReplicarPasamanos(int cliente) {
 			enviarPasamanos(cliente, msg);
-	};
+		};
 
-	list_iterate(clients, ReplicarPasamanos);
+		list_iterate(clients, ReplicarPasamanos);
 
-	puts(msg);
+		puts(msg);
+	}
 }
 
 void AlRecibirMensaje(int cliente, char* buffer, int bytesRecibidos) {
@@ -130,33 +135,28 @@ void AlRecibirMensaje(int cliente, char* buffer, int bytesRecibidos) {
 	int headerCode = stringToInt(header);
 
 	switch (headerCode) {
-		case HEADER_HANDSHAKE:
-			AlRecibirHandshake(cliente, buffer);
-			break;
-		case HEADER_PASAMANOS:
-			AlRecibirPasamanos(cliente, buffer);
-			break;
+	case HEADER_HANDSHAKE:
+		AlRecibirHandshake(cliente, buffer);
+		break;
+	case HEADER_PASAMANOS:
+		AlRecibirPasamanos(cliente, buffer);
+		break;
 	}
 
 }
 
-
-ResultWithValue CheckForIncomingData(){
+ResultWithValue CheckForIncomingData() {
 	int i;
 	ResultWithValue r;
 
-	for(i = 0; i <= fdmax; i++)
-	{
-		if (FD_ISSET(i, &rfdsTemp))
-		{
-			if(isListener(i))
-			{
+	for (i = 0; i <= fdmax; i++) {
+		if (FD_ISSET(i, &rfdsTemp)) {
+			if (isListener(i)) {
 				r = GetNewConnection(i);
 
-				if(r.result.noError != true)
+				if (r.result.noError != true)
 					return r;
-			}
-			else if(isClient(i)){
+			} else if (isClient(i)) {
 				RecibirMensaje(i, AlRecibirMensaje);
 			}
 		}
@@ -165,10 +165,9 @@ ResultWithValue CheckForIncomingData(){
 	return OkWithValue(NULL);
 }
 
-
-Result Multiplexar(int listener){
-	listeners 	= list_create();
-	clients 	= list_create();
+Result Multiplexar(int listener) {
+	listeners = list_create();
+	clients = list_create();
 
 	ResultWithValue r;
 
@@ -177,15 +176,13 @@ Result Multiplexar(int listener){
 
 	fdmax = listener;
 
-	for(;;) {
+	for (;;) {
 		rfdsTemp = rfds;
-
 
 		r = SelectReaders();
 
 		if (r.result.noError != true)
-	    	return r.result;
-
+			return r.result;
 
 		r = CheckForIncomingData();
 
