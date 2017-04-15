@@ -105,14 +105,19 @@ void conectarAKernel(){
 void esperarMensaje(){
 	while(1){
 		char* buffer = malloc(4);
-
 			while(1){
-				recv(socketMemoria, buffer, 4, MSG_WAITALL);
-				if(stringToInt(buffer) == HEADER_PASAMANOS){
+				if(recv(socketMemoria, buffer, 4, MSG_WAITALL)<=0){
+					close(socketMemoria);
+					printf("Servidor desconectado\n");
+					return;
+				}
+				else{
+					if(stringToInt(buffer) == HEADER_PASAMANOS){
 						char* msg = malloc(50);
 						recv(socketMemoria, msg, 50, 0);
 						puts(msg);
 						free(msg);
+					}
 				}
 			}
 	}

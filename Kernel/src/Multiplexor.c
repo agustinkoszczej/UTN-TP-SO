@@ -9,11 +9,11 @@
 #include <netdb.h>
 #include <stdbool.h>
 
-#include "./Utilities/Results.h"
+#include "../Results.h"
 #include <commons/collections/list.h>
-#include "./Utilities/CustomCommons.h"
-#include "Handshake.h"
-#include "./Utilities/Headers.h"
+#include "../CustomCommons.h"
+#include "../Handshake.h"
+#include "../Headers.h"
 
 t_list* listeners;
 t_list* clients;
@@ -105,6 +105,7 @@ ResultWithValue GetNewConnection(int listener) {
 
 	AddClientToMaster(newfd);
 	PrintClientData(remoteaddr, newfd, remoteIP);
+
 
 	return OkWithValue(NULL);
 }

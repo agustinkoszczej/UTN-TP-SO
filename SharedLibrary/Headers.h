@@ -10,7 +10,7 @@
 
 typedef enum {
 	HEADER_HANDSHAKE, //0
-	HEADER_PASAMANOS
+	HEADER_PASAMANOS //1
 } t_header;
 
 #endif /* SHAREDLIBRARY_HEADERS_H_ */

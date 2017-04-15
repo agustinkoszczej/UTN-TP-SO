@@ -3,6 +3,7 @@
 	<name>Memoria</name>
 	<comment></comment>
 	<projects>
+		<project>SharedLibrary</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

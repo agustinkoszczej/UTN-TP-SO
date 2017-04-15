@@ -18,10 +18,11 @@
 #include <stdbool.h>
 #include "Results.h"
 #include <commons/collections/list.h>
+#include "Handshake.h"
 
 
 ResultWithValue RecibirMensaje(int cliente, void AlRecibirMensaje(int,char*,int)){
-	int tamanio = 4;
+	int tamanio = sizeof(t_handshake);
 
 	char* buffer = malloc(tamanio);
 
