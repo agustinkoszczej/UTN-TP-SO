@@ -26,13 +26,13 @@ endif
 all: Consola
 
 dependents:
-	-cd /home/utnso/TPLOTS/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) clean all
+	-cd /home/utnso/workspace/SharedLibrary/Debug && $(MAKE) all
 
 # Tool invocations
-Consola: $(OBJS) $(USER_OBJS) /home/utnso/TPLOTS/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so
+Consola: $(OBJS) $(USER_OBJS) /home/utnso/workspace/SharedLibrary/Debug/libSharedLibrary.so
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L../../SharedLibrary/ -L"/home/utnso/TPLOTS/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug" -o "Consola" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L"/home/utnso/workspace/SharedLibrary/Debug" -L../../SharedLibrary/ -o "Consola" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -43,6 +43,6 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
-/home/utnso/TPLOTS/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so:
+/home/utnso/workspace/SharedLibrary/Debug/libSharedLibrary.so:
 
 -include ../makefile.targets
