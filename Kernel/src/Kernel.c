@@ -89,7 +89,7 @@ int main(void) {
 
 
 
-	Result r = SetupServer(8080);
+	Result r = SetupServer(kernel_config.PUERTO_CPU);
 	printf("\n");
 	//logger por ok o error total
 	if(r.noError != true)
