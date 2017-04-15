@@ -1,0 +1,297 @@
+[33mcommit 12a746ab181cc3736c50eb874aee3fc181ba9dac[m
+Author: agustinkoszczej <agustinkoszczej@hotmail.com>
+Date:   Fri Apr 14 22:08:18 2017 -0300
+
+    Minor changes
+
+[33mcommit bad8156caa80829e7aa4fb061c66462f85d9e54e[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 21:42:56 2017 -0300
+
+    fixes kernel
+
+[33mcommit 85dbf68e86e8241bd31d846dd70a09107a7ad817[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 21:29:47 2017 -0300
+
+    fix
+
+[33mcommit 9d1c0497b027b98c8c705f967619294bde021d86[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 21:19:29 2017 -0300
+
+    cambios error desconexion
+
+[33mcommit 8339a7bcb9f1a85ca6007e62fd19b9e8924be1c9[m
+Author: agustinkoszczej <agustinkoszczej@hotmail.com>
+Date:   Fri Apr 14 20:51:32 2017 -0300
+
+    Recibir mensajes
+
+[33mcommit 9641690fe2cd297b7d8818e86091847e1cf66ed9[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 19:59:06 2017 -0300
+
+    mostrar msg en pantalla 2
+
+[33mcommit 427f0b39a589c90456b7af13f1a09a9303eb0273[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 19:59:01 2017 -0300
+
+    mostrar msg en pantalla 2
+
+[33mcommit f1e36a471e9c25978b98a6d9a9b13ef3b1bf02aa[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 19:57:59 2017 -0300
+
+    mostrar msg en pantalla
+
+[33mcommit ccd225ee50b0817cf35f35f0b99df08a102fca79[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 19:37:07 2017 -0300
+
+    asd
+
+[33mcommit f7638566b8cd62c01b294b72f6ef4cc28994e724[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 19:17:14 2017 -0300
+
+    consola
+
+[33mcommit eb267ef487a1ae65f7059c2b531e9eef970dc738[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 18:20:49 2017 -0300
+
+    merge
+
+[33mcommit 7f7b7e57efd194e93aa8febbadcbe1fe3aa26d56[m
+Merge: efd5524 ef7f4da
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 18:20:39 2017 -0300
+
+    merge
+
+[33mcommit efd55249edcac52cd680868a0f52128b3cbc5d54[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 18:17:20 2017 -0300
+
+    agregado pasamanos y reorganizado
+
+[33mcommit 32b9c1e9a9983f6f72cbc2f2a6bbc0e6fe74c6f5[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Fri Apr 14 18:16:51 2017 -0300
+
+    agregado pasamanos
+
+[33mcommit ef7f4da3f80e641c5b65d6fec57cf8d81a715865[m
+Author: BrunoManchione <bmanchione@gmail.com>
+Date:   Thu Apr 13 19:11:50 2017 -0300
+
+    Conexiones FS,Memoria - Kernel
+
+[33mcommit edacd2f6e97c78a60c1f036b562b14c331a81324[m
+Author: Matu96 <mati.once@gmail.com>
+Date:   Thu Apr 13 17:33:17 2017 -0300
+
+    Kernelmodificado
+
+[33mcommit bf7419ce4ff50d3bdedeb490a54a2a5e057aef82[m
+Author: Matu96 <mati.once@gmail.com>
+Date:   Thu Apr 13 15:01:42 2017 -0300
+
+    Memoria modificado
+
+[33mcommit f12b8186f401005796ffbeddc92c7c6f07da3da0[m
+Author: Matu96 <mati.once@gmail.com>
+Date:   Thu Apr 13 15:00:24 2017 -0300
+
+    File-System modificado
+
+[33mcommit 397865ad1e6483908ec711b13ab1bacb4bd5c749[m
+Author: Matu96 <mati.once@gmail.com>
+Date:   Thu Apr 13 14:59:11 2017 -0300
+
+    Handshake Kernel
+
+[33mcommit f42da94b834490e1dcca7ef442984d44ef72e0f1[m
+Author: Matu96 <mati.once@gmail.com>
+Date:   Thu Apr 13 14:58:12 2017 -0300
+
+    Conexion CPU al Kernel
+
+[33mcommit 5122fa12b4f2ea40c47bc37370777eea649fde89[m
+Author: Matu96 <mati.once@gmail.com>
+Date:   Thu Apr 13 14:56:04 2017 -0300
+
+    Handshake Consola
+
+[33mcommit a4b6e8b82ea0bcb8269170faf3e85855329dcf25[m
+Author: joaquin1991 <joaquinsino@hotmail.com>
+Date:   Thu Apr 13 08:48:54 2017 -0300
+
+    Actualizados los loggers
+
+[33mcommit 2c3949cfacd8a7da06efd8be399faad27bfb5505[m
+Author: agustinkoszczej <agustinkoszczej@hotmail.com>
+Date:   Sun Apr 9 15:23:35 2017 -0300
+
+    Agregado Debugs y CFGs
+
+[33mcommit d3c4b1ff03a99ac97716e78e83a197f1e90ff883[m
+Author: agustinkoszczej <agustinkoszczej@hotmail.com>
+Date:   Sun Apr 9 14:26:27 2017 -0300
+
+    Cambiado Nucleo por Kernel en el Handshake
+
+[33mcommit bcc78573123a82d569514a6996d57fca4a0e773d[m
+Author: agustinkoszczej <agustinkoszczej@hotmail.com>
+Date:   Sun Apr 9 14:15:44 2017 -0300
+
+    Agregada SharedLibrary
+
+[33mcommit b1674a4593255c19582cbf63623e52d91865526a[m
+Merge: 2bdc926 3389bc2
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Sat Apr 8 16:58:06 2017 -0300
+
+    cambios kernel
+
+[33mcommit 2bdc9262d347a81a32f2530b4249e28b1ae09beb[m
+Author: mfischer00@gmail.com <mfischer00@gmail.com>
+Date:   Sat Apr 8 16:55:40 2017 -0300
+
+    Agregado uso de select en kernel
+
+[33mcommit 3389bc244a8c5d7ba04dd2fe1a2adfde4608b92f[m
+Author: BrunoManchione <bmanchione@gmail.com>
+Date:   Sat Apr 8 16:03:45 2017 -0300
+
+    Conexion Memoria y FS como servidores
+    
+    Se abre primero FS, despues Memoria, Kernel y ultimo Consola
+
+[33mcommit 0b03c253eb6996318d420d7509af187a9cb94e34[m
+Author: Matu96 <danel-malias@hotmail.com>
+Date:   Fri Apr 7 16:05:46 2017 -0300
+
+    Conexion Consola-Kernel modificado
+
+[33mcommit 43a13585b2d1cabd68bd31ac20d61f098899fd9f[m
+Author: mationce <danel-malias@hotmail.com>
+Date:   Fri Apr 7 15:55:02 2017 -0300
+
+    Conexion kernel-consola modificado
+
+[33mcommit eed2eea757c36cc3e6d047da2ec4a39999b83a43[m
+Author: Bruno Manchione <la25esrock@hotmail.com>
+Date:   Thu Apr 6 21:45:31 2017 -0300
+
+    Conexion Consola-Kernel
+
+[33mcommit 69c20dacee9f91848c55d02ec94c84c3caa83cdf[m
+Author: joaquin1991 <joaquinsino@hotmail.com>
+Date:   Thu Apr 6 18:12:20 2017 -0300
+
+    Activar Logger
+
+[33mcommit a69394ec2dfe40998b53a42e506873359eca0102[m
+Author: FischerMatias <mfischer00@gmail.com>
+Date:   Thu Apr 6 18:01:41 2017 -0300
+
+    Cambios en kernel y algun que otro backup
+
+[33mcommit 05299c21543488efe9ed7f1c86d8baf6031448de[m
+Author: agustinkoszczej <agustinkoszczej@hotmail.com>
+Date:   Thu Apr 6 17:41:38 2017 -0300
+
+    Revert
+
+[33mcommit 1b61090976f54c0a2f1851f2fc6e61794a50eb97[m
+Author: FischerMatias <mfischer00@gmail.com>
+Date:   Thu Apr 6 15:06:45 2017 -0300
+
+    separado resultados
+
+[33mcommit 950adb089b1dee1e41d18be8e98304e090912460[m
+Merge: 230c8ee 418bf85
+Author: FischerMatias <mfischer00@gmail.com>
+Date:   Thu Apr 6 14:33:30 2017 -0300
+
+    merge y agregado servidor funcionando
+
+[33mcommit 230c8eeef9d09e51cab414b87e88e4f2ad423ac1[m
+Author: FischerMatias <mfischer00@gmail.com>
+Date:   Thu Apr 6 14:15:08 2017 -0300
+
+    Agregado server
+
+[33mcommit 418bf853ba329a23e77943a283c454491337eb3f[m
+Author: agustinkoszczej <agustinkoszczej@hotmail.com>
+Date:   Thu Apr 6 11:49:34 2017 -0300
+
+    Agregadas varias funciones de servidor
+    
+    Faltaria poder usar la carpeta Commons como libreria estatica
+
+[33mcommit b9a750615895d66863bc8bcb1831c22997600735[m
+Author: joaquin1991 <joaquinsino@hotmail.com>
+Date:   Wed Apr 5 19:03:02 2017 -0300
+
+    Carpeta Commons
+
+[33mcommit f7b8c220d40f41971b6f786931c6a028db2b82b4[m
+Author: joaquin1991 <joaquinsino@hotmail.com>
+Date:   Wed Apr 5 16:45:41 2017 -0300
+
+    Logger
+
+[33mcommit 0abb041a6eaece66c131e6cdb5e5b84479ba5839[m
+Author: agustinkoszczej <agustinkoszczej@hotmail.com>
+Date:   Sun Apr 2 22:54:17 2017 -0300
+
+    Update README.md
+
+[33mcommit 2f400740a78113f46ebbfebdd556a888123d4e9a[m
+Author: agustinkoszczej <agustinkoszczej@hotmail.com>
+Date:   Sun Apr 2 22:40:33 2017 -0300
+
+    Add files via upload
+
+[33mcommit 8a5519565c8fc98bfeceeb8acde469da803608d0[m
+Author: agustinkoszczej <agustinkoszczej@hotmail.com>
+Date:   Sun Apr 2 22:20:06 2017 -0300
+
+    Carga de Configs
+    
+    Hechas cargas y muestras de archivos de configuracion de cada modulo
+
+[33mcommit c7703490b1bf3014a3e02521302ccf40c42f160b[m
+Merge: a7107c2 0c3ff7e
+Author: FischerMatias <mfischer00@gmail.com>
+Date:   Sun Apr 2 17:43:48 2017 -0300
+
+    Merge branch 'master' of https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings
+
+[33mcommit a7107c217560fe2e5a3b4c45673c8512952582e0[m
+Author: FischerMatias <mfischer00@gmail.com>
+Date:   Sun Apr 2 17:41:28 2017 -0300
+
+    Agregado ServerManager con manejo de conexiones, falta bug de eco y logging
+
+[33mcommit 0c3ff7ebe22766c7ca532f1256aa7751e820def9[m
+Author: joaquin1991 <joaquinsino@hotmail.com>
+Date:   Sun Apr 2 16:53:19 2017 -0300
+
+    Agregando consola
+
+[33mcommit 236c994928141ed31b51b5b25f9d5636fcb7b507[m
+Author: joaquin1991 <joaquinsino@hotmail.com>
+Date:   Sun Apr 2 11:47:13 2017 -0300
+
+    Armando las unidades
+
+[33mcommit 614e78755a1b9247373e33b16f765a149f366f9d[m
+Author: Sistemas Operativos - UTN.BA <inscripciones.utnso@gmail.com>
+Date:   Fri Mar 31 13:02:45 2017 -0300
+
+    Initial commit

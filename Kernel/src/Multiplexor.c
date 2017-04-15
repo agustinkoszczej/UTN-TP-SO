@@ -106,6 +106,7 @@ ResultWithValue GetNewConnection(int listener) {
 	AddClientToMaster(newfd);
 	PrintClientData(remoteaddr, newfd, remoteIP);
 
+
 	return OkWithValue(NULL);
 }
 

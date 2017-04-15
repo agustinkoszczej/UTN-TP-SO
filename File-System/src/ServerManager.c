@@ -29,18 +29,13 @@ struct sockaddr_in CrearDireccionServer(){
 	return direccionServidor;
 }
 
-void permitirReutilizarPuerto(int servidor) {
+void permitirReutilizarPuerto(int servidor) { //Comun
 	int activado = 1;
 	setsockopt(servidor, SOL_SOCKET, SO_REUSEADDR, &activado, sizeof(activado));
 }
 
-void AlAceptarConexion(int cliente){
-	printf("Recibí una conexión en %d!!\n", cliente);
-	send(cliente, "Hola NetCat!", 13, 0);
-	send(cliente, ":)\n", 4, 0);
-}
 
-ResultWithValue AceptarConexion(int servidor){
+ResultWithValue AceptarConexion(int servidor){ //Comun
 	struct sockaddr_in direccionCliente;
 	unsigned int tamanioDireccion = sizeof(struct sockaddr_in);
 
