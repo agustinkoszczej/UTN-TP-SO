@@ -36,3 +36,5 @@ Borrador
 RemoteSystemsTempFiles
 .metadata
 .gitignore
+
+*/Debug

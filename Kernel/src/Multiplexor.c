@@ -18,6 +18,7 @@
 t_list* listeners;
 t_list* clients;
 int fdmax;
+int lastMax = 0;
 fd_set rfds;
 fd_set rfdsTemp;
 
@@ -49,7 +50,17 @@ void AddFdToMaster(int fd) {
 	FD_SET(fd, &rfds);
 
 	if (fd > fdmax) {    // keep track of the max
+		lastMax = fdmax;
 		fdmax = fd;
+	}
+}
+
+
+void RemoveFdFromMaster(int fd) {
+	FD_UNSET(fd, &rfds);
+
+	if (fd == fdmax) {    // keep track of the max
+		fdmax = lastMax;
 	}
 }
 
@@ -65,6 +76,12 @@ void AddClientToMaster(int fd) {
 	list_add(clients, fd);
 }
 
+void RemoveClientFromMaster(int fd){
+	RemoveFdFromMaster(fd);
+
+	list_remove(clients,fd);
+}
+
 void ResetSet(int listener) {
 	FD_ZERO(&rfds);
 	AddListenerToMaster(listener);
@@ -74,7 +91,7 @@ ResultWithValue SelectReaders() {
 	int retval = select(fdmax + 1, &rfdsTemp, NULL, NULL, NULL);
 
 	if (retval == -1)
-		return ErrorWithValue(strerror("select()"), NULL);
+		return ErrorWithValue(strerror("select"), NULL);
 	else
 		return OkWithValue(retval);
 }
@@ -121,12 +138,6 @@ void AlRecibirHandshake(int cliente, char* buffer) {
 		printf("El cliente %d se desconecto\n", cliente);
 		close(cliente);
 	} else {
-		/*if (stringToInt(handshake) == CONSOLA) {
-			printf("Se conecto la consola %d\n", cliente);
-		}
-		if (stringToInt(handshake) == CPU) {
-			printf("Se conecto la CPU %d\n", cliente);
-		}*/
 		printf("Se conecto %s socket %d\n",textonombreProceso(stringToInt(handshake)), cliente);
 
 		devolverHandshake(cliente, KERNEL);
@@ -186,8 +197,9 @@ ResultWithValue CheckForIncomingData() {
 			} else if (isClient(i)) {
 				r = RecibirMensaje(i, AlRecibirMensaje);
 
-				if(r.value == -1)
+				if(r.value == -1){
 					FD_CLR(i, &rfds);
+				}
 			}
 		}
 	}
