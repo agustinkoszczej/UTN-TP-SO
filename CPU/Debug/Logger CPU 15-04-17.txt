@@ -1,0 +1,4 @@
+[INFO] 10:51:31:661 CPU/(3205:3205): Iniciando CPU
+[INFO] 10:51:31:661 CPU/(3205:3205): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 10:53:11:868 CPU/(3217:3217): Iniciando CPU
+[INFO] 10:53:11:868 CPU/(3217:3217): Archivo de configuracion de Consola cargado exitosamente
