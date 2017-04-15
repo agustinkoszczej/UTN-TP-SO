@@ -1,8 +1,0 @@
-[INFO] 13:03:35:439 Kernel/(4135:4135): Iniciando Kernel
-[INFO] 13:03:35:439 Kernel/(4135:4135): Archivo de configuracion cargado exitosamente
-[INFO] 13:05:25:886 Kernel/(4210:4210): Iniciando Kernel
-[INFO] 13:05:25:886 Kernel/(4210:4210): Archivo de configuracion cargado exitosamente
-[INFO] 13:06:00:16 Kernel/(4253:4253): Iniciando Kernel
-[INFO] 13:06:00:18 Kernel/(4253:4253): Archivo de configuracion cargado exitosamente
-[INFO] 13:48:27:99 Kernel/(5423:5423): Iniciando Kernel
-[INFO] 13:48:27:104 Kernel/(5423:5423): Archivo de configuracion cargado exitosamente

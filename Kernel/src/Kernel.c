@@ -12,8 +12,9 @@
 #include <commons/log.h>
 #include <commons/string.h>
 #include <commons/log.h>
-#include "./Utilities/ServerManager.h"
+#include "../ServerManager.h"
 #include "./Utilities/Kernel.h"
+#include "./Utilities/Multiplexor.h"
 
 void cargarConfigKernel() {
 
@@ -89,7 +90,7 @@ int main(void) {
 
 
 
-	Result r = SetupServer(kernel_config.PUERTO_CPU);
+	Result r = SetupServer(kernel_config.PUERTO_CPU,Multiplexar);
 	printf("\n");
 	//logger por ok o error total
 	if(r.noError != true)

@@ -14,6 +14,7 @@
 #include "../CustomCommons.h"
 #include "../Handshake.h"
 #include "../Headers.h"
+#include "../Conversor.h"
 
 t_list* listeners;
 t_list* clients;
@@ -21,29 +22,6 @@ int fdmax;
 int lastMax = 0;
 fd_set rfds;
 fd_set rfdsTemp;
-
-char* textonombreProceso(t_handshake Id_Proceso){
-	switch(Id_Proceso){
-		case KERNEL:
-			return "Kernel";
-		break;
-		case FILE_SYSTEM:
-			return "File System";
-		break;
-		case MEMORIA:
-			return "Memoria";
-		break;
-		case CPU:
-			return "CPU";
-		break;
-		case CONSOLA:
-			return "Consola";
-		break;
-		default:
-			return "?";
-		break;
-	}
-}
 
 
 void AddFdToMaster(int fd) {
@@ -57,7 +35,7 @@ void AddFdToMaster(int fd) {
 
 
 void RemoveFdFromMaster(int fd) {
-	FD_UNSET(fd, &rfds);
+	FD_CLR(fd, &rfds);
 
 	if (fd == fdmax) {    // keep track of the max
 		fdmax = lastMax;
@@ -198,7 +176,7 @@ ResultWithValue CheckForIncomingData() {
 				r = RecibirMensaje(i, AlRecibirMensaje);
 
 				if(r.value == -1){
-					FD_CLR(i, &rfds);
+					RemoveClientFromMaster(i);
 				}
 			}
 		}

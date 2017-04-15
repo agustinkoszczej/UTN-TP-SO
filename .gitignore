@@ -37,4 +37,4 @@ RemoteSystemsTempFiles
 .metadata
 .gitignore
 
-*/Debug
+Debug
