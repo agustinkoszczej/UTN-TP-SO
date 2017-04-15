@@ -104,7 +104,7 @@ void iniciarHandshake(t_handshake QuienIniciaElHandshake, t_handshake QuienDevue
 	enviarMensaje(socket, handshake, 1);		//ENVIO AL SOCKET QUE ME CONECTO EL VALOR DE QUIEN INICIA EL HANDSHAKE (EN ESTE CASO ES UN 4 QUE REPRESENTA A LA CONSOLA)
 
 	if(obtenerHandshake(socket) == QuienDevuelveHandshake) {   //OBTENGO EL HANDSHAKE DEL PROCESO AL QUE LE ENVIE ANTERIORMENTE EL HANDSHAKE (KERNEL) Y LO COMPARO
-		printf("Se conecto satisfactoriamente al Kernel\n");
+		printf("\nSe conecto satisfactoriamente al Kernel\n");
 	}
 
 }
@@ -148,6 +148,9 @@ int main (void){
 
 
 	 conectarAKernel();
+
+	 printf("\n");
+
 	 esperarMensaje();
 
 	return EXIT_SUCCESS;

@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdbool.h>
+
 #include "./Utilities/Results.h"
 #include <commons/collections/list.h>
 #include "./Utilities/CustomCommons.h"
@@ -19,6 +20,30 @@ t_list* clients;
 int fdmax;
 fd_set rfds;
 fd_set rfdsTemp;
+
+char* textonombreProceso(t_handshake Id_Proceso){
+	switch(Id_Proceso){
+		case KERNEL:
+			return "Kernel";
+		break;
+		case FILE_SYSTEM:
+			return "File System";
+		break;
+		case MEMORIA:
+			return "Memoria";
+		break;
+		case CPU:
+			return "CPU";
+		break;
+		case CONSOLA:
+			return "Consola";
+		break;
+		default:
+			return "?";
+		break;
+	}
+}
+
 
 void AddFdToMaster(int fd) {
 	FD_SET(fd, &rfds);
@@ -95,12 +120,13 @@ void AlRecibirHandshake(int cliente, char* buffer) {
 		printf("El cliente %d se desconecto\n", cliente);
 		close(cliente);
 	} else {
-		if (stringToInt(handshake) == CONSOLA) {
+		/*if (stringToInt(handshake) == CONSOLA) {
 			printf("Se conecto la consola %d\n", cliente);
 		}
 		if (stringToInt(handshake) == CPU) {
 			printf("Se conecto la CPU %d\n", cliente);
-		}
+		}*/
+		printf("Se conecto %s socket %d\n",textonombreProceso(stringToInt(handshake)), cliente);
 
 		devolverHandshake(cliente, KERNEL);
 

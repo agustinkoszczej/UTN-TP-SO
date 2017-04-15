@@ -1,6 +1,0 @@
-[INFO] 15:20:16:122 Consola/(3008:3008): Iniciando Consola
-[INFO] 15:20:16:122 Consola/(3008:3008): Archivo de configuracion de Consola cargado exitosamente
-[INFO] 15:21:28:914 Consola/(3015:3015): Iniciando Consola
-[INFO] 15:21:28:915 Consola/(3015:3015): Archivo de configuracion de Consola cargado exitosamente
-[INFO] 15:57:46:530 Consola/(4565:4565): Iniciando Consola
-[INFO] 15:57:46:531 Consola/(4565:4565): Archivo de configuracion de Consola cargado exitosamente

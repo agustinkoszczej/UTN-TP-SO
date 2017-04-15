@@ -1,4 +1,0 @@
-[INFO] 15:18:31:756 Consola/(9952:9952): Iniciando Consola
-[INFO] 15:18:31:760 Consola/(9952:9952): Archivo de configuracion de Consola cargado exitosamente
-[INFO] 15:20:31:239 Consola/(10120:10120): Iniciando Consola
-[INFO] 15:20:31:240 Consola/(10120:10120): Archivo de configuracion de Consola cargado exitosamente

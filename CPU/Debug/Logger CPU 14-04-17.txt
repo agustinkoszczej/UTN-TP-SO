@@ -2,3 +2,15 @@
 [INFO] 20:47:27:15 CPU/(6279:6279): Archivo de configuracion de Consola cargado exitosamente
 [INFO] 20:50:02:142 CPU/(6453:6453): Iniciando CPU
 [INFO] 20:50:02:142 CPU/(6453:6453): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 21:27:35:48 CPU/(7745:7745): Iniciando CPU
+[INFO] 21:27:35:48 CPU/(7745:7745): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 21:47:07:512 CPU/(8252:8252): Iniciando CPU
+[INFO] 21:47:07:512 CPU/(8252:8252): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 21:51:08:714 CPU/(8271:8271): Iniciando CPU
+[INFO] 21:51:08:714 CPU/(8271:8271): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 21:52:29:684 CPU/(8282:8282): Iniciando CPU
+[INFO] 21:52:29:684 CPU/(8282:8282): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 22:03:13:704 CPU/(8726:8726): Iniciando CPU
+[INFO] 22:03:13:704 CPU/(8726:8726): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 22:05:33:873 CPU/(8808:8808): Iniciando CPU
+[INFO] 22:05:33:875 CPU/(8808:8808): Archivo de configuracion de Consola cargado exitosamente
