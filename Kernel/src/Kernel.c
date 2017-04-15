@@ -156,6 +156,13 @@ int main(void) {
 
 	Result r = SetupServer();
 	printf("\n");
+	//logger por ok o error total
+	if(r.noError != true)
+		logger(r.msg, "ERROR");
+	else
+		logger(r.msg, "INFO");
+
+
 	puts(r.msg);
 
 	return 0;

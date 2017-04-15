@@ -65,11 +65,15 @@ Result SetupServer(){
 	permitirReutilizarPuerto(servidor);
 
 	if (bind(servidor, (void*) &direccionServer, sizeof(direccionServer)) != 0) {
-		return Error("Fallo el bind");
+		return Error(strerror("bind"));
+
 	}
 
+
+	logger("Setup Server OK", "INFO");
+
+	listen(servidor, 100);
 	printf("Estoy escuchando\n");
-	 	listen(servidor, 100);
 
 	Multiplexar(servidor);
 
