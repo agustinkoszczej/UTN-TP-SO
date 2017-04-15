@@ -138,6 +138,26 @@ void esperarMensaje(){
 	}
 }
 
+
+
+/*Result AlLevantarServer(int servidor){
+	//------------------------------
+
+		 ResultWithValue r = AceptarConexion(servidor);
+
+		//------------------------------
+
+		 if(r.value != NULL)
+			 RecibirMensaje(r.value);
+		 else
+			 return r.result;
+}
+
+Falta codear AceptarConexion y RecibirMensaje
+
+*/
+
+
 int main(void) {
 	printf("Iniciando File System...\n\n");
 	logger("Inicinado File System", "INFO");
@@ -153,6 +173,8 @@ int main(void) {
 
 	printf("\n");
 
+
+	//Result r = SetupServer(8080,AlLevantarServer);
 	//puts(r.msg);
 
 	esperarMensaje();

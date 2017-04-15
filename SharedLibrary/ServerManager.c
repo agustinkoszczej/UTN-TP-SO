@@ -55,7 +55,6 @@ Result SetupServer(int puerto, Result AlLevantarServidor(int)){			//Comun
 
 }
 
-
-
-
-
+int getSocket(){
+	return socket(AF_INET, SOCK_STREAM,0);
+}

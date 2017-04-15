@@ -26,13 +26,13 @@ endif
 all: CPU
 
 dependents:
-	-cd /home/utnso/Escritorio/ELSagrado/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) all
+	-cd /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) all
 
 # Tool invocations
-CPU: $(OBJS) $(USER_OBJS) /home/utnso/Escritorio/ELSagrado/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so
+CPU: $(OBJS) $(USER_OBJS) /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L../../SharedLibrary/ -L"/home/utnso/Escritorio/ELSagrado/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug" -o "CPU" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L../../SharedLibrary/ -L"/home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug" -o "CPU" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -43,6 +43,6 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
-/home/utnso/Escritorio/ELSagrado/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so:
+/home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so:
 
 -include ../makefile.targets
