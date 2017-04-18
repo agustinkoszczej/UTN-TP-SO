@@ -19,3 +19,6 @@
 [INFO] 17:00:08:730 Consola/(4550:4550): Iniciando Consola
 [INFO] 17:00:08:730 Consola/(4550:4550): Archivo de configuracion de Consola cargado exitosamente
 [TRACE] 17:00:08:730 Consola/(4550:4550): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 17:02:46:274 Consola/(4674:4674): Iniciando Consola
+[INFO] 17:02:46:274 Consola/(4674:4674): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 17:02:46:274 Consola/(4674:4674): Enviado mensaje de prueba de conexion al Kernel
