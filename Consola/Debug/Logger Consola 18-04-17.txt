@@ -4,3 +4,15 @@
 [INFO] 15:54:28:72 Consola/(7179:7179): Iniciando Consola
 [INFO] 15:54:28:72 Consola/(7179:7179): Archivo de configuracion de Consola cargado exitosamente
 [ERROR] 15:54:28:72 Consola/(7179:7179): Error en el connect
+[INFO] 16:17:27:139 Consola/(8446:8446): Iniciando Consola
+[INFO] 16:17:27:139 Consola/(8446:8446): Archivo de configuracion de Consola cargado exitosamente
+[ERROR] 16:17:27:139 Consola/(8446:8446): Error en el connect
+[INFO] 16:19:09:96 Consola/(8571:8571): Iniciando Consola
+[INFO] 16:19:09:96 Consola/(8571:8571): Archivo de configuracion de Consola cargado exitosamente
+[ERROR] 16:19:09:96 Consola/(8571:8571): Error en el connect
+[INFO] 16:20:47:490 Consola/(8640:8640): Iniciando Consola
+[INFO] 16:20:47:490 Consola/(8640:8640): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 16:20:47:491 Consola/(8640:8640): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 16:21:52:941 Consola/(8704:8704): Iniciando Consola
+[INFO] 16:21:52:941 Consola/(8704:8704): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 16:21:52:943 Consola/(8704:8704): Enviado mensaje de prueba de conexion al Kernel

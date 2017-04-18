@@ -26,3 +26,7 @@
 [INFO] 15:52:10:383 Kernel/(6914:6914): Archivo de configuracion cargado exitosamente
 [INFO] 15:54:10:759 Kernel/(7173:7173): Iniciando Kernel
 [INFO] 15:54:10:760 Kernel/(7173:7173): Archivo de configuracion cargado exitosamente
+[INFO] 16:17:17:786 Kernel/(8443:8443): Iniciando Kernel
+[INFO] 16:17:17:787 Kernel/(8443:8443): Archivo de configuracion cargado exitosamente
+[INFO] 16:21:50:601 Kernel/(8703:8703): Iniciando Kernel
+[INFO] 16:21:50:601 Kernel/(8703:8703): Archivo de configuracion cargado exitosamente

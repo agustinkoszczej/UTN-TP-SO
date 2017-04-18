@@ -16,3 +16,12 @@
 [INFO] 15:54:17:413 Memoria/(7176:7176): Configurado Retardo Memoria
 [INFO] 15:54:17:413 Memoria/(7176:7176): Archivo de configuracion cargado exitosamente
 [ERROR] 15:54:17:413 Memoria/(7176:7176): Error en el connect
+[INFO] 16:22:40:792 Memoria/(8780:8780): Iniciando Memoria
+[INFO] 16:22:40:792 Memoria/(8780:8780): Configurado Puerto
+[INFO] 16:22:40:792 Memoria/(8780:8780): Configurado Marcos
+[INFO] 16:22:40:792 Memoria/(8780:8780): Configurado Marco Size
+[INFO] 16:22:40:792 Memoria/(8780:8780): Configurado Entradas Cache
+[INFO] 16:22:40:792 Memoria/(8780:8780): Configurado Cache por Proc.
+[INFO] 16:22:40:792 Memoria/(8780:8780): Configurado Retardo Memoria
+[INFO] 16:22:40:792 Memoria/(8780:8780): Archivo de configuracion cargado exitosamente
+[TRACE] 16:22:40:793 Memoria/(8780:8780): Enviado mensaje de prueba de conexion al Kernel
