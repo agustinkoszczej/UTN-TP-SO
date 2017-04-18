@@ -1,0 +1,3 @@
+[INFO] 15:54:21:908 File System/(7177:7177): Inicinado File System
+[INFO] 15:54:21:908 File System/(7177:7177): Archivo de configuracion cargado exitosamente
+[ERROR] 15:54:21:908 File System/(7177:7177): Error en el connect

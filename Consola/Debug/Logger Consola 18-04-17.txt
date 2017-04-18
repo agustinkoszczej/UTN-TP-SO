@@ -1,0 +1,6 @@
+[INFO] 15:52:27:707 Consola/(6918:6918): Iniciando Consola
+[INFO] 15:52:27:707 Consola/(6918:6918): Archivo de configuracion de Consola cargado exitosamente
+[ERROR] 15:52:27:707 Consola/(6918:6918): Error en el connect
+[INFO] 15:54:28:72 Consola/(7179:7179): Iniciando Consola
+[INFO] 15:54:28:72 Consola/(7179:7179): Archivo de configuracion de Consola cargado exitosamente
+[ERROR] 15:54:28:72 Consola/(7179:7179): Error en el connect

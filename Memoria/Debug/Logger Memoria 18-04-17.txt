@@ -1,0 +1,18 @@
+[INFO] 15:54:12:447 Memoria/(7174:7174): Iniciando Memoria
+[INFO] 15:54:12:447 Memoria/(7174:7174): Configurado Puerto
+[INFO] 15:54:12:447 Memoria/(7174:7174): Configurado Marcos
+[INFO] 15:54:12:447 Memoria/(7174:7174): Configurado Marco Size
+[INFO] 15:54:12:447 Memoria/(7174:7174): Configurado Entradas Cache
+[INFO] 15:54:12:447 Memoria/(7174:7174): Configurado Cache por Proc.
+[INFO] 15:54:12:447 Memoria/(7174:7174): Configurado Retardo Memoria
+[INFO] 15:54:12:447 Memoria/(7174:7174): Archivo de configuracion cargado exitosamente
+[ERROR] 15:54:12:447 Memoria/(7174:7174): Error en el connect
+[INFO] 15:54:17:413 Memoria/(7176:7176): Iniciando Memoria
+[INFO] 15:54:17:413 Memoria/(7176:7176): Configurado Puerto
+[INFO] 15:54:17:413 Memoria/(7176:7176): Configurado Marcos
+[INFO] 15:54:17:413 Memoria/(7176:7176): Configurado Marco Size
+[INFO] 15:54:17:413 Memoria/(7176:7176): Configurado Entradas Cache
+[INFO] 15:54:17:413 Memoria/(7176:7176): Configurado Cache por Proc.
+[INFO] 15:54:17:413 Memoria/(7176:7176): Configurado Retardo Memoria
+[INFO] 15:54:17:413 Memoria/(7176:7176): Archivo de configuracion cargado exitosamente
+[ERROR] 15:54:17:413 Memoria/(7176:7176): Error en el connect
