@@ -26,7 +26,7 @@ endif
 all: FileSystem
 
 dependents:
-	-cd /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) clean all
+	-cd /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) all
 
 # Tool invocations
 FileSystem: $(OBJS) $(USER_OBJS) /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so
