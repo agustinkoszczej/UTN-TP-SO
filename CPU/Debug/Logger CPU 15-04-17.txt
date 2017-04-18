@@ -1,2 +1,0 @@
-[INFO] 10:52:02:970 CPU/(2999:2999): Iniciando CPU
-[INFO] 10:52:02:970 CPU/(2999:2999): Archivo de configuracion de Consola cargado exitosamente

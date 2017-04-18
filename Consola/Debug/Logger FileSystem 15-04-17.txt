@@ -1,6 +1,0 @@
-[INFO] 13:36:43:667 FileSystem/(5794:5794): Iniciando Consola
-[INFO] 13:36:43:667 FileSystem/(5794:5794): Archivo de configuracion de Consola cargado exitosamente
-[ERROR] 13:36:43:667 FileSystem/(5794:5794): Error en el connect
-[INFO] 13:56:06:316 FileSystem/(6700:6700): Iniciando Consola
-[INFO] 13:56:06:316 FileSystem/(6700:6700): Archivo de configuracion de Consola cargado exitosamente
-[ERROR] 13:56:06:316 FileSystem/(6700:6700): Error en el connect

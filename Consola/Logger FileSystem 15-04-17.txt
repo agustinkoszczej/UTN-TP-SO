@@ -1,4 +1,0 @@
-[INFO] 13:17:30:886 FileSystem/(5340:5340): Iniciando Consola
-[INFO] 13:17:30:886 FileSystem/(5340:5340): Archivo de configuracion de Consola cargado exitosamente
-[ERROR] 13:17:30:886 FileSystem/(5340:5340): Error en el connect
-[TRACE] 13:17:30:886 FileSystem/(5340:5340): Enviado mensaje de prueba de conexion al Kernel

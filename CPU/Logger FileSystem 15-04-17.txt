@@ -1,4 +1,0 @@
-[INFO] 13:18:35:979 FileSystem/(5360:5360): Iniciando CPU
-[INFO] 13:18:35:979 FileSystem/(5360:5360): Archivo de configuracion de Consola cargado exitosamente
-[INFO] 13:19:11:25 FileSystem/(5397:5397): Iniciando CPU
-[INFO] 13:19:11:25 FileSystem/(5397:5397): Archivo de configuracion de Consola cargado exitosamente

@@ -1,1 +1,0 @@
-Conversor.d: ../Conversor.c

@@ -1,4 +1,0 @@
-[INFO] 13:20:03:859 FileSystem/(5461:5461): Inicinado File System
-[INFO] 13:20:03:859 FileSystem/(5461:5461): Archivo de configuracion cargado exitosamente
-[ERROR] 13:20:03:859 FileSystem/(5461:5461): Error en el connect
-[TRACE] 13:20:03:859 FileSystem/(5461:5461): Enviado mensaje de prueba de conexion al Kernel
