@@ -26,13 +26,13 @@ endif
 all: Memoria
 
 dependents:
-	-cd /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) all
+	-cd /home/utnso/Escritorio/ElSagrado/tp-2017-1c-Lords-of-the-Strings/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) all
 
 # Tool invocations
-Memoria: $(OBJS) $(USER_OBJS) /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so
+Memoria: $(OBJS) $(USER_OBJS) /home/utnso/Escritorio/ElSagrado/tp-2017-1c-Lords-of-the-Strings/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L"/home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug" -o "Memoria" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L"/home/utnso/Escritorio/ElSagrado/tp-2017-1c-Lords-of-the-Strings/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug" -o "Memoria" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -43,6 +43,6 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
-/home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so:
+/home/utnso/Escritorio/ElSagrado/tp-2017-1c-Lords-of-the-Strings/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so:
 
 -include ../makefile.targets
