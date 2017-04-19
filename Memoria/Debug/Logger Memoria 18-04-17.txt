@@ -193,3 +193,20 @@
 [INFO] 23:36:47:70 Memoria/(7621:7621): Configurado Retardo Memoria
 [INFO] 23:36:47:70 Memoria/(7621:7621): Archivo de configuracion cargado exitosamente
 [TRACE] 23:36:47:71 Memoria/(7621:7621): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 23:47:36:47 Memoria/(7979:7979): Iniciando Memoria
+[INFO] 23:47:36:47 Memoria/(7979:7979): Configurado Puerto
+[INFO] 23:47:36:47 Memoria/(7979:7979): Configurado Marcos
+[INFO] 23:47:36:47 Memoria/(7979:7979): Configurado Marco Size
+[INFO] 23:47:36:47 Memoria/(7979:7979): Configurado Entradas Cache
+[INFO] 23:47:36:47 Memoria/(7979:7979): Configurado Cache por Proc.
+[INFO] 23:47:36:47 Memoria/(7979:7979): Configurado Retardo Memoria
+[INFO] 23:47:36:47 Memoria/(7979:7979): Archivo de configuracion cargado exitosamente
+[TRACE] 23:47:36:47 Memoria/(7979:7979): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 23:51:34:657 Memoria/(8300:8300): Iniciando Memoria
+[INFO] 23:51:34:657 Memoria/(8300:8300): Configurado Puerto
+[INFO] 23:51:34:657 Memoria/(8300:8300): Configurado Marcos
+[INFO] 23:51:34:657 Memoria/(8300:8300): Configurado Marco Size
+[INFO] 23:51:34:657 Memoria/(8300:8300): Configurado Entradas Cache
+[INFO] 23:51:34:657 Memoria/(8300:8300): Configurado Cache por Proc.
+[INFO] 23:51:34:657 Memoria/(8300:8300): Configurado Retardo Memoria
+[INFO] 23:51:34:657 Memoria/(8300:8300): Archivo de configuracion cargado exitosamente

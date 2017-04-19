@@ -8,18 +8,14 @@
 #ifndef CPU_H_
 #define CPU_H_
 
+#include "ConfigCPU.h"
+
 #include <commons/config.h>
 
 #include <SharedLibrary/Handshake.h>
 #include <SharedLibrary/Headers.h>
 #include <SharedLibrary/logger.h>
 
-typedef struct {
-  char* IP_KERNEL;	//Después usar esta funcion para transformarlo inet_addr(IP_KERNEL)
-  int PUERTO_KERNEL;
-}Config_CPU;
-
-Config_CPU cpu_config;
-char* path = "CPU.cfg";
+#define NOMBRE_PROCESO "CPU"
 
 #endif /* CPU_H_ */

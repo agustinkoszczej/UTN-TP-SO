@@ -1,0 +1,40 @@
+[INFO] 00:06:11:450 Consola/(9037:9037): Iniciando Consola
+[INFO] 00:06:11:450 Consola/(9037:9037): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:06:36:281 Consola/(9048:9048): Iniciando Consola
+[INFO] 00:06:36:282 Consola/(9048:9048): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:15:47:433 Consola/(9690:9690): Iniciando Consola
+[INFO] 00:15:47:433 Consola/(9690:9690): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:23:59:546 Consola/(10330:10330): Iniciando Consola
+[INFO] 00:23:59:547 Consola/(10330:10330): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:24:03:947 Consola/(10332:10332): Iniciando Consola
+[INFO] 00:24:03:947 Consola/(10332:10332): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:24:52:840 Consola/(10347:10347): Iniciando Consola
+[INFO] 00:24:52:840 Consola/(10347:10347): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:26:44:600 Consola/(10459:10459): Iniciando Consola
+[INFO] 00:26:44:600 Consola/(10459:10459): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:26:53:523 Consola/(10463:10463): Iniciando Consola
+[INFO] 00:26:53:523 Consola/(10463:10463): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:41:45:520 Consola/(12039:12039): Iniciando Consola
+[INFO] 00:41:45:521 Consola/(12039:12039): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:42:03:643 Consola/(12069:12069): Iniciando Consola
+[INFO] 00:42:03:643 Consola/(12069:12069): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:42:06:650 Consola/(12070:12070): Iniciando Consola
+[INFO] 00:42:06:650 Consola/(12070:12070): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:43:12:26 Consola/(12181:12181): Iniciando Consola
+[INFO] 00:43:12:26 Consola/(12181:12181): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:45:35:644 Consola/(12352:12352): Iniciando Consola
+[INFO] 00:45:35:644 Consola/(12352:12352): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:47:19:219 Consola/(12463:12463): Iniciando Consola
+[INFO] 00:47:19:219 Consola/(12463:12463): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:48:35:481 Consola/(12545:12545): Iniciando Consola
+[INFO] 00:48:35:481 Consola/(12545:12545): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:50:11:979 Consola/(12726:12726): Iniciando Consola
+[INFO] 00:50:11:979 Consola/(12726:12726): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:50:39:576 Consola/(12735:12735): Iniciando Consola
+[INFO] 00:50:39:576 Consola/(12735:12735): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:50:57:925 Consola/(12740:12740): Iniciando Consola
+[INFO] 00:50:57:925 Consola/(12740:12740): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:52:20:748 Consola/(12808:12808): Iniciando Consola
+[INFO] 00:52:20:748 Consola/(12808:12808): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:52:21:941 Consola/(12809:12809): Iniciando Consola
+[INFO] 00:52:21:941 Consola/(12809:12809): Archivo de configuracion de Consola cargado exitosamente

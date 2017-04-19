@@ -16,13 +16,8 @@
 #include <SharedLibrary/ServerManager.h>
 #include <SharedLibrary/Results.h>
 
-typedef struct {
-	int PUERTO;
-	char* PUNTO_MONTAJE;
-}Config_FileSystem;
+#include "ConfigFileSystem.h"
 
-Config_FileSystem file_system_config;
-char* path = "FileSystem.cfg";
-
+#define NOMBRE_PROCESO "FileSystem"
 
 #endif /* FILESYSTEM_H_ */

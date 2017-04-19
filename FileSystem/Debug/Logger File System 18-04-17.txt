@@ -4,3 +4,6 @@
 [INFO] 16:22:16:367 File System/(8754:8754): Inicinado File System
 [INFO] 16:22:16:367 File System/(8754:8754): Archivo de configuracion cargado exitosamente
 [TRACE] 16:22:16:368 File System/(8754:8754): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 23:51:54:728 File System/(8329:8329): Inicinado File System
+[INFO] 23:51:54:741 File System/(8329:8329): Archivo de configuracion cargado exitosamente
+[TRACE] 23:51:54:741 File System/(8329:8329): Enviado mensaje de prueba de conexion al Kernel

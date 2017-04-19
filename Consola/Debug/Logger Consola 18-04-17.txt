@@ -55,3 +55,13 @@
 [INFO] 23:36:45:727 Consola/(7620:7620): Iniciando Consola
 [INFO] 23:36:45:727 Consola/(7620:7620): Archivo de configuracion de Consola cargado exitosamente
 [TRACE] 23:36:45:728 Consola/(7620:7620): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 23:47:31:8 Consola/(7978:7978): Iniciando Consola
+[INFO] 23:47:31:8 Consola/(7978:7978): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 23:47:31:8 Consola/(7978:7978): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 23:47:46:306 Consola/(8006:8006): Iniciando Consola
+[INFO] 23:47:46:306 Consola/(8006:8006): Archivo de configuracion de Consola cargado exitosamente
+[TRACE] 23:47:46:306 Consola/(8006:8006): Enviado mensaje de prueba de conexion al Kernel
+[INFO] 23:51:32:394 Consola/(8299:8299): Iniciando Consola
+[INFO] 23:51:32:394 Consola/(8299:8299): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 23:51:36:741 Consola/(8301:8301): Iniciando Consola
+[INFO] 23:51:36:743 Consola/(8301:8301): Archivo de configuracion de Consola cargado exitosamente

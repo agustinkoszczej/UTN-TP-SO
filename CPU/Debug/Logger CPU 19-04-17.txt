@@ -1,0 +1,22 @@
+[INFO] 00:06:20:516 CPU/(9044:9044): Iniciando CPU
+[INFO] 00:06:20:518 CPU/(9044:9044): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:06:25:581 CPU/(9045:9045): Iniciando CPU
+[INFO] 00:06:25:582 CPU/(9045:9045): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:24:08:645 CPU/(10334:10334): Iniciando CPU
+[INFO] 00:24:08:645 CPU/(10334:10334): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:24:10:481 CPU/(10335:10335): Iniciando CPU
+[INFO] 00:24:10:481 CPU/(10335:10335): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:26:55:801 CPU/(10465:10465): Iniciando CPU
+[INFO] 00:26:55:801 CPU/(10465:10465): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:26:57:42 CPU/(10466:10466): Iniciando CPU
+[INFO] 00:26:57:44 CPU/(10466:10466): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:42:12:99 CPU/(12073:12073): Iniciando CPU
+[INFO] 00:42:12:100 CPU/(12073:12073): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:42:14:308 CPU/(12076:12076): Iniciando CPU
+[INFO] 00:42:14:308 CPU/(12076:12076): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:47:22:652 CPU/(12465:12465): Iniciando CPU
+[INFO] 00:47:22:652 CPU/(12465:12465): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:52:27:204 CPU/(12814:12814): Iniciando CPU
+[INFO] 00:52:27:204 CPU/(12814:12814): Archivo de configuracion de Consola cargado exitosamente
+[INFO] 00:52:28:649 CPU/(12815:12815): Iniciando CPU
+[INFO] 00:52:28:649 CPU/(12815:12815): Archivo de configuracion de Consola cargado exitosamente

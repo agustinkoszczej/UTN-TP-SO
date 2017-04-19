@@ -1,0 +1,32 @@
+[INFO] 00:15:51:3 FileSystem/(9692:9692): Inicinado File System
+[INFO] 00:15:51:3 FileSystem/(9692:9692): Archivo de configuracion cargado exitosamente
+[ERROR] 00:15:51:3 FileSystem/(9692:9692): Error en el connect
+[INFO] 00:15:54:508 FileSystem/(9693:9693): Inicinado File System
+[INFO] 00:15:54:508 FileSystem/(9693:9693): Archivo de configuracion cargado exitosamente
+[ERROR] 00:15:54:508 FileSystem/(9693:9693): Error en el connect
+[INFO] 00:16:03:966 FileSystem/(9697:9697): Inicinado File System
+[INFO] 00:16:03:966 FileSystem/(9697:9697): Archivo de configuracion cargado exitosamente
+[INFO] 00:16:41:732 FileSystem/(9788:9788): Inicinado File System
+[INFO] 00:16:41:732 FileSystem/(9788:9788): Archivo de configuracion cargado exitosamente
+[INFO] 00:24:06:872 FileSystem/(10333:10333): Inicinado File System
+[INFO] 00:24:06:872 FileSystem/(10333:10333): Archivo de configuracion cargado exitosamente
+[INFO] 00:26:54:656 FileSystem/(10464:10464): Inicinado File System
+[INFO] 00:26:54:656 FileSystem/(10464:10464): Archivo de configuracion cargado exitosamente
+[INFO] 00:42:10:847 FileSystem/(12072:12072): Inicinado File System
+[INFO] 00:42:10:847 FileSystem/(12072:12072): Archivo de configuracion cargado exitosamente
+[INFO] 00:48:41:332 FileSystem/(12547:12547): Inicinado File System
+[INFO] 00:48:41:332 FileSystem/(12547:12547): Archivo de configuracion cargado exitosamente
+[INFO] 00:49:10:18 FileSystem/(12600:12600): Inicinado File System
+[INFO] 00:49:10:19 FileSystem/(12600:12600): Archivo de configuracion cargado exitosamente
+[INFO] 00:49:58:902 FileSystem/(12675:12675): Inicinado File System
+[INFO] 00:49:58:902 FileSystem/(12675:12675): Archivo de configuracion cargado exitosamente
+[INFO] 00:50:08:811 FileSystem/(12724:12724): Inicinado File System
+[INFO] 00:50:08:811 FileSystem/(12724:12724): Archivo de configuracion cargado exitosamente
+[INFO] 00:50:15:224 FileSystem/(12728:12728): Inicinado File System
+[INFO] 00:50:15:224 FileSystem/(12728:12728): Archivo de configuracion cargado exitosamente
+[INFO] 00:50:30:936 FileSystem/(12733:12733): Inicinado File System
+[INFO] 00:50:30:937 FileSystem/(12733:12733): Archivo de configuracion cargado exitosamente
+[INFO] 00:51:00:677 FileSystem/(12741:12741): Inicinado File System
+[INFO] 00:51:00:677 FileSystem/(12741:12741): Archivo de configuracion cargado exitosamente
+[INFO] 00:52:25:976 FileSystem/(12811:12811): Inicinado File System
+[INFO] 00:52:25:976 FileSystem/(12811:12811): Archivo de configuracion cargado exitosamente

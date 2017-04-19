@@ -1,0 +1,3 @@
+[INFO] 00:06:19:340 File System/(9043:9043): Inicinado File System
+[INFO] 00:06:19:340 File System/(9043:9043): Archivo de configuracion cargado exitosamente
+[ERROR] 00:06:19:340 File System/(9043:9043): Error en el connect

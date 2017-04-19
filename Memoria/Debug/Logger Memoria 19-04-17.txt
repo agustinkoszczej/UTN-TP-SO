@@ -1,0 +1,120 @@
+[INFO] 00:06:14:847 Memoria/(9038:9038): Iniciando Memoria
+[INFO] 00:06:14:847 Memoria/(9038:9038): Configurado Puerto
+[INFO] 00:06:14:847 Memoria/(9038:9038): Configurado Marcos
+[INFO] 00:06:14:847 Memoria/(9038:9038): Configurado Marco Size
+[INFO] 00:06:14:847 Memoria/(9038:9038): Configurado Entradas Cache
+[INFO] 00:06:14:847 Memoria/(9038:9038): Configurado Cache por Proc.
+[INFO] 00:06:14:847 Memoria/(9038:9038): Configurado Retardo Memoria
+[INFO] 00:06:14:847 Memoria/(9038:9038): Archivo de configuracion cargado exitosamente
+[INFO] 00:06:40:368 Memoria/(9049:9049): Iniciando Memoria
+[INFO] 00:06:40:368 Memoria/(9049:9049): Configurado Puerto
+[INFO] 00:06:40:368 Memoria/(9049:9049): Configurado Marcos
+[INFO] 00:06:40:368 Memoria/(9049:9049): Configurado Marco Size
+[INFO] 00:06:40:368 Memoria/(9049:9049): Configurado Entradas Cache
+[INFO] 00:06:40:368 Memoria/(9049:9049): Configurado Cache por Proc.
+[INFO] 00:06:40:368 Memoria/(9049:9049): Configurado Retardo Memoria
+[INFO] 00:06:40:368 Memoria/(9049:9049): Archivo de configuracion cargado exitosamente
+[INFO] 00:07:16:216 Memoria/(9055:9055): Iniciando Memoria
+[INFO] 00:07:16:216 Memoria/(9055:9055): Configurado Puerto
+[INFO] 00:07:16:216 Memoria/(9055:9055): Configurado Marcos
+[INFO] 00:07:16:216 Memoria/(9055:9055): Configurado Marco Size
+[INFO] 00:07:16:216 Memoria/(9055:9055): Configurado Entradas Cache
+[INFO] 00:07:16:216 Memoria/(9055:9055): Configurado Cache por Proc.
+[INFO] 00:07:16:216 Memoria/(9055:9055): Configurado Retardo Memoria
+[INFO] 00:07:16:216 Memoria/(9055:9055): Archivo de configuracion cargado exitosamente
+[INFO] 00:07:42:968 Memoria/(9114:9114): Iniciando Memoria
+[INFO] 00:07:42:968 Memoria/(9114:9114): Configurado Puerto
+[INFO] 00:07:42:969 Memoria/(9114:9114): Configurado Marcos
+[INFO] 00:07:42:969 Memoria/(9114:9114): Configurado Marco Size
+[INFO] 00:07:42:969 Memoria/(9114:9114): Configurado Entradas Cache
+[INFO] 00:07:42:969 Memoria/(9114:9114): Configurado Cache por Proc.
+[INFO] 00:07:42:969 Memoria/(9114:9114): Configurado Retardo Memoria
+[INFO] 00:07:42:969 Memoria/(9114:9114): Archivo de configuracion cargado exitosamente
+[INFO] 00:07:47:52 Memoria/(9118:9118): Iniciando Memoria
+[INFO] 00:07:47:52 Memoria/(9118:9118): Configurado Puerto
+[INFO] 00:07:47:52 Memoria/(9118:9118): Configurado Marcos
+[INFO] 00:07:47:52 Memoria/(9118:9118): Configurado Marco Size
+[INFO] 00:07:47:52 Memoria/(9118:9118): Configurado Entradas Cache
+[INFO] 00:07:47:52 Memoria/(9118:9118): Configurado Cache por Proc.
+[INFO] 00:07:47:52 Memoria/(9118:9118): Configurado Retardo Memoria
+[INFO] 00:07:47:52 Memoria/(9118:9118): Archivo de configuracion cargado exitosamente
+[INFO] 00:14:47:493 Memoria/(9543:9543): Iniciando Memoria
+[INFO] 00:14:47:496 Memoria/(9543:9543): Configurado Puerto
+[INFO] 00:14:47:496 Memoria/(9543:9543): Configurado Marcos
+[INFO] 00:14:47:496 Memoria/(9543:9543): Configurado Marco Size
+[INFO] 00:14:47:496 Memoria/(9543:9543): Configurado Entradas Cache
+[INFO] 00:14:47:496 Memoria/(9543:9543): Configurado Cache por Proc.
+[INFO] 00:14:47:496 Memoria/(9543:9543): Configurado Retardo Memoria
+[INFO] 00:14:47:496 Memoria/(9543:9543): Archivo de configuracion cargado exitosamente
+[INFO] 00:15:21:312 Memoria/(9652:9652): Iniciando Memoria
+[INFO] 00:15:21:312 Memoria/(9652:9652): Configurado Puerto
+[INFO] 00:15:21:312 Memoria/(9652:9652): Configurado Marcos
+[INFO] 00:15:21:312 Memoria/(9652:9652): Configurado Marco Size
+[INFO] 00:15:21:312 Memoria/(9652:9652): Configurado Entradas Cache
+[INFO] 00:15:21:312 Memoria/(9652:9652): Configurado Cache por Proc.
+[INFO] 00:15:21:312 Memoria/(9652:9652): Configurado Retardo Memoria
+[INFO] 00:15:21:312 Memoria/(9652:9652): Archivo de configuracion cargado exitosamente
+[INFO] 00:17:57:827 Memoria/(9893:9893): Iniciando Memoria
+[INFO] 00:17:57:827 Memoria/(9893:9893): Configurado Puerto
+[INFO] 00:17:57:827 Memoria/(9893:9893): Configurado Marcos
+[INFO] 00:17:57:827 Memoria/(9893:9893): Configurado Marco Size
+[INFO] 00:17:57:827 Memoria/(9893:9893): Configurado Entradas Cache
+[INFO] 00:17:57:827 Memoria/(9893:9893): Configurado Cache por Proc.
+[INFO] 00:17:57:827 Memoria/(9893:9893): Configurado Retardo Memoria
+[INFO] 00:17:57:827 Memoria/(9893:9893): Archivo de configuracion cargado exitosamente
+[INFO] 00:18:05:291 Memoria/(9899:9899): Iniciando Memoria
+[INFO] 00:18:05:291 Memoria/(9899:9899): Configurado Puerto
+[INFO] 00:18:05:291 Memoria/(9899:9899): Configurado Marcos
+[INFO] 00:18:05:291 Memoria/(9899:9899): Configurado Marco Size
+[INFO] 00:18:05:291 Memoria/(9899:9899): Configurado Entradas Cache
+[INFO] 00:18:05:291 Memoria/(9899:9899): Configurado Cache por Proc.
+[INFO] 00:18:05:291 Memoria/(9899:9899): Configurado Retardo Memoria
+[INFO] 00:18:05:291 Memoria/(9899:9899): Archivo de configuracion cargado exitosamente
+[INFO] 00:22:22:291 Memoria/(10119:10119): Iniciando Memoria
+[INFO] 00:22:22:291 Memoria/(10119:10119): Configurado Puerto
+[INFO] 00:22:22:291 Memoria/(10119:10119): Configurado Marcos
+[INFO] 00:22:22:291 Memoria/(10119:10119): Configurado Marco Size
+[INFO] 00:22:22:291 Memoria/(10119:10119): Configurado Entradas Cache
+[INFO] 00:22:22:291 Memoria/(10119:10119): Configurado Cache por Proc.
+[INFO] 00:22:22:291 Memoria/(10119:10119): Configurado Retardo Memoria
+[INFO] 00:22:22:291 Memoria/(10119:10119): Archivo de configuracion cargado exitosamente
+[INFO] 00:23:30:350 Memoria/(10229:10229): Iniciando Memoria
+[INFO] 00:23:30:352 Memoria/(10229:10229): Configurado Puerto
+[INFO] 00:23:30:352 Memoria/(10229:10229): Configurado Marcos
+[INFO] 00:23:30:352 Memoria/(10229:10229): Configurado Marco Size
+[INFO] 00:23:30:352 Memoria/(10229:10229): Configurado Entradas Cache
+[INFO] 00:23:30:352 Memoria/(10229:10229): Configurado Cache por Proc.
+[INFO] 00:23:30:352 Memoria/(10229:10229): Configurado Retardo Memoria
+[INFO] 00:23:30:352 Memoria/(10229:10229): Archivo de configuracion cargado exitosamente
+[INFO] 00:23:51:901 Memoria/(10328:10328): Iniciando Memoria
+[INFO] 00:23:51:901 Memoria/(10328:10328): Configurado Puerto
+[INFO] 00:23:51:901 Memoria/(10328:10328): Configurado Marcos
+[INFO] 00:23:51:901 Memoria/(10328:10328): Configurado Marco Size
+[INFO] 00:23:51:901 Memoria/(10328:10328): Configurado Entradas Cache
+[INFO] 00:23:51:901 Memoria/(10328:10328): Configurado Cache por Proc.
+[INFO] 00:23:51:901 Memoria/(10328:10328): Configurado Retardo Memoria
+[INFO] 00:23:51:901 Memoria/(10328:10328): Archivo de configuracion cargado exitosamente
+[INFO] 00:26:49:838 Memoria/(10460:10460): Iniciando Memoria
+[INFO] 00:26:49:839 Memoria/(10460:10460): Configurado Puerto
+[INFO] 00:26:49:840 Memoria/(10460:10460): Configurado Marcos
+[INFO] 00:26:49:840 Memoria/(10460:10460): Configurado Marco Size
+[INFO] 00:26:49:840 Memoria/(10460:10460): Configurado Entradas Cache
+[INFO] 00:26:49:840 Memoria/(10460:10460): Configurado Cache por Proc.
+[INFO] 00:26:49:840 Memoria/(10460:10460): Configurado Retardo Memoria
+[INFO] 00:26:49:840 Memoria/(10460:10460): Archivo de configuracion cargado exitosamente
+[INFO] 00:42:09:480 Memoria/(12071:12071): Iniciando Memoria
+[INFO] 00:42:09:480 Memoria/(12071:12071): Configurado Puerto
+[INFO] 00:42:09:480 Memoria/(12071:12071): Configurado Marcos
+[INFO] 00:42:09:480 Memoria/(12071:12071): Configurado Marco Size
+[INFO] 00:42:09:480 Memoria/(12071:12071): Configurado Entradas Cache
+[INFO] 00:42:09:480 Memoria/(12071:12071): Configurado Cache por Proc.
+[INFO] 00:42:09:480 Memoria/(12071:12071): Configurado Retardo Memoria
+[INFO] 00:42:09:480 Memoria/(12071:12071): Archivo de configuracion cargado exitosamente
+[INFO] 00:52:23:855 Memoria/(12810:12810): Iniciando Memoria
+[INFO] 00:52:23:857 Memoria/(12810:12810): Configurado Puerto
+[INFO] 00:52:23:857 Memoria/(12810:12810): Configurado Marcos
+[INFO] 00:52:23:857 Memoria/(12810:12810): Configurado Marco Size
+[INFO] 00:52:23:857 Memoria/(12810:12810): Configurado Entradas Cache
+[INFO] 00:52:23:857 Memoria/(12810:12810): Configurado Cache por Proc.
+[INFO] 00:52:23:857 Memoria/(12810:12810): Configurado Retardo Memoria
+[INFO] 00:52:23:857 Memoria/(12810:12810): Archivo de configuracion cargado exitosamente
