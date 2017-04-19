@@ -8,6 +8,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include src/Utilities/subdir.mk
 -include src/subdir.mk
 -include subdir.mk
 -include objects.mk
@@ -26,7 +27,11 @@ endif
 all: Kernel
 
 dependents:
+<<<<<<< HEAD
 	-cd /home/utnso/Escritorio/ElSagrado/tp-2017-1c-Lords-of-the-Strings/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) all
+=======
+	-cd /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) clean all
+>>>>>>> d8fde31ab3812480825fc5e6e4e890626ea30fbf
 
 # Tool invocations
 Kernel: $(OBJS) $(USER_OBJS) /home/utnso/Escritorio/ElSagrado/tp-2017-1c-Lords-of-the-Strings/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so

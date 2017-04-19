@@ -17,7 +17,7 @@
 #include <netdb.h>
 #include <stdbool.h>
 #include "Results.h"
-//#include "./Utilities/Multiplexor.h"
+
 
 struct sockaddr_in CrearDireccionServer(int puerto){ //Direccion local Kernel
 	struct sockaddr_in direccionServidor;
@@ -55,4 +55,12 @@ Result SetupServer(int puerto, Result AlLevantarServidor(int)){			//Comun
 
 int getSocket(){
 	return socket(AF_INET, SOCK_STREAM,0);
+}
+
+void conectar(int socket, struct sockaddr_in* direccionServidor) {
+	if (connect(socket, (void*) direccionServidor, sizeof(*direccionServidor))
+			!= 0) {
+		perror("No se pudo conectar");
+		exit(1);
+	}
 }

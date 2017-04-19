@@ -21,7 +21,7 @@
 #include "Handshake.h"
 #include "Results.h"
 
-ResultWithValue RecibirMensaje(int cliente, void AlRecibirMensaje(int,char*,int)){
+ResultWithValue RecibirMensajeConResult(int cliente, void AlRecibirMensaje(int,char*,int)){
 	int tamanio = sizeof(t_handshake);
 
 	char* buffer = malloc(tamanio);

@@ -195,7 +195,7 @@ ResultWithValue CheckForIncomingData() {
 				if (r.result.noError != true)
 					return r;
 			} else if (isClient(i)) {
-				r = RecibirMensaje(i, AlRecibirMensaje);
+				r = RecibirMensajeConResult(i, AlRecibirMensaje);
 
 				if(r.value == -1){
 					RemoveClientFromMaster(i);

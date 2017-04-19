@@ -26,7 +26,11 @@ endif
 all: Memoria
 
 dependents:
+<<<<<<< HEAD
 	-cd /home/utnso/Escritorio/ElSagrado/tp-2017-1c-Lords-of-the-Strings/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) all
+=======
+	-cd /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) clean all
+>>>>>>> d8fde31ab3812480825fc5e6e4e890626ea30fbf
 
 # Tool invocations
 Memoria: $(OBJS) $(USER_OBJS) /home/utnso/Escritorio/ElSagrado/tp-2017-1c-Lords-of-the-Strings/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so

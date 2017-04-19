@@ -1,4 +1,0 @@
-[INFO] 15:54:25:263 CPU/(7178:7178): Iniciando CPU
-[INFO] 15:54:25:263 CPU/(7178:7178): Archivo de configuracion de Consola cargado exitosamente
-[INFO] 16:22:03:462 CPU/(8729:8729): Iniciando CPU
-[INFO] 16:22:03:462 CPU/(8729:8729): Archivo de configuracion de Consola cargado exitosamente
