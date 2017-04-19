@@ -16,16 +16,8 @@
 #include <SharedLibrary/Results.h>
 #include <SharedLibrary/ServerManager.h>
 
-typedef struct {
-	int PUERTO;
-	int MARCOS;
-	int MARCO_SIZE;
-	int ENTRADAS_CACHE;
-	int CACHE_X_PROC;
-	int RETARDO_MEMORIA;
-}Config_Memoria;
+#include "ConfigMemoria.h"
 
-Config_Memoria memoria_config;
-char* path = "Memoria.cfg";
+#define NOMBRE_PROCESO "Memoria"
 
 #endif /* MEMORIA_H_ */

@@ -72,7 +72,7 @@ int stringToInt(char* string) {
  return atoi(string);
 }
 
-int getSocket(){
+int crearSocket(){
   return socket(AF_INET, SOCK_STREAM,0);
 }
 
@@ -91,12 +91,6 @@ void enviarMensaje(int socketCliente, char* msg, int tamanio) {
  send(socketCliente, msg, tamanio, 0);
 }
 
-void enviarHeader(int socket,int header) {
-	char* head = intToString(header);
-
-	send(socket, head, 4, 0);
-}
-
 void iniciarHandshake(t_handshake QuienIniciaElHandshake, t_handshake QuienDevuelveHandshake, int socket) {
 
 	enviarHeader(socket, HEADER_HANDSHAKE);  //ENVIO EL HEADER DEL HANDSHAKE PARA QUE EL PROCESO QUE LO RECIBE VERIFIQUE SI ES UN HANDSHAKE LO QUE LE ENVIO O NO
@@ -112,7 +106,7 @@ void iniciarHandshake(t_handshake QuienIniciaElHandshake, t_handshake QuienDevue
 
 void conectarAKernel(){
 
-  socketCPU = getSocket();
+  socketCPU = crearSocket();
 
   struct sockaddr_in *direccionDelServidor = direccionServidor();
   if(connect(socketCPU,(struct sockaddr*) direccionDelServidor, sizeof(*direccionDelServidor)) != 0){

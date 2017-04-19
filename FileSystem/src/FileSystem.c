@@ -70,12 +70,6 @@ void enviarMensaje(int socketCliente, char* msg, int tamanio) {
  send(socketCliente, msg, tamanio, 0);
 }
 
-void enviarHeader(int socket,int header) {
-	char* head = intToString(header);
-
-	send(socket, head, 4, 0);
-}
-
 void iniciarHandshake(t_handshake QuienIniciaElHandshake, t_handshake QuienDevuelveHandshake, int socket) {
 
 	enviarHeader(socket, HEADER_HANDSHAKE);  //ENVIO EL HEADER DEL HANDSHAKE PARA QUE EL PROCESO QUE LO RECIBE VERIFIQUE SI ES UN HANDSHAKE LO QUE LE ENVIO O NO

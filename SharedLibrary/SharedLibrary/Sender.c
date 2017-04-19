@@ -12,10 +12,10 @@ void enviarMensaje(int socketCliente, char* msg, int tamanio) {
 	send(socketCliente, msg, tamanio, 0);
 }
 
-void enviarHeader(int socket,int header) {
+void enviarHeader(int socket, int header) {
 	char* head = intToString(header);
 
-	send(socket, head, 4, 0);
+	enviarMensaje(socket, head, 4);
 }
 
 void devolverHandshake(int socketCliente, t_handshake QuienDevuelveElHandshake) {

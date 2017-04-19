@@ -9,6 +9,6 @@
 #define CUSTOMCOMMONS_H_
 #include "Results.h"
 
-ResultWithValue RecibirMensaje(int cliente, void AlRecibirMensaje(char*,int));
+ResultWithValue RecibirMensajeConResult(int cliente, void AlRecibirMensaje(char*,int));
 
 #endif /* CUSTOMCOMMONS_H_ */

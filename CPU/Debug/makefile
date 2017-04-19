@@ -26,7 +26,7 @@ endif
 all: CPU
 
 dependents:
-	-cd /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) all
+	-cd /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug && $(MAKE) clean all
 
 # Tool invocations
 CPU: $(OBJS) $(USER_OBJS) /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/SharedLibrary/Debug/libSharedLibrary.so

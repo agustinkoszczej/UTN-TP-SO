@@ -4,12 +4,15 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/ConfigMemoria.c \
 ../src/Memoria.c 
 
 OBJS += \
+./src/ConfigMemoria.o \
 ./src/Memoria.o 
 
 C_DEPS += \
+./src/ConfigMemoria.d \
 ./src/Memoria.d 
 
 
