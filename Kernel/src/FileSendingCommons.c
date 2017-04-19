@@ -16,10 +16,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/sendfile.h>
-#include "Results.h"
-#include "Sender.h"
-#include "Conversor.h"
-#include "Headers.h"
+#include "SharedLibrary/Results.h"
+#include "SharedLibrary/Sender.h"
+#include "SharedLibrary/Conversor.h"
+#include "SharedLibrary/Headers.h"
 
 ResultWithValue GetFileDescriptor(char fileName[]){
 	int fd = open(fileName, O_RDONLY);
