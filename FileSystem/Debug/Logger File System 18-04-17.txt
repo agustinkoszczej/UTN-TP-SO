@@ -1,6 +1,0 @@
-[INFO] 15:54:21:908 File System/(7177:7177): Inicinado File System
-[INFO] 15:54:21:908 File System/(7177:7177): Archivo de configuracion cargado exitosamente
-[ERROR] 15:54:21:908 File System/(7177:7177): Error en el connect
-[INFO] 16:22:16:367 File System/(8754:8754): Inicinado File System
-[INFO] 16:22:16:367 File System/(8754:8754): Archivo de configuracion cargado exitosamente
-[TRACE] 16:22:16:368 File System/(8754:8754): Enviado mensaje de prueba de conexion al Kernel
