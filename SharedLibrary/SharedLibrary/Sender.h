@@ -8,7 +8,7 @@
 #ifndef SENDER_H_
 #define SENDER_H_
 
-#include <./Headers.h>
+#include <Headers.h>
 
 //PARTE ENVIAR
 void enviarMensaje(int socketCliente, char* msg, int tamanio);
