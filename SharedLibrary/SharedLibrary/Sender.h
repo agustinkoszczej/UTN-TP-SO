@@ -11,6 +11,7 @@
 #include <SharedLibrary/Headers.h>
 #include <SharedLibrary/Handshake.h>
 
+
 //PARTE ENVIAR
 void enviarMensaje(int socketCliente, char* msg, int tamanio);
 void enviarHeader(int socket,int header);
