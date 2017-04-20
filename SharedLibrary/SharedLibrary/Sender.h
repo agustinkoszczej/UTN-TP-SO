@@ -14,7 +14,7 @@
 
 //PARTE ENVIAR
 void enviarMensaje(int socketCliente, char* msg, int tamanio);
-void enviarHeader(int socket,int header);
+void enviarHeader(int socket,t_header header);
 void enviarPasamnos();
 void enviarMensajeConTamanioDinamico(int socketCliente, char* msj);
 //PARTE RECIBIR

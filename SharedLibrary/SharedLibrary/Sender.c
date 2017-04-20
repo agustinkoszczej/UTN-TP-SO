@@ -23,7 +23,7 @@ void enviarMensaje(int socketCliente, char* msg, int tamanio) {
 	send(socketCliente, msg, tamanio, 0);
 }
 
-void enviarHeader(int socket, int header) {
+void enviarHeader(int socket, t_header header) {
 	char* head = intToString(header);
 
 	enviarMensaje(socket, head, 4);

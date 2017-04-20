@@ -48,8 +48,8 @@ ResultWithValue SendFileLength(int fd, int socketCliente){
 	if(r.result.noError){
 		int fileLength = r.value;
 
-		EnviarHeader(HEADER_TAMANIO);
-		EnviarMensaje(socketCliente,intToString(fileLength),sizeof(int)); //NO ES INT, HAY QUE REVER
+		enviarHeader(socketCliente, HEADER_TAMANIO);
+		enviarMensaje(socketCliente,intToString(fileLength),sizeof(int)); //NO ES INT, HAY QUE REVER
 
 		return OkWithValue(fileLength);
 	} else
