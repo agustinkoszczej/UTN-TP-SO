@@ -2,3 +2,5 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspaces/SharedLibrary/Debug -> Tira
 sudo chmod +x path.sh -> A lo mejor no sea necesario
 source path.sh ->Sobre cada Modulo
 path.sh = archivo
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspace/TPSO/SharedLibrary/Debug/
