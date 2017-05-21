@@ -1,23 +1,24 @@
-/*
- * FileSystem.h
- *
- *
- *      Author: utnso
- */
-
 #ifndef FILESYSTEM_H_
 #define FILESYSTEM_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <commons/string.h>
 #include <commons/config.h>
+#include <commons/log.h>
+#include <console.h>
+#include <stdbool.h>
+#include <config.h>
+#include <socket.h>
+#include "filesystem_interface.h"
 
-#include <SharedLibrary/Handshake.h>
-#include <SharedLibrary/Headers.h>
-#include <SharedLibrary/logger.h>
-#include <SharedLibrary/ServerManager.h>
-#include <SharedLibrary/Results.h>
+#define PORT "PORT"
+#define MOUNT_POINT "MOUNT_POINT"
+#define CONFIG_FIELDS_N 2
 
-#include "ConfigFileSystem.h"
-
-#define NOMBRE_PROCESO "FileSystem"
+t_dictionary* fns;
+pthread_mutex_t mx_main;
+t_log* logger;
 
 #endif /* FILESYSTEM_H_ */

@@ -1,55 +1,41 @@
-/*
- * FileSystem.c
- *
- *
- *      Author: utnso
- */
+#include "filesystem.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include<stdbool.h>
-#include<sys/types.h>
-#include<time.h>
-#include<string.h>
-#include<commons/log.h>
-#include<commons/string.h>
+const char * CONFIG_FIELDS[] = { PORT, MOUNT_POINT };
 
-#include "FileSystem.h"
-
-#include <arpa/inet.h>
-#include<sys/socket.h>
-
-int socketFileSystem;
-
-//-----------------------------------------------------------------------------------
-
-struct sockaddr_in *direccionServidor() { //Kernel
-	struct sockaddr_in *retorno = malloc(sizeof(struct sockaddr_in));
-
-	retorno->sin_family = AF_INET;
-	retorno->sin_addr.s_addr = inet_addr("127.0.0.1");//Hardcodeado nomas en este check
-	retorno->sin_port = htons(8080);
-
-	return retorno;
-}
-void conectarAKernel() {
-	socketFileSystem = getSocket();
-	struct sockaddr_in *VdireccionServidor = direccionServidor();
-	conectar(socketFileSystem, VdireccionServidor);
-	iniciarHandshake(FILE_SYSTEM, KERNEL, socketFileSystem);
+void create_function_dictionary() {
+	fns = dictionary_create();
 }
 
-//-----------------------------------------------------------------------------------
+void init_filesystem(t_config* config) {
+	log_debug(logger, "Initiating FILESYSTEM.");
 
-int main(void) {
-	printf("Iniciando File System...\n\n");
-	logger("Inicinado File System", "INFO", NOMBRE_PROCESO);
+	int port = config_get_int_value(config, PORT);
 
-	cargarConfigFileSystem();
-	mostrarConfigFileSystem();
-	conectarAKernel();
-	printf("\n");
-	esperarMensaje(socketFileSystem);
+	if (createListen(port, &newClient, fns, &connectionClosed, NULL) == -1) {
+		log_error(logger, "Error at creating listener at port %d", port);
+		exit(EXIT_FAILURE);
+	}
+	log_debug(logger, "Listening new clients at %d.\n", port);
+
+	pthread_mutex_init(&mx_main, NULL);
+	pthread_mutex_lock(&mx_main);
+	pthread_mutex_lock(&mx_main);
+}
+
+int main(int argc, char *argv[]) {
+	clear_screen();
+	t_config *config = malloc(sizeof(t_config));
+
+	remove("log");
+	logger = log_create("log", "FILESYSTEM", false, LOG_LEVEL_DEBUG);
+
+	create_function_dictionary();
+
+	load_config(&config, argc, argv[1]);
+	print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
+
+	init_filesystem(config);
 
 	return EXIT_SUCCESS;
 }
+

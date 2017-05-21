@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>CPU</name>
+	<name>cpu</name>
 	<comment></comment>
 	<projects>
-		<project>SharedLibrary</project>
+		<project>utils</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -1,9 +1,10 @@
+log
+
 # Object files
 *.o
 *.ko
 *.obj
 *.elf
-*.orig
 
 # Precompiled Headers
 *.gch
@@ -33,8 +34,7 @@
 *.dSYM/
 *.su
 
-Borrador
-RemoteSystemsTempFiles
-.metadata
-
-/Debug/
+#Environment
+.cproject
+.project
+.settings/

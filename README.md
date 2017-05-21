@@ -13,10 +13,9 @@ inventado y diseñado por la cátedra para fines didácticos.
 
 ## **Integrantes:**
 
-* Fischer, Matías
 * Koszczej, Agustín
 * Manchione, Bruno
-* Sinopoli, Joaquín
+* Plawner, Sebastián
 * Villalba, Matías
 
 ## **Procesos:**
@@ -30,15 +29,15 @@ inventado y diseñado por la cátedra para fines didácticos.
 ## **Checkpoints:**
 * Checkpoint 1 - Obligatorio
   * Fecha: 15/04/2017
-  * Estado: ✔ (en fecha)
+  * Estado: ✔ (entregado)
   
 * Checkpoint 2
   * Fecha: 06/05/2017
-  * Estado: ✔ (en fecha)
+  * Estado: ✔ (entregado)
   
 * Checkpoint 3
   * Fecha: 20/05/2017
-  * Estado: ✔ (en fecha)
+  * Estado: ✔ (entregado)
   
 * Checkpoint 4 - Obligatorio (En Laboratorio)
   * Fecha: 03/06/2017

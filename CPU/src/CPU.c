@@ -1,52 +1,66 @@
-/*
- * CPU.c
- *
- *
- *      Author: utnso
- */
+#include "cpu.h"
+#include "cpu_interface.h"
 
-#include "CPU.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include<stdbool.h>
-#include<sys/types.h>
-#include<time.h>
-#include<commons/log.h>
-#include<commons/string.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-
-#define MSJ_DINAMICO 50
-
-int socketCPU;
-
-struct sockaddr_in *direccionServidor() {
-	struct sockaddr_in *retorno = malloc(sizeof(struct sockaddr_in));
-
-	retorno->sin_family = AF_INET;
-	retorno->sin_addr.s_addr = inet_addr(cpu_config.IP_KERNEL);
-	retorno->sin_port = htons(cpu_config.PUERTO_KERNEL);
-
-	return retorno;
+void connect_to_kernel() {
+	if ((socket_server = connectServer(ip, port, fns, &server_connectionClosed, NULL)) == -1) {
+		error_show(" al intentar conectar a servidor. IP = %s, Port = %d.\n", ip, port);
+		exit(EXIT_FAILURE);
+	}
+	printf("Connected to server. Socket = %d, IP = %s, Port = %d.\n", socket_server, ip, port);
 }
 
-void conectarAKernel() {
-	socketCPU = getSocket();
-	struct sockaddr_in *VdireccionServidor = direccionServidor();
-	conectar(socketCPU, VdireccionServidor);
-	iniciarHandshake(CPU, KERNEL, socketCPU);
+void print_menu() {
+	clear_screen();
+	show_title("CPU - MAIN MENU");
+	println("Enter your choice:");
+	println("> START_CPU");
+	println("> EXIT_CPU\n");
 }
 
-int main(void) {
-	printf("Iniciando CPU...\n\n");
-	logger("Iniciando CPU", "INFO", NOMBRE_PROCESO);
-	cargarConfigCPU();
-	mostrarConfigCPU();
-	conectarAKernel();
-	printf("\n");
-	esperarMensaje(socketCPU);
+void ask_option(char *sel) {
+	print_menu();
+	fgets(sel, sizeof(char) * 255, stdin);
+	strtok(sel, "\n");
+	string_to_upper(sel);
+}
 
-	return EXIT_SUCCESS;
+void do_ask_option(char* sel, int close_flag) {
+	if (!close_flag)
+		ask_option(sel);
+}
+
+void do_start_cpu(char* sel) {
+	if (!strcmp(sel, "START_CPU")) {
+		println_with_clean(">>>> INITIATING CPU");
+		connect_to_kernel();
+		pthread_mutex_init(&mx_main, NULL);
+		pthread_mutex_lock(&mx_main);
+		pthread_mutex_lock(&mx_main);
+	}
+}
+
+void do_exit_cpu(char* sel, int *close_flag) {
+	if (!strcmp(sel, "EXIT_CPU")) {
+		println_with_clean(">>>> CLOSING");
+		*close_flag = 1;
+	}
+}
+
+int main(int argc, char *argv[]) {
+	int close_flag = 0;
+	char sel[255];
+
+	fns = dictionary_create();
+	dictionary_put(fns, "server_handshake", &server_handshake);
+	dictionary_put(fns, "server_identify", &server_identify); // <--
+	dictionary_put(fns, "server_print_message", &server_print_message); // <--
+
+	ask_option(sel);
+	do {
+		do_start_cpu(sel);
+		do_exit_cpu(sel, &close_flag);
+		do_ask_option(sel, close_flag);
+	} while (!close_flag);
+
+	return EXIT_SUCCESS; // Fin exitoso
 }
