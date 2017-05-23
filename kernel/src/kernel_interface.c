@@ -95,7 +95,7 @@ void console_load_program(socket_connection* connection, char** args) {
 		new_pcb->statistics.cycles = 0;
 		new_pcb->statistics.op_priviliges = 0;
 
-		set_indices(new_pcb, program);
+		//set_indices(new_pcb, program);
 
 		pthread_mutex_lock(&pcb_list_mutex);
 		queue_push(new_queue, &new_pcb);
@@ -110,7 +110,8 @@ void console_load_program(socket_connection* connection, char** args) {
 		 program_struct.pcb = &new_pcb;
 		 */
 
-		runFunction(mem_socket, "i_start_program", 1, string_itoa(new_pcb->pid), program);
+
+		runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program);
 
 		/*
 		 pthread_attr_t attr;
@@ -173,7 +174,7 @@ void connectionClosed(socket_connection* connection) {
 
 	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n", client, connection->socket, connection->ip, connection->port);
 
-	if (strcmp(client, CONSOLE)) {
+	if (!strcmp(client, CONSOLE)) {
 		pcb* l_pcb = find_pcb_by_socket(connection->socket);
 		move_to_list(l_pcb, EXIT_LIST);
 		remove_pcb_from_socket_pcb_list(l_pcb);

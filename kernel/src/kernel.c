@@ -257,8 +257,8 @@ void init_kernel(t_config* config) {
 	connect_to_server(config, FILESYSTEM);
 	connect_to_server(config, MEMORY);
 
-	pthread_mutex_lock(&mx_main);
-	pthread_mutex_lock(&mx_main);
+	/*pthread_mutex_lock(&mx_main);
+	pthread_mutex_lock(&mx_main);*/
 }
 
 void print_menu() {
@@ -470,7 +470,7 @@ int main(int argc, char *argv[]) {
 	print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
 
 	init_kernel(config);
-	start_planning();
+	//start_planning();
 
 	wait_any_key();
 

@@ -109,6 +109,7 @@ void start_program(char* location) {
 		new_message("Error at creating process.", -1);
 		return;
 	}
+
 	log_debug(logger, "Connected to KERNEL. Socket = %d, IP = %s, Port = %d.", process->socket, ip, port);
 
 	FILE* file = fopen(string_from_format("resources/%s", location), "r");
@@ -163,7 +164,6 @@ void do_start_program(char* sel) {
 		fgets(location, sizeof(location), stdin);
 		strtok(location, "\n");
 		pthread_mutex_unlock(&print_menu_mutex);
-
 		start_program(location);
 	}
 }
