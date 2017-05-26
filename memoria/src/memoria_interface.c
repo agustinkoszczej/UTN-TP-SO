@@ -4,7 +4,6 @@
  * INTERFACE
  */
 void i_start_program(socket_connection* connection, char** args) {
-
 	int pid = atoi(args[0]);
 	char* buffer = args[1];
 
@@ -20,10 +19,9 @@ void i_start_program(socket_connection* connection, char** args) {
 			store_bytes(pid, i, 0, size, buffer2);
 		}
 
-		runFunction(m_sockets.k_socket, "memory_response_start_program", 1, string_itoa(NO_ERRORES));
+		runFunction(m_sockets.k_socket, "memory_response_start_program", 2, string_itoa(NO_ERRORES), string_itoa(n_frames + 1));
 	} else
 		runFunction(m_sockets.k_socket, "memory_response_start_program", 1, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS));
-puts("Termina");
 }
 void i_read_bytes_from_page(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -77,7 +75,7 @@ void client_identify(socket_connection* connection, char** args) {
 		pthread_mutex_unlock(&cpu_sockets_mutex);
 	} else if (!strcmp(sender, KERNEL)) {
 		m_sockets.k_socket = connection->socket;
-		runFunction(connection->socket, "memory_page_size", 2, MEMORY, string_itoa(frame_size));
+		runFunction(connection->socket, "memory_page_size", 1, string_itoa(frame_size));
 	}
 }
 

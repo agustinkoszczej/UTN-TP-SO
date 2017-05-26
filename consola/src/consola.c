@@ -16,12 +16,14 @@ t_process* find_process_by_socket(int socket) {
 }
 
 t_process* find_process_by_pid(int pid) {
+	pthread_mutex_lock(&process_list_mutex);
 	bool find_pid(void* element) {
 		t_process* p = element;
 		return p->pid == pid;
 	}
 
 	t_process* process = list_find(process_list, find_pid);
+	pthread_mutex_unlock(&process_list_mutex);
 	return process;
 }
 
@@ -73,10 +75,8 @@ void new_message(char* text, int pid) {
 	message->message = text;
 	message->time = temporal_get_string_time();
 
-	pthread_mutex_lock(&process_list_mutex);
 	t_process* process = find_process_by_pid(pid);
 	process->c_message++;
-	pthread_mutex_unlock(&process_list_mutex);
 
 	pthread_mutex_lock(&messages_list_mutex);
 	list_add(messages_list, message);
@@ -109,7 +109,6 @@ void start_program(char* location) {
 		new_message("Error at creating process.", -1);
 		return;
 	}
-
 	log_debug(logger, "Connected to KERNEL. Socket = %d, IP = %s, Port = %d.", process->socket, ip, port);
 
 	FILE* file = fopen(string_from_format("resources/%s", location), "r");
@@ -131,7 +130,7 @@ void start_program(char* location) {
 	list_add(process_list, process);
 	pthread_mutex_unlock(&process_list_mutex);
 
-	runFunction(process->socket, "console_load_program", 2, CONSOLE, buffer);
+	runFunction(process->socket, "console_load_program", 1, buffer);
 }
 
 void ask_option(char *sel) {
@@ -164,6 +163,7 @@ void do_start_program(char* sel) {
 		fgets(location, sizeof(location), stdin);
 		strtok(location, "\n");
 		pthread_mutex_unlock(&print_menu_mutex);
+
 		start_program(location);
 	}
 }
@@ -172,6 +172,7 @@ void abort_program(t_process* process, int exit_code) {
 	close(process->socket);
 
 	if (process->pid > 0) {
+		process->time_finish = temporal_get_string_time();
 		new_message(dictionary_get(message_map, string_itoa(exit_code)), process->pid);
 		char* message = string_from_format("[%s] [%s] [%d]", process->time_start, process->time_finish, process->c_message);
 		new_message(message, process->pid);

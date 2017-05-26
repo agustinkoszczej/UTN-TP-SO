@@ -11,7 +11,6 @@
 #include <config.h>
 #include <socket.h>
 #include <pthread.h>
-#include <md5.h>
 #include <pcb.h>
 
 #define NO_ERRORES 0
@@ -27,17 +26,7 @@
 #define RETARDO_MEMORIA "RETARDO_MEMORIA"
 #define CONFIG_FIELDS_N 6
 
-/*
- typedef struct {
- int frame;
- int pos;
- } curPos;
- */
-
-MD5_CTX context;
-
 typedef struct {
-	unsigned char hash[16];
 	int frame;
 	int pid;
 	int pag;
@@ -51,10 +40,8 @@ typedef struct {
 t_list* adm_list;
 t_list* cache_list;
 
-t_config *config;
 t_dictionary* fns;
 
-pthread_mutex_t mx_main;
 pthread_mutex_t frames_mutex;
 pthread_mutex_t frames_cache_mutex;
 
@@ -62,7 +49,6 @@ t_log* logger;
 
 char* frames_cache;
 char* frames;
-int cur_pos;
 int frames_count;
 int frame_size;
 int mem_delay;

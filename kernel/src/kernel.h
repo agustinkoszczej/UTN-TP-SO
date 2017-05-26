@@ -93,7 +93,6 @@ pthread_mutex_t cpu_mutex;
 bool planning_running;
 
 t_dictionary * fns;
-pthread_mutex_t mx_main;
 t_log* logger;
 
 int mem_page_size;
@@ -101,7 +100,6 @@ int mem_page_size;
 void move_to_list(pcb* pcb, int list_name);
 pcb* find_pcb_by_socket(int socket);
 void remove_pcb_from_socket_pcb_list(pcb* n_pcb);
-void set_indices(pcb* n_pcb, char* program);
 void remove_cpu_from_cpu_list(t_cpu* cpu);
 t_cpu* find_cpu_by_socket(int socket);
 

@@ -44,36 +44,6 @@ void remove_pcb_from_socket_pcb_list(pcb* n_pcb) {
 	pthread_mutex_unlock(&socket_pcb_mutex);
 }
 
-void set_indices(pcb* n_pcb, char* program) {
-	int offset = 0;
-
-	void by_line(char* line) {
-		offset += string_length(line) + 1;
-		if (!string_is_empty(line) && string_starts_with(line, "#")) {
-			if (string_starts_with(line, "function") || string_starts_with(line, ":")) {
-				char* name_func;
-				if (string_starts_with(line, "function"))
-					name_func = string_substring_from(line, string_length("function "));
-				else if (string_starts_with(line, ":"))
-					name_func = string_substring_from(line, string_length(":"));
-
-				int i_code = list_size(n_pcb->i_code);
-				dictionary_put(n_pcb->i_label, name_func, &i_code);
-			} else if (string_starts_with(line, "begin")) {
-				n_pcb->pc = list_size(n_pcb->i_code);
-			} else {
-				t_i_code n_i_code;
-				n_i_code.length = string_length(line);
-				n_i_code.offset = offset;
-
-				list_add(n_pcb->i_code, &n_i_code);
-			}
-		}
-	}
-
-	string_iterate_lines(&program, by_line);
-}
-
 pcb* find_pcb_by_pid(int pid) {
 	pthread_mutex_lock(&socket_pcb_mutex);
 	bool find(void* element) {
@@ -226,7 +196,6 @@ void init_kernel(t_config* config) {
 	pthread_mutex_init(&console_mutex, NULL);
 	pthread_mutex_init(&pcb_list_mutex, NULL);
 	pthread_mutex_init(&planning_mutex, NULL);
-	pthread_mutex_init(&mx_main, NULL);
 
 	port_con = config_get_int_value(config, PUERTO_PROG);
 	port_cpu = config_get_int_value(config, PUERTO_CPU);
@@ -256,9 +225,6 @@ void init_kernel(t_config* config) {
 	open_socket(config, CPU);
 	connect_to_server(config, FILESYSTEM);
 	connect_to_server(config, MEMORY);
-
-	/*pthread_mutex_lock(&mx_main);
-	pthread_mutex_lock(&mx_main);*/
 }
 
 void print_menu() {

@@ -36,32 +36,6 @@ void print_menu() {
 	println("> SIZE\n");
 }
 
-/*
- // TODO Usar hashing
- void store_in_frame(int frame, int pid, int page, char* buffer) {
- memcpy(&frames[frame * frame_size], buffer, frame_size);
-
- t_adm_table* adm_table = list_get(adm_list, frame);
- adm_table->pid = pid;
- adm_table->pag = page;
- char* new_frame = string_from_format("%d%d", pid, page);
- MD5_Update(&context, new_frame, string_length(new_frame));
- MD5_Final(adm_table->hash, &context);
-
- list_remove(adm_list, frame);
- list_add_in_index(adm_list, atoi((char*) adm_table->hash), adm_table);
- }
-
- int find_frame(int pid, int page) {
- char* new_frame = string_from_format("%d%d", pid, page);
- MD5_Update(&context, new_frame, string_length(new_frame));
- unsigned char frame[16];
- MD5_Final(frame, &context);
-
- return atoi((char*) frame);
- }
- */
-
 bool has_available_frames(int n_frames) {
 	pthread_mutex_lock(&frames_mutex);
 	bool find(void* element) {
@@ -314,8 +288,6 @@ void init_memory(t_config *config) {
 
 	mem_allocate_fullspace();
 
-	MD5_Init(&context);
-	cur_pos = 0;
 	m_sockets.cpu_sockets = list_create();
 	adm_list = list_create();
 	cache_list = list_create();
@@ -480,7 +452,7 @@ void ask_option(char *sel) {
 int main(int argc, char *argv[]) {
 	clear_screen();
 	char sel[255];
-	config = malloc(sizeof(t_config));
+	t_config* config = malloc(sizeof(t_config));
 
 	remove("log");
 	logger = log_create("log", "MEMORY", false, LOG_LEVEL_DEBUG);
