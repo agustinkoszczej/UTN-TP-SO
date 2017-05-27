@@ -31,8 +31,8 @@ void remove_from_process_list(t_process* process) {
 	int i;
 	pthread_mutex_lock(&process_list_mutex);
 	for (i = 0; i < list_size(process_list); i++) {
-		t_process* process = list_get(process_list, i);
-		if (process->socket == process->socket) {
+		t_process* process2 = list_get(process_list, i);
+		if (process->socket == process2->socket) {
 			list_remove(process_list, i);
 			break;
 		}
@@ -90,7 +90,6 @@ void new_message(char* text, int pid) {
 void create_function_dictionary() {
 	fns = dictionary_create();
 
-	dictionary_put(fns, "server_connectionClosed", &server_connectionClosed);
 	dictionary_put(fns, "kernel_print_message", &kernel_print_message);
 	dictionary_put(fns, "kernel_response_load_program", &kernel_response_load_program);
 	dictionary_put(fns, "kernel_stop_process", &kernel_stop_process);
@@ -100,7 +99,11 @@ void start_program(char* location) {
 	char* buffer;
 	int size;
 	t_process* process = malloc(sizeof(t_process));
-	process->time_start = temporal_get_string_time();
+
+	char* time_start = temporal_get_string_time();
+	process->time_start = malloc(string_length(time_start));
+	process->time_start = time_start;
+
 	process->c_message = 0;
 	process->pid = -1;
 
@@ -109,7 +112,7 @@ void start_program(char* location) {
 		new_message("Error at creating process.", -1);
 		return;
 	}
-	log_debug(logger, "Connected to KERNEL. Socket = %d, IP = %s, Port = %d.", process->socket, ip, port);
+	//log_debug(logger, "Connected to KERNEL. Socket = %d, IP = %s, Port = %d.", process->socket, ip, port);
 
 	FILE* file = fopen(string_from_format("resources/%s", location), "r");
 	if (file == NULL) {
@@ -169,16 +172,23 @@ void do_start_program(char* sel) {
 }
 
 void abort_program(t_process* process, int exit_code) {
-	close(process->socket);
-
 	if (process->pid > 0) {
-		process->time_finish = temporal_get_string_time();
+		char* time_finish = temporal_get_string_time();
+		process->time_finish = malloc(string_length(time_finish));
+		process->time_finish = time_finish;
+
 		new_message(dictionary_get(message_map, string_itoa(exit_code)), process->pid);
 		char* message = string_from_format("[%s] [%s] [%d]", process->time_start, process->time_finish, process->c_message);
 		new_message(message, process->pid);
-		log_debug(logger, dictionary_get(message_map, string_itoa(exit_code)));
-		runFunction(process->socket, "console_abort_program", 2, CONSOLE, string_itoa(process->pid));
+
+		pthread_mutex_lock(&p_counter_mutex);
+		p_counter--;
+		pthread_mutex_unlock(&p_counter_mutex);
+
+		//log_debug(logger, dictionary_get(message_map, string_itoa(exit_code)));
+		//runFunction(process->socket, "console_abort_program", 2, CONSOLE, string_itoa(process->pid));
 	}
+	close(process->socket);
 }
 
 void do_abort_program(char* sel) {
@@ -194,12 +204,22 @@ void do_abort_program(char* sel) {
 		int i;
 		pthread_mutex_lock(&process_list_mutex);
 		for (i = 0; i < list_size(process_list); i++) {
+			pthread_mutex_unlock(&process_list_mutex);
+
+			pthread_mutex_lock(&process_list_mutex);
 			t_process* process = list_get(process_list, i);
+			pthread_mutex_unlock(&process_list_mutex);
+
 			if (!strcmp(string_itoa(process->pid), pid)) {
 				abort_program(process, DESCONEXION_CONSOLA);
+
+				pthread_mutex_lock(&process_list_mutex);
 				list_remove(process_list, i);
+				pthread_mutex_unlock(&process_list_mutex);
+
 				break;
 			}
+			pthread_mutex_lock(&process_list_mutex);
 		}
 		pthread_mutex_unlock(&process_list_mutex);
 	}
@@ -241,8 +261,8 @@ int main(int argc, char *argv[]) {
 	char sel[255];
 	t_config* config = malloc(sizeof(t_config));
 
-	remove("log");
-	logger = log_create("log", "CONSOLE", false, LOG_LEVEL_DEBUG);
+	//remove("log");
+	//logger = log_create("log", "CONSOLE", false, LOG_LEVEL_DEBUG);
 
 	create_function_dictionary();
 

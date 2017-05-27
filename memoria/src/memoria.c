@@ -44,8 +44,8 @@ bool has_available_frames(int n_frames) {
 	}
 
 	int available_pages = list_size(list_filter(adm_list, find));
-	return available_pages >= n_frames;
 	pthread_mutex_unlock(&frames_mutex);
+	return available_pages >= n_frames;
 }
 
 void start_program(int pid, int n_frames) {
@@ -56,6 +56,7 @@ void start_program(int pid, int n_frames) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
+			adm_table->frame = i;
 			adm_table->pag = n_frames - page_c;
 			if (--page_c <= 0)
 				break;
@@ -294,24 +295,24 @@ void init_memory(t_config *config) {
 
 	int i;
 	for (i = 0; i < frames_count; i++) {
-		t_adm_table adm_table;
-		adm_table.frame = i;
-		adm_table.pag = 0;
-		adm_table.pid = -1;
+		t_adm_table* adm_table = malloc(sizeof(t_adm_table));
+		adm_table->frame = i;
+		adm_table->pag = 0;
+		adm_table->pid = -1;
 
-		list_add(adm_list, &adm_table);
+		list_add(adm_list, adm_table);
 	}
 	for (i = 0; i < cache_size; i++) {
-		t_cache cache;
-		t_adm_table adm_table;
-		adm_table.frame = i;
-		adm_table.pag = 0;
-		adm_table.pid = -1;
+		t_cache* cache = malloc(sizeof(t_cache));
+		t_adm_table* adm_table = malloc(sizeof(t_adm_table));
+		adm_table->frame = i;
+		adm_table->pag = 0;
+		adm_table->pid = -1;
 
-		cache.adm_table = &adm_table;
-		cache.lru = -1;
+		cache->adm_table = adm_table;
+		cache->lru = -1;
 
-		list_add(cache_list, &cache);
+		list_add(cache_list, cache);
 	}
 
 	if ((m_sockets.k_socket = createListen(port, &newClient, fns, &connectionClosed, NULL) == -1)) {

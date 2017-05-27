@@ -8,7 +8,7 @@ void i_start_program(socket_connection* connection, char** args) {
 	char* buffer = args[1];
 
 	int size_buffer = string_length(buffer);
-	int n_frames = ceil(size_buffer / frame_size);
+	int n_frames = ceil((float) size_buffer / frame_size);
 
 	if (has_available_frames(n_frames + 1)) {
 		start_program(pid, n_frames);
