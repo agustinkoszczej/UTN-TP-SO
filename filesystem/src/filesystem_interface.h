@@ -13,13 +13,13 @@
 
 int k_socket;
 
-void newClient(socket_connection * connection);
-void connectionClosed(socket_connection * connection);
+void newClient(socket_connection* connection);
+void connectionClosed(socket_connection* connection);
 
-bool validateFile(char filePath[]);
-bool createFile(char filePath[]);
-bool deleteFile(char filePath[]);
-char* getData(char filePath[],int offSet,int size);
-bool saveData(char filePath[],int offSet,int size,int buffer);
+void validateFile(socket_connection* connection, char** args);
+void createFile(socket_connection* connection, char** args);
+void deleteFile(socket_connection* connection, char** args);
+void getData(socket_connection* connection, char** args);
+void saveData(socket_connection* connection, char** args);
 
 #endif /* FILESYSTEM_INTERFACE_H_ */

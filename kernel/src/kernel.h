@@ -52,6 +52,9 @@
 int p_counter;
 int multiprog;
 int planning_alg;
+int quantum;
+t_dictionary* shared_vars;
+t_dictionary* sem_ids;
 
 t_queue* new_queue;
 t_list* ready_list;
@@ -89,6 +92,7 @@ pthread_mutex_t pcb_list_mutex;
 pthread_mutex_t socket_pcb_mutex;
 pthread_mutex_t planning_mutex;
 pthread_mutex_t cpu_mutex;
+pthread_mutex_t process_in_memory_mutex;
 
 bool planning_running;
 
@@ -96,11 +100,13 @@ t_dictionary * fns;
 t_log* logger;
 
 int mem_page_size;
+int process_in_memory;
 
 void move_to_list(pcb* pcb, int list_name);
 pcb* find_pcb_by_socket(int socket);
 void remove_pcb_from_socket_pcb_list(pcb* n_pcb);
 void remove_cpu_from_cpu_list(t_cpu* cpu);
 t_cpu* find_cpu_by_socket(int socket);
+void add_process_in_memory();
 
 #endif /* KERNEL_H_ */

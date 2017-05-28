@@ -90,10 +90,10 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 	if (response == NO_ERRORES) {
 		int n_frames = atoi(args[1]);
 		process_struct.pcb->page_c = n_frames;
+		add_process_in_memory();
 	}
 
 	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
-	pthread_mutex_unlock(&console_mutex);
 }
 void memory_page_size(socket_connection* connection, char** args) {
 	int page_size = atoi(args[0]);

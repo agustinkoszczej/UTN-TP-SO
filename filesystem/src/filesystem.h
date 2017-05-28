@@ -17,8 +17,11 @@
 #define MOUNT_POINT "MOUNT_POINT"
 #define CONFIG_FIELDS_N 2
 
+char* mount_point;
+
 t_dictionary* fns;
 pthread_mutex_t mx_main;
+pthread_mutex_t request_mutex;
 t_log* logger;
 
 #endif /* FILESYSTEM_H_ */

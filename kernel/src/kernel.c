@@ -5,6 +5,47 @@ IP_MEMORIA, IP_FILESYSTEM, PUERTO_MEMORIA, IP_FS, PUERTO_FS, QUANTUM,
 QUANTUM_SLEEP, ALGORITMO, GRADO_MULTIPROG, SEM_IDS, SEM_INIT,
 SHARED_VARS, STACK_SIZE };
 
+bool is_cpu_free() {
+	pthread_mutex_lock(&cpu_mutex);
+	bool find(void* e) {
+		t_cpu* cpu = e;
+		return !cpu->busy;
+	}
+
+	bool result = list_any_satisfy(cpu_list, find);
+	pthread_mutex_unlock(&cpu_mutex);
+	return result;
+}
+
+t_cpu* get_cpu_free() {
+	pthread_mutex_lock(&cpu_mutex);
+	bool find(void* e) {
+		t_cpu* cpu = e;
+		return !cpu->busy;
+	}
+
+	t_cpu* result = list_find(cpu_list, find);
+	pthread_mutex_unlock(&cpu_mutex);
+	return result;
+}
+
+void short_planning() {
+	if (planning_running && is_cpu_free() && list_size(ready_list) > 0) {
+		t_cpu* free_cpu = get_cpu_free();
+		pcb* _pcb = list_get(ready_list, 0);
+
+		move_to_list(_pcb, EXEC_LIST);
+		free_cpu->busy = true;
+
+		char* pcb_string = pcb_to_string(_pcb);
+
+		if (planning_alg == FIFO)
+			runFunction(free_cpu->socket, "kernel_receive_pcb", 2, string_itoa(FIFO), pcb_string);
+		else if (planning_alg == RR)
+			runFunction(free_cpu->socket, "kernel_receive_pcb", 3, string_itoa(RR), string_itoa(quantum), pcb_string);
+	}
+}
+
 void remove_cpu_from_cpu_list(t_cpu* cpu) {
 	pthread_mutex_lock(&cpu_mutex);
 	int i;
@@ -81,6 +122,26 @@ int find_pcb_pos_in_list(t_list* list, pcb* l_pcb) {
 	return -1;
 }
 
+void substract_process_in_memory() {
+	pthread_mutex_lock(&process_in_memory_mutex);
+
+	process_in_memory--;
+	if (process_in_memory < multiprog)
+		pthread_mutex_unlock(&console_mutex);
+
+	pthread_mutex_unlock(&process_in_memory_mutex);
+}
+
+void add_process_in_memory() {
+	pthread_mutex_lock(&process_in_memory_mutex);
+
+	process_in_memory++;
+	if (process_in_memory < multiprog)
+		pthread_mutex_unlock(&console_mutex);
+
+	pthread_mutex_unlock(&process_in_memory_mutex);
+}
+
 void move_to_list(pcb* pcb, int list_name) {
 	int pos;
 
@@ -127,6 +188,11 @@ void move_to_list(pcb* pcb, int list_name) {
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
 	pthread_mutex_unlock(&planning_mutex);
+
+	if(list_name == READY_LIST)
+		short_planning();
+	else if(list_name == EXIT_LIST)
+		substract_process_in_memory();
 }
 
 void create_function_dictionary() {
@@ -196,19 +262,41 @@ void init_kernel(t_config* config) {
 	pthread_mutex_init(&console_mutex, NULL);
 	pthread_mutex_init(&pcb_list_mutex, NULL);
 	pthread_mutex_init(&planning_mutex, NULL);
+	pthread_mutex_init(&process_in_memory_mutex, NULL);
 
 	port_con = config_get_int_value(config, PUERTO_PROG);
 	port_cpu = config_get_int_value(config, PUERTO_CPU);
 	multiprog = config_get_int_value(config, GRADO_MULTIPROG);
+	quantum = config_get_int_value(config, QUANTUM);
+
+	shared_vars = dictionary_create();
+	char** global_vars_arr = config_get_array_value(config, SHARED_VARS);
+	int i = 0;
+	while(global_vars_arr[i] != NULL) {
+		dictionary_put(shared_vars, global_vars_arr[i], 0);
+		i++;
+	}
+
+	sem_ids = dictionary_create();
+	char** sem_ids_arr = config_get_array_value(config, SEM_IDS);
+	char** sem_vals_arr = config_get_array_value(config, SEM_INIT);
+	i = 0;
+	while(sem_ids_arr[i] != NULL) {
+		int* val = malloc(sizeof(int));
+		*val = atoi(sem_vals_arr[i]);
+		dictionary_put(sem_ids, sem_ids_arr[i], val);
+		i++;
+	}
 
 	char* p = config_get_string_value(config, ALGORITMO);
-	if(!strcmp(p, "FIFO")) {
+	if (!strcmp(p, "FIFO")) {
 		planning_alg = FIFO;
-	} else if(!strcmp(p, "RR")) {
+	} else if (!strcmp(p, "RR")) {
 		planning_alg = RR;
 	}
 
 	p_counter = 0;
+	process_in_memory = 0;
 	planning_running = true;
 
 	new_queue = queue_create();
@@ -407,19 +495,9 @@ void do_stop_process(char* sel) {
 
 void do_stop_planification(char* sel) {
 	if (!strcmp(sel, "P")) {
-		if (planning_running) {
-			pthread_mutex_lock(&planning_mutex);
-		} else {
-			pthread_mutex_unlock(&planning_mutex);
-		}
-	}
-
-	planning_running = !planning_running;
-}
-
-void start_planning() {
-	while(true) {
-
+		planning_running = !planning_running;
+		if(planning_running)
+			short_planning();
 	}
 }
 
@@ -436,7 +514,6 @@ int main(int argc, char *argv[]) {
 	print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
 
 	init_kernel(config);
-	//start_planning();
 
 	wait_any_key();
 

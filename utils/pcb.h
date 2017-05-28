@@ -1,6 +1,9 @@
 #ifndef PCB_H_
 #define PCB_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include "cJSON.h"
 #include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
 
@@ -45,5 +48,7 @@ typedef struct {
 	int offset;
 	int length;
 } t_i_code;
+
+char* pcb_to_string(pcb* _pcb);
 
 #endif /* PCB_H_ */
