@@ -1,0 +1,4 @@
+begin
+a = 30
+prints a
+end
