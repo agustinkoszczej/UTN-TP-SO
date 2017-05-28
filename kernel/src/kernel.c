@@ -92,7 +92,7 @@ pcb* find_pcb_by_pid(int pid) {
 		return n_pcb->pcb->pid == pid;
 	}
 
-	t_socket_pcb* n_pcb = list_find(socket_pcb_list, find);
+	t_socket_pcb* n_pcb = list_find(socket_pcb_list, &find);
 	pthread_mutex_unlock(&socket_pcb_mutex);
 
 	return n_pcb->pcb;
@@ -105,7 +105,7 @@ pcb* find_pcb_by_socket(int socket) {
 		return n_pcb->socket == socket;
 	}
 
-	t_socket_pcb* n_pcb = list_find(socket_pcb_list, find);
+	t_socket_pcb* n_pcb = list_find(socket_pcb_list, &find);
 	pthread_mutex_unlock(&socket_pcb_mutex);
 
 	return n_pcb->pcb;

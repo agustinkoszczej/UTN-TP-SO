@@ -340,7 +340,19 @@ void dump(int pid) {
 	pthread_mutex_lock(&frames_mutex);
 	char* dump_mem_struct = string_new();
 	char* dump_act_process = string_new();
-	char* dump_mem_content = string_from_format("%s", frames);
+	char* dump_mem_content;
+
+	if (pid == -1) {
+		string_append(&dump_mem_content, frames);
+	} else {
+		for (i = 0; i < list_size(adm_list); i++) {
+			t_adm_table* adm_table = list_get(adm_list, i);
+			if (adm_table->pid == pid) {
+				char* frame = string_substring(frames, adm_table->frame * frame_size, frame_size);
+				string_append_with_format(&dump_mem_content, "FRAME: %d | PID: %d | PAGE: %d\n%s\n", adm_table->frame, adm_table->pid, adm_table->pag, frame);
+			}
+		}
+	}
 
 	for (i = 0; i < frames_count; i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
@@ -418,12 +430,12 @@ void size(int option) {
 		int used_c = list_size(list_filter(adm_list, find_used));
 		int free_c = list_size(list_filter(adm_list, find_free));
 
-		string_append_with_format(&size_s, "FRAMES: %s\n", frames_count);
-		string_append_with_format(&size_s, "USED: %s\n", used_c);
-		string_append_with_format(&size_s, "FREE: %s\n", free_c);
+		string_append_with_format(&size_s, "FRAMES: %d\n", frames_count);
+		string_append_with_format(&size_s, "USED: %d\n", used_c);
+		string_append_with_format(&size_s, "FREE: %d\n", free_c);
 	} else {
 		int pid_c = list_size(list_filter(adm_list, find_pid));
-		string_append_with_format(&size_s, "USED BY [%d]: %s\n", option, pid_c);
+		string_append_with_format(&size_s, "USED BY [%d]: %d\n", option, pid_c);
 	}
 	pthread_mutex_unlock(&frames_mutex);
 	clear_screen();
