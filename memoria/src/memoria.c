@@ -14,6 +14,8 @@ void create_function_dictionary() {
 	dictionary_put(fns, "i_store_bytes_in_page", &i_store_bytes_in_page);
 	dictionary_put(fns, "i_add_pages_to_program", &i_add_pages_to_program);
 	dictionary_put(fns, "i_finish_program", &i_finish_program);
+
+	dictionary_put(fns, "kernel_stack_size", &kernel_stack_size);
 }
 
 void mem_allocate_fullspace() {

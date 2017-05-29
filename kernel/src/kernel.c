@@ -144,7 +144,6 @@ void add_process_in_memory() {
 void move_to_list(pcb* pcb, int list_name) {
 	int pos;
 
-	pthread_mutex_lock(&planning_mutex);
 	pthread_mutex_lock(&pcb_list_mutex);
 	switch (pcb->state) {
 		case NEW_LIST:
@@ -186,7 +185,6 @@ void move_to_list(pcb* pcb, int list_name) {
 			break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
-	pthread_mutex_unlock(&planning_mutex);
 
 	if (list_name == READY_LIST)
 		short_planning();
@@ -317,6 +315,8 @@ void init_kernel(t_config* config) {
 }
 
 void print_menu() {
+	clear_screen();
+
 	show_title("KERNEL - MAIN MENU");
 	println("Enter your choice:");
 	println("> ACTIVE_PROCESS");
