@@ -212,6 +212,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);
+	dictionary_put(fns, "cpu_received_page_size", &cpu_received_page_size);
 }
 
 void open_socket(t_config* config, char* name) {
