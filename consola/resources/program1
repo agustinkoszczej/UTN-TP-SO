@@ -1,4 +1,7 @@
+#!/usr/bin/ansisop
 begin
-a = 30
-prints a
+	variables a, b
+	a = 3
+	b = 5
+	a = b + 12
 end

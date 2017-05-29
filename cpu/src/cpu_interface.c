@@ -14,21 +14,21 @@ void memory_identify(socket_connection* connection, char** args) {
 void memory_response_read_bytes_from_page(socket_connection* connection, char** args) {
 	mem_buffer = string_new();
 	string_append(&mem_buffer, args[0]);
-	pthread_mutex_unlock(&planning_mutex);
+	signal_response();
 }
 void memory_response_store_bytes_in_page(socket_connection* connection, char** args) {
-	pthread_mutex_unlock(&planning_mutex);
+	signal_response();
 }
 
 /*
  * KERNEL
  */
 void kernel_response_set_shared_var(socket_connection* connection, char** args) {
-	pthread_mutex_unlock(&planning_mutex);
+	signal_response();
 }
 void kernel_response_get_shared_var(socket_connection* connection, char** args) {
 	kernel_shared_var = atoi(args[0]);
-	pthread_mutex_unlock(&planning_mutex);
+	signal_response();
 }
 void kernel_page_stack_size(socket_connection* connection, char** args) {
 	int mem_page_size = atoi(args[0]);
@@ -39,11 +39,12 @@ void kernel_page_stack_size(socket_connection* connection, char** args) {
 	runFunction(connection->socket, "cpu_received_page_stack_size", 0);
 }
 void kernel_receive_pcb(socket_connection* connection, char** args) {
-	int quantum = atoi(args[0]);
-	pcb_actual = string_to_pcb(args[1]);
+	int planning_alg = atoi(args[0]);
+	int quantum = atoi(args[1]);
+	pcb_actual = string_to_pcb(args[2]);
 	finished = false;
 
-	while (quantum-- >= 0 && !finished) {
+	while ((planning_alg == FIFO || quantum-- >= 0) && !finished) {
 		t_intructions* i_code = list_get(pcb_actual->i_code, pcb_actual->pc);
 		int start = i_code->start;
 		int offset = i_code->offset;
@@ -51,7 +52,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 
 		int n_page = start / frame_size;
 		int n_offset = start - frame_size * n_page;
-		int n_size = offset - start;
+		int n_size = offset;
 
 		runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(n_page), string_itoa(n_offset), string_itoa(n_size));
 		wait_response();

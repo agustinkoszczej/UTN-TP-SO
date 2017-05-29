@@ -65,7 +65,7 @@ void start_program(int pid, int n_frames) {
 		}
 	}
 	pthread_mutex_unlock(&frames_mutex);
-	add_pages(pid, 1);
+	add_pages(pid, stack_size);
 }
 
 void finish_program(int pid) {
@@ -237,8 +237,7 @@ char* read_bytes(int pid, int page, int offset, int size) {
 	}
 
 	int start = frame_size * adm_table->frame + offset;
-	int end = start + size;
-	char* buffer = string_substring(frames, start, end);
+	char* buffer = string_substring(frames, start, size);
 
 	pthread_mutex_unlock(&frames_mutex);
 	store_in_cache(adm_table);

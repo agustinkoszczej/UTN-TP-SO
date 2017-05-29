@@ -52,6 +52,7 @@ int p_counter;
 int multiprog;
 int quantum;
 int stack_size;
+int planning_alg;
 t_dictionary* shared_vars;
 t_dictionary* sem_ids;
 
@@ -104,10 +105,13 @@ int process_in_memory;
 
 void move_to_list(pcb* pcb, int list_name);
 pcb* find_pcb_by_socket(int socket);
+pcb* find_pcb_by_pid(int pid);
 void remove_pcb_from_socket_pcb_list(pcb* n_pcb);
 void remove_cpu_from_cpu_list(t_cpu* cpu);
 t_cpu* find_cpu_by_socket(int socket);
+t_socket_pcb* find_socket_by_pid(int pid);
 void add_process_in_memory();
+void substract_process_in_memory();
 void short_planning();
 
 #endif /* KERNEL_H_ */

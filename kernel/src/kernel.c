@@ -40,7 +40,7 @@ void short_planning() {
 
 		char* pcb_string = pcb_to_string(_pcb);
 
-		runFunction(free_cpu->socket, "kernel_receive_pcb", 2, string_itoa(quantum), pcb_string);
+		runFunction(free_cpu->socket, "kernel_receive_pcb", 3, string_itoa(planning_alg), string_itoa(quantum), pcb_string);
 	}
 	pthread_mutex_unlock(&planning_mutex);
 }
@@ -185,11 +185,6 @@ void move_to_list(pcb* pcb, int list_name) {
 			break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
-
-	if (list_name == READY_LIST)
-		short_planning();
-	else if (list_name == EXIT_LIST)
-		substract_process_in_memory();
 }
 
 void create_function_dictionary() {
@@ -198,10 +193,10 @@ void create_function_dictionary() {
 	dictionary_put(fns, "console_load_program", &console_load_program);
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
-	dictionary_put(fns, "memory_response_add_pages_to_program", &memory_response_add_pages_to_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);
 	dictionary_put(fns, "cpu_received_page_stack_size", &cpu_received_page_stack_size);
 	dictionary_put(fns, "cpu_get_shared_var", &cpu_get_shared_var);
+	dictionary_put(fns, "cpu_task_finished", &cpu_task_finished);
 }
 
 void open_socket(t_config* config, char* name) {
@@ -289,10 +284,13 @@ void init_kernel(t_config* config) {
 	}
 
 	char* p = config_get_string_value(config, ALGORITMO);
-	if (!strcmp(p, "FIFO"))
+	if (!strcmp(p, "FIFO")) {
+		planning_alg = FIFO;
 		quantum = 0;
-	else if (!strcmp(p, "RR"))
+	} else if (!strcmp(p, "RR")) {
+		planning_alg = RR;
 		quantum = config_get_int_value(config, QUANTUM) - 1;
+	}
 
 	p_counter = 0;
 	process_in_memory = 0;

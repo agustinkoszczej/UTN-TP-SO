@@ -57,24 +57,18 @@ void console_load_program(socket_connection* connection, char** args) {
 	queue_push(new_queue, new_pcb);
 	pthread_mutex_unlock(&pcb_list_mutex);
 
+	t_socket_pcb* socket_pcb = malloc(sizeof(t_socket_pcb));
+	socket_pcb->pcb = new_pcb;
+	socket_pcb->socket = connection->socket;
+	pthread_mutex_lock(&socket_pcb_mutex);
+	list_add(socket_pcb_list, socket_pcb);
+	pthread_mutex_unlock(&socket_pcb_mutex);
+
 	pthread_mutex_lock(&console_mutex);
 	process_struct.socket = connection->socket;
 	process_struct.pcb = new_pcb;
-	/*
-	 program_struct.socket = connection->socket;
-	 program_struct.program = malloc(string_length(program));
-	 strcpy(program_struct.program, program);
-	 program_struct.pcb = &new_pcb;
-	 */
 
 	runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program);
-
-	/*
-	 pthread_attr_t attr;
-	 pthread_attr_init(&attr);
-	 pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	 pthread_create(&program_struct.thread_info, &attr, &kernel_create_pcb, NULL);
-	 */
 }
 
 /*
@@ -107,6 +101,30 @@ void cpu_set_shared_var(socket_connection* connection, char** args) {
 
 	runFunction(connection->socket, "kernel_response_set_shared_var", 0);
 }
+void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
+	*o_pcb = n_pcb;
+}
+void cpu_task_finished(socket_connection* connection, char** args) {
+	pcb* n_pcb = string_to_pcb(args[0]);
+	bool finished = atoi(args[1]);
+
+	pcb* o_pcb = find_pcb_by_pid(n_pcb->pid);
+	set_new_pcb(&o_pcb, n_pcb);
+
+	t_cpu* n_cpu = find_cpu_by_socket(connection->socket);
+	n_cpu->busy = false;
+
+	if (finished) {
+		move_to_list(n_pcb, EXIT_LIST);
+		substract_process_in_memory();
+		t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
+		runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
+	} else {
+		move_to_list(n_pcb, READY_LIST);
+	}
+
+	short_planning();
+}
 
 /*
  * MEMORY
@@ -120,22 +138,12 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 	process_struct.pcb->exit_code = response;
 
 	if (response == NO_ERRORES) {
-		runFunction(mem_socket, "i_add_pages_to_program", 2, string_itoa(process_struct.pcb->pid), string_itoa(stack_size));
-	} else {
-		move_to_list(process_struct.pcb, EXIT_LIST);
-		runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
-	}
-}
-void memory_response_add_pages_to_program(socket_connection* connection, char** args) {
-	int response = atoi(args[0]);
-
-	process_struct.pcb->exit_code = response;
-
-	if (response == NO_ERRORES) {
 		move_to_list(process_struct.pcb, READY_LIST);
 		add_process_in_memory();
+		short_planning();
 	} else {
 		move_to_list(process_struct.pcb, EXIT_LIST);
+		substract_process_in_memory();
 	}
 
 	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
@@ -182,6 +190,7 @@ void connectionClosed(socket_connection* connection) {
 	if (strcmp(client, CONSOLE)) {
 		pcb* l_pcb = find_pcb_by_socket(connection->socket);
 		move_to_list(l_pcb, EXIT_LIST);
+		substract_process_in_memory();
 		remove_pcb_from_socket_pcb_list(l_pcb);
 	} else if (!strcmp(client, CPU)) {
 		t_cpu* cpu = find_cpu_by_socket(connection->socket);

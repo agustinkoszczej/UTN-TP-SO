@@ -251,9 +251,10 @@ void init_console() {
 	process_list = list_create();
 	message_map = dictionary_create();
 
-	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), "No se pueden reservar recursos.");
-	dictionary_put(message_map, string_itoa(ERROR_SIN_DEFINIR), "Error sin definición.");
-	dictionary_put(message_map, string_itoa(DESCONEXION_CONSOLA), "Desconexion de consola.");
+	dictionary_put(message_map, string_itoa(NO_ERRORES), "Successfull exit.");
+	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), "Can not reserve resources.");
+	dictionary_put(message_map, string_itoa(ERROR_SIN_DEFINIR), "Unknown error.");
+	dictionary_put(message_map, string_itoa(DESCONEXION_CONSOLA), "Console disconnected.");
 }
 
 int main(int argc, char *argv[]) {

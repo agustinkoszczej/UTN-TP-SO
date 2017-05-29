@@ -43,5 +43,6 @@ int vars_in_stack();
 int calculate_page_for_var();
 int calculate_offset_for_var();
 void wait_response();
+void signal_response();
 
 #endif /* CPU_H_ */

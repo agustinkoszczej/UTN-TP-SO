@@ -44,7 +44,10 @@ int vars_in_stack() {
 
 void wait_response() {
 	pthread_mutex_lock(&planning_mutex);
-	pthread_mutex_lock(&planning_mutex);
+}
+
+void signal_response() {
+	pthread_mutex_unlock(&planning_mutex);
 }
 
 void create_function_dictionary() {
@@ -92,8 +95,8 @@ void init_cpu(t_config* config) {
 	pthread_mutex_init(&mx_main, NULL);
 	pthread_mutex_init(&planning_mutex, NULL);
 
-	connect_to_server(config, KERNEL);
 	connect_to_server(config, MEMORY);
+	connect_to_server(config, KERNEL);
 
 	finished = false;
 
@@ -120,6 +123,7 @@ void init_cpu(t_config* config) {
 	kernel_functions.AnSISOP_escribir = kernel_escribir;
 	kernel_functions.AnSISOP_leer = kernel_leer;
 
+	pthread_mutex_lock(&planning_mutex);
 	pthread_mutex_lock(&mx_main);
 	pthread_mutex_lock(&mx_main);
 }
