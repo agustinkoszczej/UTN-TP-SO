@@ -201,7 +201,6 @@ void create_function_dictionary() {
 	fns = dictionary_create();
 
 	dictionary_put(fns, "console_load_program", &console_load_program);
-
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);

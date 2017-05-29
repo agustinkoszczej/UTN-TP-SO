@@ -34,7 +34,4 @@ log
 *.dSYM/
 *.su
 
-#Environment
-.cproject
-.project
-.settings/
+Debug

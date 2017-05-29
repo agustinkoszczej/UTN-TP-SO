@@ -14,7 +14,7 @@ typedef struct {
 } t_statistics;
 
 typedef struct {
-	int id;
+	char id;
 	int pag;
 	int off;
 	int size;
@@ -46,5 +46,6 @@ typedef struct {
 } pcb;
 
 char* pcb_to_string(pcb* _pcb);
+pcb* string_to_pcb(char* str);
 
 #endif /* PCB_H_ */
