@@ -13,7 +13,7 @@ typedef struct {
 } t_statistics;
 
 typedef struct {
-	int id;
+	char id;
 	int pag;
 	int off;
 	int size;
@@ -26,7 +26,7 @@ typedef struct {
 } t_retvar;
 
 typedef struct {
-	t_arg_var* args;
+	t_list* args;
 	t_list* vars;
 	int* retpos;
 	t_retvar* retvar;

@@ -30,6 +30,7 @@ t_cpu* get_cpu_free() {
 }
 
 void short_planning() {
+
 	if (planning_running && is_cpu_free() && list_size(ready_list) > 0) {
 		t_cpu* free_cpu = get_cpu_free();
 		pcb* _pcb = list_get(ready_list, 0);
@@ -40,9 +41,9 @@ void short_planning() {
 		char* pcb_string = pcb_to_string(_pcb);
 
 		if (planning_alg == FIFO)
-			runFunction(free_cpu->socket, "kernel_receive_pcb", 2, string_itoa(FIFO), pcb_string);
+			runFunction(free_cpu->socket, "kernel_receive_pcb", 2, "FIFO", pcb_string);
 		else if (planning_alg == RR)
-			runFunction(free_cpu->socket, "kernel_receive_pcb", 3, string_itoa(RR), string_itoa(quantum), pcb_string);
+			runFunction(free_cpu->socket, "kernel_receive_pcb", 3, "RR", string_itoa(quantum), pcb_string);
 	}
 }
 
@@ -199,7 +200,6 @@ void create_function_dictionary() {
 	fns = dictionary_create();
 
 	dictionary_put(fns, "console_load_program", &console_load_program);
-
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);

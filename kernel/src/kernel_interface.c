@@ -42,12 +42,17 @@ void console_load_program(socket_connection* connection, char** args) {
 		}
 	}
 
-	if (metadata->cantidad_de_funciones > 0) {
+	if (metadata->instrucciones_size > 0) {
 		for (i = 0; i < metadata->instrucciones_size; i++) {
 			t_intructions* instruction = malloc(sizeof(t_intructions));
 			*instruction = (metadata->instrucciones_serializado)[i];
 			list_add(new_pcb->i_code, instruction);
 		}
+	}
+	int j;
+	for(j=0; j<list_size(new_pcb->i_code); j++){
+		t_intructions* caca = list_get(new_pcb->i_code, j);
+		printf("Start=%d\tLength=%d\n", caca->start, caca->offset);
 	}
 
 	metadata_destruir(metadata);
@@ -91,6 +96,9 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 		int n_frames = atoi(args[1]);
 		process_struct.pcb->page_c = n_frames;
 		add_process_in_memory();
+		//TODO ES PARA PROBAR xd
+		//short_planning();
+		move_to_list(process_struct.pcb, READY_LIST);
 	}
 
 	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));

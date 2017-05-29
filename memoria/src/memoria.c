@@ -237,6 +237,7 @@ char* read_bytes(int pid, int page, int offset, int size) {
 	int start = frame_size * adm_table->frame + offset;
 	int end = start + size;
 	char* buffer = string_substring(frames, start, end);
+
 	pthread_mutex_unlock(&frames_mutex);
 	store_in_cache(adm_table);
 	return buffer;
@@ -325,6 +326,7 @@ void init_memory(t_config *config) {
 
 void dump(int pid) {
 	int i;
+
 	pthread_mutex_lock(&frames_cache_mutex);
 	char* dump_cache = string_new();
 	char* dump_cache_struct = string_new();

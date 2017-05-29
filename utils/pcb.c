@@ -21,10 +21,10 @@ pcb* string_to_pcb(char* str) {
 
 	int i;
 	for (i = 0; i < cJSON_GetArraySize(i_code_arr); i++) {
-		t_i_code* i_code = malloc(sizeof(t_i_code));
+		t_intructions* i_code = malloc(sizeof(t_i_code));
 		cJSON* i_code_o = cJSON_GetArrayItem(i_code_arr, i);
-		i_code->length = cJSON_GetObjectItem(i_code_o, "length")->valueint;
 		i_code->offset = cJSON_GetObjectItem(i_code_o, "offset")->valueint;
+		i_code->start = cJSON_GetObjectItem(i_code_o, "start")->valueint;
 
 		list_add(n_pcb->i_code, i_code);
 	}
@@ -155,11 +155,11 @@ char* pcb_to_string(pcb* n_pcb) {
 	}
 
 	void it_i_code(void* c) {
-		t_i_code* i_code = c;
+		t_intructions* i_code = c;
 		cJSON* i_code_o = cJSON_CreateObject();
 
+		cJSON_AddItemToObject(i_code_o, "start", cJSON_CreateNumber(i_code->start));
 		cJSON_AddItemToObject(i_code_o, "offset", cJSON_CreateNumber(i_code->offset));
-		cJSON_AddItemToObject(i_code_o, "length", cJSON_CreateNumber(i_code->length));
 
 		cJSON_AddItemToArray(i_code_arr, i_code_o);
 	}
