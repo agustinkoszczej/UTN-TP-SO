@@ -49,7 +49,7 @@ pcb* string_to_pcb(char* str) {
 			for (j = 0; j < cJSON_GetArraySize(args_arr); j++) {
 				cJSON* args_o = cJSON_GetArrayItem(args_arr, j);
 				t_arg_var* arg = malloc(sizeof(t_arg_var));
-				arg->id = cJSON_GetObjectItem(args_o, "id")->valueint;
+				arg->id = cJSON_GetObjectItem(args_o, "id")->valuestring;
 				arg->off = cJSON_GetObjectItem(args_o, "off")->valueint;
 				arg->pag = cJSON_GetObjectItem(args_o, "pag")->valueint;
 				arg->size = cJSON_GetObjectItem(args_o, "size")->valueint;
@@ -65,7 +65,7 @@ pcb* string_to_pcb(char* str) {
 			for (j = 0; j < cJSON_GetArraySize(vars_arr); j++) {
 				cJSON* vars_o = cJSON_GetArrayItem(vars_arr, j);
 				t_arg_var* var = malloc(sizeof(t_arg_var));
-				var->id = cJSON_GetObjectItem(vars_o, "id")->valueint;
+				var->id = cJSON_GetObjectItem(vars_o, "id")->valuestring;
 				var->off = cJSON_GetObjectItem(vars_o, "off")->valueint;
 				var->pag = cJSON_GetObjectItem(vars_o, "pag")->valueint;
 				var->size = cJSON_GetObjectItem(vars_o, "size")->valueint;
@@ -122,7 +122,7 @@ char* pcb_to_string(pcb* n_pcb) {
 			void it_args(void* v) {
 				t_arg_var* arg = v;
 				cJSON* arg_o = cJSON_CreateObject();
-				cJSON_AddItemToObject(arg_o, "id", cJSON_CreateNumber(arg->id));
+				cJSON_AddItemToObject(arg_o, "id", cJSON_CreateString(arg->id));
 				cJSON_AddItemToObject(arg_o, "pag", cJSON_CreateNumber(arg->pag));
 				cJSON_AddItemToObject(arg_o, "off", cJSON_CreateNumber(arg->off));
 				cJSON_AddItemToObject(arg_o, "size", cJSON_CreateNumber(arg->size));
@@ -139,7 +139,7 @@ char* pcb_to_string(pcb* n_pcb) {
 			void it_vars(void* v) {
 				t_arg_var* var = v;
 				cJSON* var_o = cJSON_CreateObject();
-				cJSON_AddItemToObject(var_o, "id", cJSON_CreateNumber(var->id));
+				cJSON_AddItemToObject(var_o, "id", cJSON_CreateString(var->id));
 				cJSON_AddItemToObject(var_o, "pag", cJSON_CreateNumber(var->pag));
 				cJSON_AddItemToObject(var_o, "off", cJSON_CreateNumber(var->off));
 				cJSON_AddItemToObject(var_o, "size", cJSON_CreateNumber(var->size));
