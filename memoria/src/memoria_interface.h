@@ -10,7 +10,6 @@
 #include <commons/string.h>
 #include <socket.h>
 #include <math.h>
-#include "memoria_kernel.h"
 #include "memoria.h"
 
 typedef struct {

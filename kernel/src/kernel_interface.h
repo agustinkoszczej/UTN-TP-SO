@@ -14,8 +14,6 @@
 #include <socket.h>
 #include <pcb.h>
 #include "kernel.h"
-#include "kernel_console.h"
-#include "kernel_memory.h"
 #include <parser/metadata_program.h>
 
 int port_cpu;

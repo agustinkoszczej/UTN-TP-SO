@@ -16,7 +16,6 @@
 #include <socket.h>
 #include <pcb.h>
 #include "kernel_interface.h"
-#include "kernel_console.h"
 
 #define NO_ERRORES 0
 #define NO_SE_PUEDEN_RESERVAR_RECURSOS -1
