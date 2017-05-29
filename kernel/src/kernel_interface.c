@@ -32,7 +32,7 @@ void console_load_program(socket_connection* connection, char** args) {
 
 	int i;
 
-	if (metadata->cantidad_de_etiquetas > 0) {
+	if (metadata->etiquetas_size > 0) {
 		char** labels = string_split(metadata->etiquetas, "\0");
 		for (i = 0; i < metadata->etiquetas_size; i++) {
 			char* label = labels[i];
@@ -42,7 +42,7 @@ void console_load_program(socket_connection* connection, char** args) {
 		}
 	}
 
-	if (metadata->cantidad_de_funciones > 0) {
+	if (metadata->instrucciones_size > 0) {
 		for (i = 0; i < metadata->instrucciones_size; i++) {
 			t_intructions* instruction = malloc(sizeof(t_intructions));
 			*instruction = (metadata->instrucciones_serializado)[i];
