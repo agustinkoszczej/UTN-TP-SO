@@ -6,6 +6,7 @@
 #include "cJSON.h"
 #include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
+#include <parser/metadata_program.h>
 
 typedef struct {
 	int cycles;
@@ -44,11 +45,7 @@ typedef struct {
 	int exit_code;
 } pcb;
 
-typedef struct {
-	int offset;
-	int length;
-} t_i_code;
-
 char* pcb_to_string(pcb* _pcb);
+pcb* string_to_pcb(char* str);
 
 #endif /* PCB_H_ */

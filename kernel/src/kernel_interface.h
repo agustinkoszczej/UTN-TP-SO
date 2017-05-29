@@ -34,6 +34,8 @@ void memory_identify(socket_connection* connection, char** args);
 void memory_response_start_program(socket_connection* connection, char** args);
 void memory_page_size(socket_connection* connection, char** args);
 
+void cpu_received_page_size(socket_connection* connection, char** args);
+
 /*
  * SERVER
  */

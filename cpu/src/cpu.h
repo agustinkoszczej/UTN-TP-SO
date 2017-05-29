@@ -12,12 +12,12 @@
 #include <console.h>
 #include <config.h>
 #include <socket.h>
-
 #include <pcb.h>
-
 #include "cpu_interface.h"
-
 #include <parser/metadata_program.h>
+
+#define FIFO 1
+#define RR 2
 
 #define CPU "CPU"
 
@@ -27,12 +27,13 @@
 #define PUERTO_MEMORIA "PUERTO_MEMORIA"
 #define CONFIG_FIELDS_N 4
 
-t_dictionary * 		fns;					/* Funciones de socket */
-pthread_mutex_t 	mx_main;				/* Semaforo de main */
-t_log* 				logger;
+t_dictionary * fns;
+pthread_mutex_t mx_main;
+pthread_mutex_t planning_mutex;
+t_log* logger;
 
-pcb* 				pcbActual;
-bool 				running;
+pcb* pcbActual;
+bool running;
 //TODO
 int FRAME_SIZE; //se lo tengo que pedir a Memoria, despues veo como hacerlo
 

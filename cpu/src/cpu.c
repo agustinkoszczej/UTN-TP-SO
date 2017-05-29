@@ -47,14 +47,13 @@ const char* CONFIG_FIELDS[] = { IP_KERNEL, PUERTO_KERNEL, IP_MEMORIA, PUERTO_MEM
  }
  }*/
 
-
 void create_function_dictionary() {
 	fns = dictionary_create();
 
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "kernel_receive_pcb", &kernel_receive_pcb);
 	dictionary_put(fns, "memory_response_read_bytes_from_page", &memory_response_read_bytes_from_page);
-
+	dictionary_put(fns, "kernel_page_size", &kernel_page_size);
 }
 void connect_to_server(t_config* config, char* name) {
 	int port;
@@ -83,38 +82,42 @@ void connect_to_server(t_config* config, char* name) {
 	log_debug(logger, "Connected to %s.", name);
 }
 
-void init_cpu(t_config* config){
+void init_cpu(t_config* config) {
 	log_debug(logger, "Initiating CPU");
 
 	pthread_mutex_init(&mx_main, NULL);
+	pthread_mutex_init(&planning_mutex, NULL);
 
 	connect_to_server(config, KERNEL);
 	connect_to_server(config, MEMORY);
 
 	FRAME_SIZE = 256;
 
-	functions.AnSISOP_definirVariable 			= cpu_definirVariable;
-	functions.AnSISOP_obtenerPosicionVariable 	= cpu_obtenerPosicionVariable;
-	functions.AnSISOP_dereferenciar 				= cpu_dereferenciar;
-	functions.AnSISOP_asignar 					= cpu_asignar;
-	functions.AnSISOP_obtenerValorCompartida 	= cpu_obtenerValorCompartida;
-	functions.AnSISOP_asignarValorCompartida 	= cpu_asignarValorCompartida;
-	functions.AnSISOP_irAlLabel 					= cpu_irAlLabel;
-	functions.AnSISOP_llamarSinRetorno 			= cpu_llamarSinRetorno;
-	functions.AnSISOP_llamarConRetorno 			= cpu_llamarConRetorno;
-	functions.AnSISOP_finalizar 					= cpu_finalizar;
-	functions.AnSISOP_retornar 					= cpu_retornar;
+	functions.AnSISOP_definirVariable = cpu_definirVariable;
+	functions.AnSISOP_obtenerPosicionVariable = cpu_obtenerPosicionVariable;
+	functions.AnSISOP_dereferenciar = cpu_dereferenciar;
+	functions.AnSISOP_asignar = cpu_asignar;
+	functions.AnSISOP_obtenerValorCompartida = cpu_obtenerValorCompartida;
+	functions.AnSISOP_asignarValorCompartida = cpu_asignarValorCompartida;
+	functions.AnSISOP_irAlLabel = cpu_irAlLabel;
+	functions.AnSISOP_llamarSinRetorno = cpu_llamarSinRetorno;
+	functions.AnSISOP_llamarConRetorno = cpu_llamarConRetorno;
+	functions.AnSISOP_finalizar = cpu_finalizar;
+	functions.AnSISOP_retornar = cpu_retornar;
 
-	kernel_functions.AnSISOP_wait 						= kernel_wait;
-	kernel_functions.AnSISOP_signal 					= kernel_signal;
-	kernel_functions.AnSISOP_reservar 					= kernel_reservar;
-	kernel_functions.AnSISOP_liberar 					= kernel_liberar;
-	kernel_functions.AnSISOP_abrir 						= kernel_abrir;
-	kernel_functions.AnSISOP_borrar 					= kernel_borrar;
-	kernel_functions.AnSISOP_cerrar 					= kernel_cerrar;
-	kernel_functions.AnSISOP_moverCursor 				= kernel_moverCursor;
-	kernel_functions.AnSISOP_escribir 					= kernel_escribir;
-	kernel_functions.AnSISOP_leer 						= kernel_leer;
+	kernel_functions.AnSISOP_wait = kernel_wait;
+	kernel_functions.AnSISOP_signal = kernel_signal;
+	kernel_functions.AnSISOP_reservar = kernel_reservar;
+	kernel_functions.AnSISOP_liberar = kernel_liberar;
+	kernel_functions.AnSISOP_abrir = kernel_abrir;
+	kernel_functions.AnSISOP_borrar = kernel_borrar;
+	kernel_functions.AnSISOP_cerrar = kernel_cerrar;
+	kernel_functions.AnSISOP_moverCursor = kernel_moverCursor;
+	kernel_functions.AnSISOP_escribir = kernel_escribir;
+	kernel_functions.AnSISOP_leer = kernel_leer;
+
+	pthread_mutex_lock(&mx_main);
+	pthread_mutex_lock(&mx_main);
 }
 
 int main(int argc, char *argv[]) {
@@ -130,13 +133,6 @@ int main(int argc, char *argv[]) {
 	print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
 
 	init_cpu(config);
-
-	wait_any_key();
-
-	do{
-
-
-	}while(true);
 
 	return EXIT_SUCCESS; // Fin exitoso
 }

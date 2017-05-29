@@ -21,10 +21,10 @@ pcb* string_to_pcb(char* str) {
 
 	int i;
 	for (i = 0; i < cJSON_GetArraySize(i_code_arr); i++) {
-		t_intructions* i_code = malloc(sizeof(t_i_code));
+		t_intructions* i_code = malloc(sizeof(t_intructions));
 		cJSON* i_code_o = cJSON_GetArrayItem(i_code_arr, i);
-		i_code->offset = cJSON_GetObjectItem(i_code_o, "offset")->valueint;
 		i_code->start = cJSON_GetObjectItem(i_code_o, "start")->valueint;
+		i_code->offset = cJSON_GetObjectItem(i_code_o, "offset")->valueint;
 
 		list_add(n_pcb->i_code, i_code);
 	}
@@ -43,27 +43,33 @@ pcb* string_to_pcb(char* str) {
 		t_stack* stack = malloc(sizeof(t_stack));
 
 		if (cJSON_HasObjectItem(i_stack_o, "args")) {
-			cJSON* args_o = cJSON_GetObjectItem(i_stack_o, "args");
-			t_arg_var* args = malloc(sizeof(t_arg_var));
-			args->id = cJSON_GetObjectItem(args_o, "id")->valueint;
-			args->off = cJSON_GetObjectItem(args_o, "off")->valueint;
-			args->pag = cJSON_GetObjectItem(args_o, "pag")->valueint;
-			args->size = cJSON_GetObjectItem(args_o, "size")->valueint;
-			stack->args = args;
+			stack->args = list_create();
+			cJSON* args_arr = cJSON_GetObjectItem(i_stack_o, "args");
+			int j;
+			for (j = 0; j < cJSON_GetArraySize(args_arr); j++) {
+				cJSON* args_o = cJSON_GetArrayItem(args_arr, j);
+				t_arg_var* arg = malloc(sizeof(t_arg_var));
+				arg->id = cJSON_GetObjectItem(args_o, "id")->valuestring;
+				arg->off = cJSON_GetObjectItem(args_o, "off")->valueint;
+				arg->pag = cJSON_GetObjectItem(args_o, "pag")->valueint;
+				arg->size = cJSON_GetObjectItem(args_o, "size")->valueint;
+				list_add(stack->args, arg);
+			}
 		} else
 			stack->args = NULL;
 
 		if (cJSON_HasObjectItem(i_stack_o, "vars")) {
+			stack->vars = list_create();
 			cJSON* vars_arr = cJSON_GetObjectItem(i_stack_o, "vars");
 			int j;
 			for (j = 0; j < cJSON_GetArraySize(vars_arr); j++) {
 				cJSON* vars_o = cJSON_GetArrayItem(vars_arr, j);
 				t_arg_var* var = malloc(sizeof(t_arg_var));
-				var->id = cJSON_GetObjectItem(vars_o, "id")->valueint;
+				var->id = cJSON_GetObjectItem(vars_o, "id")->valuestring;
 				var->off = cJSON_GetObjectItem(vars_o, "off")->valueint;
 				var->pag = cJSON_GetObjectItem(vars_o, "pag")->valueint;
 				var->size = cJSON_GetObjectItem(vars_o, "size")->valueint;
-				list_add(n_pcb->i_stack, var);
+				list_add(stack->vars, var);
 			}
 		} else
 			stack->vars = NULL;
@@ -85,6 +91,8 @@ pcb* string_to_pcb(char* str) {
 			stack->retvar = retvar;
 		} else
 			stack->retvar = NULL;
+
+		list_add(n_pcb->i_stack, stack);
 	}
 
 	return n_pcb;
@@ -109,14 +117,20 @@ char* pcb_to_string(pcb* n_pcb) {
 		cJSON* stack_o = cJSON_CreateObject();
 
 		if (stack->args != NULL) {
-			t_arg_var* args = stack->args;
-			cJSON* args_o = cJSON_CreateObject();
-			cJSON_AddItemToObject(args_o, "id", cJSON_CreateNumber(args->id));
-			cJSON_AddItemToObject(args_o, "pag", cJSON_CreateNumber(args->pag));
-			cJSON_AddItemToObject(args_o, "off", cJSON_CreateNumber(args->off));
-			cJSON_AddItemToObject(args_o, "size", cJSON_CreateNumber(args->size));
+			t_list* args = stack->vars;
+			cJSON* args_arr = cJSON_CreateArray();
+			void it_args(void* v) {
+				t_arg_var* arg = v;
+				cJSON* arg_o = cJSON_CreateObject();
+				cJSON_AddItemToObject(arg_o, "id", cJSON_CreateString(arg->id));
+				cJSON_AddItemToObject(arg_o, "pag", cJSON_CreateNumber(arg->pag));
+				cJSON_AddItemToObject(arg_o, "off", cJSON_CreateNumber(arg->off));
+				cJSON_AddItemToObject(arg_o, "size", cJSON_CreateNumber(arg->size));
 
-			cJSON_AddItemToObject(stack_o, "args", args_o);
+				cJSON_AddItemToArray(args_arr, arg_o);
+			}
+			list_iterate(args, &it_args);
+			cJSON_AddItemToObject(stack_o, "vars", args_arr);
 		}
 
 		if (stack->vars != NULL) {
@@ -125,7 +139,7 @@ char* pcb_to_string(pcb* n_pcb) {
 			void it_vars(void* v) {
 				t_arg_var* var = v;
 				cJSON* var_o = cJSON_CreateObject();
-				cJSON_AddItemToObject(var_o, "id", cJSON_CreateNumber(var->id));
+				cJSON_AddItemToObject(var_o, "id", cJSON_CreateString(var->id));
 				cJSON_AddItemToObject(var_o, "pag", cJSON_CreateNumber(var->pag));
 				cJSON_AddItemToObject(var_o, "off", cJSON_CreateNumber(var->off));
 				cJSON_AddItemToObject(var_o, "size", cJSON_CreateNumber(var->size));

@@ -30,9 +30,10 @@ void console_load_program(socket_connection* connection, char** args) {
 
 	t_metadata_program* metadata = metadata_desde_literal(program);
 
+	new_pcb->pc = metadata->instruccion_inicio;
 	int i;
 
-	if (metadata->cantidad_de_etiquetas > 0) {
+	if (metadata->etiquetas_size > 0) {
 		char** labels = string_split(metadata->etiquetas, "\0");
 		for (i = 0; i < metadata->etiquetas_size; i++) {
 			char* label = labels[i];
@@ -48,11 +49,6 @@ void console_load_program(socket_connection* connection, char** args) {
 			*instruction = (metadata->instrucciones_serializado)[i];
 			list_add(new_pcb->i_code, instruction);
 		}
-	}
-	int j;
-	for(j=0; j<list_size(new_pcb->i_code); j++){
-		t_intructions* caca = list_get(new_pcb->i_code, j);
-		printf("Start=%d\tLength=%d\n", caca->start, caca->offset);
 	}
 
 	metadata_destruir(metadata);
@@ -95,10 +91,10 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 	if (response == NO_ERRORES) {
 		int n_frames = atoi(args[1]);
 		process_struct.pcb->page_c = n_frames;
-		add_process_in_memory();
-		//TODO ES PARA PROBAR xd
-		//short_planning();
 		move_to_list(process_struct.pcb, READY_LIST);
+		add_process_in_memory();
+	} else {
+		move_to_list(process_struct.pcb, EXIT_LIST);
 	}
 
 	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
@@ -107,6 +103,9 @@ void memory_page_size(socket_connection* connection, char** args) {
 	int page_size = atoi(args[0]);
 
 	mem_page_size = page_size;
+}
+void cpu_received_page_size(socket_connection* connection, char** args) {
+	short_planning();
 }
 
 /*
@@ -133,6 +132,7 @@ void newClient(socket_connection* connection) {
 		pthread_mutex_lock(&cpu_mutex);
 		list_add(cpu_list, cpu);
 		pthread_mutex_unlock(&cpu_mutex);
+		runFunction(connection->socket, "kernel_page_size", 1, mem_page_size);
 	}
 }
 void connectionClosed(socket_connection* connection) {
