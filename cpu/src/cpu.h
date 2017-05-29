@@ -27,14 +27,21 @@
 #define PUERTO_MEMORIA "PUERTO_MEMORIA"
 #define CONFIG_FIELDS_N 4
 
+char* mem_buffer;
+int kernel_shared_var;
+
 t_dictionary * fns;
 pthread_mutex_t mx_main;
 pthread_mutex_t planning_mutex;
 t_log* logger;
 
-pcb* pcbActual;
-bool running;
-//TODO
-int FRAME_SIZE; //se lo tengo que pedir a Memoria, despues veo como hacerlo
+pcb* pcb_actual;
+int frame_size;
+int stack_size;
+
+int vars_in_stack();
+int calculate_page_for_var();
+int calculate_offset_for_var();
+void wait_response();
 
 #endif /* CPU_H_ */

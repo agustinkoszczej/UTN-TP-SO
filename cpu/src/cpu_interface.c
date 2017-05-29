@@ -8,68 +8,56 @@ void server_connectionClosed(socket_connection * connection) {
 /*
  * MEMORY
  */
-char* LINE_CODE;
 void memory_identify(socket_connection* connection, char** args) {
 	runFunction(connection->socket, "client_identify", 1, CPU);
 }
 void memory_response_read_bytes_from_page(socket_connection* connection, char** args) {
-	LINE_CODE = args[0];
+	mem_buffer = string_new();
+	string_append(&mem_buffer, args[0]);
 	pthread_mutex_unlock(&planning_mutex);
 }
-
-char* conseguirDatosDeLaMemoria(char* programa, t_puntero_instruccion inicioDeLaInstruccion, t_size tamanio) {
-	char* aRetornar = calloc(1, 100);
-	memcpy(aRetornar, programa + inicioDeLaInstruccion, tamanio);
-	return aRetornar;
+void memory_response_store_bytes_in_page(socket_connection* connection, char** args) {
+	pthread_mutex_unlock(&planning_mutex);
 }
 
 /*
  * KERNEL
  */
-void kernel_page_size(socket_connection* connection, char** args) {
+void kernel_response_set_shared_var(socket_connection* connection, char** args) {
+	pthread_mutex_unlock(&planning_mutex);
+}
+void kernel_response_get_shared_var(socket_connection* connection, char** args) {
+	kernel_shared_var = atoi(args[0]);
+	pthread_mutex_unlock(&planning_mutex);
+}
+void kernel_page_stack_size(socket_connection* connection, char** args) {
 	int mem_page_size = atoi(args[0]);
+	int stack_s = atoi(args[1]);
 
-	FRAME_SIZE = mem_page_size;
-	runFunction(connection->socket, "cpu_received_page_size", 0);
+	frame_size = mem_page_size;
+	stack_size = stack_s;
+	runFunction(connection->socket, "cpu_received_page_stack_size", 0);
 }
 void kernel_receive_pcb(socket_connection* connection, char** args) {
-	int algoritmo = atoi(args[0]);
+	int quantum = atoi(args[0]);
+	pcb_actual = string_to_pcb(args[1]);
+	finished = false;
 
-	int quantum;
+	while (quantum-- >= 0 && !finished) {
+		t_intructions* i_code = list_get(pcb_actual->i_code, pcb_actual->pc);
+		int start = i_code->start;
+		int offset = i_code->offset;
+		int pid = pcb_actual->pid;
 
-	if (algoritmo == RR) {
-		quantum = atoi(args[1]);
-		pcbActual = string_to_pcb(args[2]);
-	} else if (algoritmo == FIFO) {
-		pcbActual = string_to_pcb(args[1]);
+		int n_page = start / frame_size;
+		int n_offset = start - frame_size * n_page;
+		int n_size = offset - start;
+
+		runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(n_page), string_itoa(n_offset), string_itoa(n_size));
+		wait_response();
+		pcb_actual->pc++;
+		analizadorLinea(mem_buffer, &functions, &kernel_functions);
 	}
 
-	running = true;
-
-	/*char *programa = strdup(codigo);
-	 t_metadata_program *metadata = metadata_desde_literal(programa);*/
-
-	//t_i_code* ind_code = pcbActual->i_code;
-	t_intructions* ind_code = pcbActual->i_code; // TODO eso es una lista, campeón
-
-	while (!terminoElPrograma()) {
-		/*char* const linea = conseguirDatosDeLaMemoria(programa,
-		 metadata->instrucciones_serializado[pcbActual->pc].start,
-		 metadata->instrucciones_serializado[pcbActual->pc].offset);*/
-		int n_page = ind_code->start / FRAME_SIZE;
-		int n_offset = (ind_code->start) - n_page * FRAME_SIZE;
-		int n_length = ind_code->offset;
-
-		printf("PID=%d\tPage=%d\tOffset=%d\tLength=%d\n", pcbActual->pid, n_page, n_offset, n_length);
-		runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pcbActual->pid), string_itoa(n_page), string_itoa(n_offset), string_itoa(n_length));
-		pthread_mutex_lock(&planning_mutex);
-		pthread_mutex_lock(&planning_mutex);
-
-		//TODO muestra caca
-		printf("%s\n", LINE_CODE);
-		analizadorLinea(LINE_CODE, &functions, &kernel_functions);
-		pcbActual->pc++;
-		ind_code = list_get(pcbActual->i_code, pcbActual->pc);
-	}
-	//metadata_destruir(metadata);
+	runFunction(kernel_socket, "cpu_task_finished", 2, pcb_to_string(pcb_actual), string_itoa(finished));
 }

@@ -7,250 +7,210 @@
 
 #include "cpu_primitivas.h"
 
+/*
+ * DEFINIR VARIABLE
+ *
+ * Reserva en el Contexto de Ejecución Actual el espacio necesario para una variable llamada
+ * identificador_variable y la registra tanto en el Stack como en el Diccionario de Variables.
+ * Retornando la posición del valor de esta nueva variable del stack
+ * El valor de la variable queda indefinido: no deberá inicializarlo con ningún valor default.
+ * Esta función se invoca una vez por variable, a pesar que este varias veces en una línea.
+ * Ej: Evaluar "variables a, b, c" llamará tres veces a esta función con los parámetros "a", "b" y "c"
+ *
+ * @sintax	TEXT_VARIABLE (variables)
+ * 			-- nota: Al menos un identificador; separado por comas
+ * @param	identificador_variable	Nombre de variable a definir
+ * @return	Puntero a la variable recien asignada
+ */
+t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
+	bool is_digit = isdigit(identificador_variable) ? true : false;
 
-static const int CONTENIDO_VARIABLE = 20;
-static const int POSICION_MEMORIA = 0x10;
-bool termino = false;
+	t_stack* stack = list_get(pcb_actual->i_stack, list_size(pcb_actual->i_stack) - 1);
 
+	if (stack->vars == NULL)
+		stack->vars = list_create();
 
-
-bool terminoElPrograma(void) {
-	return termino;
-}
-
-bool isArgument(t_nombre_variable variable){
-	if(isdigit(variable)){
-		return true;
-	}else{
-		return false;
-	}
-}
-
-t_puntero cpu_definirVariable(t_nombre_variable variable) {
-	/*
-	 * DEFINIR VARIABLE
-	 *
-	 * Reserva en el Contexto de Ejecución Actual el espacio necesario para una variable llamada
-	 * identificador_variable y la registra tanto en el Stack como en el Diccionario de Variables.
-	 * Retornando la posición del valor de esta nueva variable del stack
-	 * El valor de la variable queda indefinido: no deberá inicializarlo con ningún valor default.
-	 * Esta función se invoca una vez por variable, a pesar que este varias veces en una línea.
-	 * Ej: Evaluar "variables a, b, c" llamará tres veces a esta función con los parámetros "a", "b" y "c"
-	 *
-	 * @sintax	TEXT_VARIABLE (variables)
-	 * 			-- nota: Al menos un identificador; separado por comas
-	 * @param	identificador_variable	Nombre de variable a definir
-	 * @return	Puntero a la variable recien asignada
-	 */
+	int vars_c = vars_in_stack();
 
 	t_arg_var* n_var = malloc(sizeof(t_arg_var));
-	n_var->id = variable;
-	n_var->off = -1;
-	n_var->pag = -1;
-	n_var->size = -1;
+	n_var->id = identificador_variable;
+	n_var->pag = pcb_actual->page_c + ceil((double) vars_c * 4 / frame_size);
+	n_var->off = vars_c * 4 - n_var->pag * frame_size;
+	n_var->size = 4;
 
-	t_stack* last_stack = list_get(pcbActual-> i_stack, list_size(pcbActual-> i_stack)-1);
-	t_list* vars_args_stack;
+	list_add(stack->vars, n_var);
 
-	if(!isArgument(variable)){
-		log_trace(logger, "Definiendo nueva variable: '%c'.", variable);
-		vars_args_stack = last_stack->vars;
-	}
-	else{
-		log_trace(logger, "Definiendo nuevo argumento: '%c'.", variable);
-		vars_args_stack = last_stack->args;
-	}
+	return (int) n_var;
+}
 
-	list_add(vars_args_stack, n_var);
+/*
+ * OBTENER POSICION de una VARIABLE
+ *
+ * Devuelve el desplazamiento respecto al inicio del segmento Stacken que se encuentra el valor de la variable identificador_variable del contexto actual.
+ * En caso de error, retorna -1.
+ *
+ * @sintax	TEXT_REFERENCE_OP (&)
+ * @param	identificador_variable 		Nombre de la variable a buscar (De ser un parametro, se invocara sin el '$')
+ * @return	Donde se encuentre la variable buscada
+ */
+t_puntero cpu_obtenerPosicionVariable(t_nombre_variable identificador_variable) {
+	int space_occupied = 0;
+	int i, j;
+	for (i = 0; i < list_size(pcb_actual->i_stack); i++) {
+		t_stack* stack = list_get(pcb_actual->i_stack, i);
 
-	return n_var;
+		for (j = 0; j < list_size(stack->vars); j++) {
+			t_arg_var* var = list_get(stack->vars, j);
 
-
-		// Defino una nueva posicion en el stack para la variable:
-		/*int var_page = pcbActual->i_stack;
-		int var_offset = pcbActual->stackPointer;
-
-		while(var_offset > tamanioPagina){
-			(var_page)++;
-			var_offset -= tamanioPagina;
+			if (var->id == identificador_variable)
+				return space_occupied;
+			else
+				space_occupied += 4;
 		}
-		// Verifico si se desborda la pila en memoria:
-		if(pcbActual->stackPointer + 4 > (tamanioPagina*tamanioStack)){
-				log_trace(logger, "Stack Overflow al definir variable '%c'.", variable);
-				huboStackOverflow = true;
+	}
 
-			return ERROR;
-		}else{
-			// Selecciono registro actual del Ã­ndice de stack:
-			registroStack* regStack = list_get(pcbActual->indiceStack, pcbActual->indiceStack->elements_count -1);
-
-			if(regStack == NULL){ // si no hay registros, creo uno nuevo
-				regStack = reg_stack_create();
-				// Guardo el nuevo registro en el Ã­ndice:
-				list_add(pcbActual->indiceStack, regStack);
-			}
-
-			if(!esArgumento(variable)){ // agrego nueva variable
-				variable* new_var = malloc(sizeof(variable));
-				new_var->nombre = variable;
-				new_var->direccion.pagina = var_page;
-				new_var->direccion.offset = var_offset;
-				new_var->direccion.size = INT;
-
-				list_add(regStack->vars, new_var);
-			}
-			else{ // agrego nuevo argumento
-				variable* new_arg = malloc(sizeof(variable));
-				new_arg->nombre = variable;
-				new_arg->direccion.pagina = var_page;
-				new_arg->direccion.offset = var_offset;
-				new_arg->direccion.size = INT;
-
-				list_add(regStack->args, new_arg);
-			}
-
-			log_trace(logger, "'%c' -> DirecciÃ³n lÃ³gica definida: %i, %i, %i.", variable, var_page, var_offset, INT);
-
-			// Actualizo parÃ¡metros del PCB:
-			int total_heap_offset = (pcbActual->paginas_codigo * tamanioPagina) + pcbActual->stackPointer;
-			pcbActual->stackPointer += INT;
-			pcbActual->paginaActualStack = (total_heap_offset + INT) / tamanioPagina;
-
-			return total_heap_offset;
-		} // fin else ERROR
-
-
-	pcbActual->i_stack;
-
-	return POSICION_MEMORIA;*/
+	return -1;
 }
 
-t_puntero cpu_obtenerPosicionVariable(t_nombre_variable variable) {
-	/*
-	 * OBTENER POSICION de una VARIABLE
-	 *
-	 * Devuelve el desplazamiento respecto al inicio del segmento Stacken que se encuentra el valor de la variable identificador_variable del contexto actual.
-	 * En caso de error, retorna -1.
-	 *
-	 * @sintax	TEXT_REFERENCE_OP (&)
-	 * @param	identificador_variable 		Nombre de la variable a buscar (De ser un parametro, se invocara sin el '$')
-	 * @return	Donde se encuentre la variable buscada
-	 */
-	printf("Obtener posicion de %c\n", variable);
-	return POSICION_MEMORIA;
+/*
+ * DEREFERENCIAR
+ *
+ * Obtiene el valor resultante de leer a partir de direccion_variable, sin importar cual fuera el contexto actual
+ *
+ * @sintax	TEXT_DEREFERENCE_OP (*)
+ * @param	direccion_variable	Lugar donde buscar
+ * @return	Valor que se encuentra en esa posicion
+ */
+t_valor_variable cpu_dereferenciar(t_puntero direccion_variable) {
+	int n_page = direccion_variable / frame_size;
+	int n_offset = direccion_variable - n_page * frame_size;
+
+	char* pid = string_itoa(pcb_actual->pid);
+	char* page = string_itoa(pcb_actual->page_c + n_page + 1);
+	char* offset = string_itoa(n_offset);
+	char* size = string_itoa(4);
+
+	runFunction(mem_socket, "i_read_bytes_from_page", 4, pid, page, offset, size);
+	wait_response();
+	return atoi(mem_buffer);
 }
 
-t_valor_variable cpu_dereferenciar(t_puntero puntero) {
-	/*
-	 * DEREFERENCIAR
-	 *
-	 * Obtiene el valor resultante de leer a partir de direccion_variable, sin importar cual fuera el contexto actual
-	 *
-	 * @sintax	TEXT_DEREFERENCE_OP (*)
-	 * @param	direccion_variable	Lugar donde buscar
-	 * @return	Valor que se encuentra en esa posicion
-	 */
-	printf("Dereferenciar %d y su valor es: %d\n", puntero, CONTENIDO_VARIABLE);
-	return CONTENIDO_VARIABLE;
+/*
+ * ASIGNAR
+ *
+ * Inserta una copia del valor en la variable ubicada en direccion_variable.
+ *
+ * @sintax	TEXT_ASSIGNATION (=)
+ * @param	direccion_variable	lugar donde insertar el valor
+ * @param	valor	Valor a insertar
+ * @return	void
+ */
+void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
+	int n_page = direccion_variable / frame_size;
+	int n_offset = direccion_variable - n_page * frame_size;
+
+	char* pid = string_itoa(pcb_actual->pid);
+	char* page = string_itoa(pcb_actual->page_c + n_page + 1);
+	char* offset = string_itoa(n_offset);
+	char* size = string_itoa(4);
+	char* buffer = string_itoa(valor);
+
+	runFunction(mem_socket, "i_store_bytes_in_page", 5, pid, page, offset, size, buffer);
+	wait_response();
 }
 
-void cpu_asignar(t_puntero puntero, t_valor_variable variable) {
-	/*
-	 * ASIGNAR
-	 *
-	 * Inserta una copia del valor en la variable ubicada en direccion_variable.
-	 *
-	 * @sintax	TEXT_ASSIGNATION (=)
-	 * @param	direccion_variable	lugar donde insertar el valor
-	 * @param	valor	Valor a insertar
-	 * @return	void
-	 */
-	printf("Asignando en %d el valor %d\n", puntero, variable);
-}
-
+/*
+ * OBTENER VALOR de una variable COMPARTIDA
+ *
+ * Pide al kernel el valor (copia, no puntero) de la variable compartida por parametro.
+ *
+ * @sintax	TEXT_VAR_START_GLOBAL (!)
+ * @param	variable	Nombre de la variable compartida a buscar
+ * @return	El valor de la variable compartida
+ */
 t_valor_variable cpu_obtenerValorCompartida(t_nombre_compartida variable) {
-	/*
-	 * OBTENER VALOR de una variable COMPARTIDA
-	 *
-	 * Pide al kernel el valor (copia, no puntero) de la variable compartida por parametro.
-	 *
-	 * @sintax	TEXT_VAR_START_GLOBAL (!)
-	 * @param	variable	Nombre de la variable compartida a buscar
-	 * @return	El valor de la variable compartida
-	 */
+	runFunction(kernel_socket, "cpu_get_shared_var", 1, variable);
+	wait_response();
 
+	return atoi(kernel_shared_var);
 }
-t_valor_variable cpu_asignarValorCompartida(t_nombre_compartida variable,
-		t_valor_variable valor) {
-	/*
-	 * ASIGNAR VALOR a variable COMPARTIDA
-	 *
-	 * Pide al kernel asignar el valor a la variable compartida.
-	 * Devuelve el valor asignado.
-	 *
-	 * @sintax	TEXT_VAR_START_GLOBAL (!) IDENTIFICADOR TEXT_ASSIGNATION (=) EXPRESION
-	 * @param	variable	Nombre (sin el '!') de la variable a pedir
-	 * @param	valor	Valor que se le quire asignar
-	 * @return	Valor que se asigno
-	 */
 
+/*
+ * ASIGNAR VALOR a variable COMPARTIDA
+ *
+ * Pide al kernel asignar el valor a la variable compartida.
+ * Devuelve el valor asignado.
+ *
+ * @sintax	TEXT_VAR_START_GLOBAL (!) IDENTIFICADOR TEXT_ASSIGNATION (=) EXPRESION
+ * @param	variable	Nombre (sin el '!') de la variable a pedir
+ * @param	valor	Valor que se le quire asignar
+ * @return	Valor que se asigno
+ */
+t_valor_variable cpu_asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
+	runFunction(kernel_socket, "cpu_set_shared_var", 2, variable, valor);
+	wait_response();
+
+	return valor;
 }
+
+/*
+ * IR a la ETIQUETA
+ *
+ * Cambia la linea de ejecucion a la correspondiente de la etiqueta buscada.
+ *
+ * @sintax	TEXT_GOTO (goto)
+ * @param	t_nombre_etiqueta	Nombre de la etiqueta
+ * @return	void
+ */
 void cpu_irAlLabel(t_nombre_etiqueta t_nombre_etiqueta) {
-	/*
-	 * IR a la ETIQUETA
-	 *
-	 * Cambia la linea de ejecucion a la correspondiente de la etiqueta buscada.
-	 *
-	 * @sintax	TEXT_GOTO (goto)
-	 * @param	t_nombre_etiqueta	Nombre de la etiqueta
-	 * @return	void
-	 */
-
+	pcb_actual->pc = dictionary_get(pcb_actual->i_label, t_nombre_etiqueta);
 }
+
+/*
+ * LLAMAR SIN RETORNO
+ *
+ * Preserva el contexto de ejecución actual para poder retornar luego al mismo.
+ * Modifica las estructuras correspondientes para mostrar un nuevo contexto vacío.
+ *
+ * Los parámetros serán definidos luego de esta instrucción de la misma manera que una variable local, con identificadores numéricos empezando por el 0.
+ *
+ * @sintax	Sin sintaxis particular, se invoca cuando no coresponde a ninguna de las otras reglas sintacticas
+ * @param	etiqueta	Nombre de la funcion
+ * @return	void
+ */
 void cpu_llamarSinRetorno(t_nombre_etiqueta etiqueta) {
-	/*
-	 * LLAMAR SIN RETORNO
-	 *
-	 * Preserva el contexto de ejecución actual para poder retornar luego al mismo.
-	 * Modifica las estructuras correspondientes para mostrar un nuevo contexto vacío.
-	 *
-	 * Los parámetros serán definidos luego de esta instrucción de la misma manera que una variable local, con identificadores numéricos empezando por el 0.
-	 *
-	 * @sintax	Sin sintaxis particular, se invoca cuando no coresponde a ninguna de las otras reglas sintacticas
-	 * @param	etiqueta	Nombre de la funcion
-	 * @return	void
-	 */
 
 }
+
+/*
+ * LLAMAR CON RETORNO
+ *
+ * Preserva el contexto de ejecución actual para poder retornar luego al mismo, junto con la posicion de la variable entregada por donde_retornar.
+ * Modifica las estructuras correspondientes para mostrar un nuevo contexto vacío.
+ *
+ * Los parámetros serán definidos luego de esta instrucción de la misma manera que una variable local, con identificadores numéricos empezando por el 0.
+ *
+ * @sintax	TEXT_CALL (<-)
+ * @param	etiqueta	Nombre de la funcion
+ * @param	donde_retornar	Posicion donde insertar el valor de retorno
+ * @return	void
+ */
 void cpu_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
-	/*
-	 * LLAMAR CON RETORNO
-	 *
-	 * Preserva el contexto de ejecución actual para poder retornar luego al mismo, junto con la posicion de la variable entregada por donde_retornar.
-	 * Modifica las estructuras correspondientes para mostrar un nuevo contexto vacío.
-	 *
-	 * Los parámetros serán definidos luego de esta instrucción de la misma manera que una variable local, con identificadores numéricos empezando por el 0.
-	 *
-	 * @sintax	TEXT_CALL (<-)
-	 * @param	etiqueta	Nombre de la funcion
-	 * @param	donde_retornar	Posicion donde insertar el valor de retorno
-	 * @return	void
-	 */
+
 }
 
+/*
+ * FINALIZAR
+ *
+ * Cambia el Contexto de Ejecución Actual para volver al Contexto anterior al que se está ejecutando, recuperando el Cursor de Contexto Actual y el Program Counter previamente apilados en el Stack.
+ * En caso de estar finalizando el Contexto principal (el ubicado al inicio del Stack), deberá finalizar la ejecución del programa.
+ *
+ * @sintax	TEXT_END (end)
+ * @param	void
+ * @return	void
+ */
 void cpu_finalizar(void) {
-	/*
-	 * FINALIZAR
-	 *
-	 * Cambia el Contexto de Ejecución Actual para volver al Contexto anterior al que se está ejecutando, recuperando el Cursor de Contexto Actual y el Program Counter previamente apilados en el Stack.
-	 * En caso de estar finalizando el Contexto principal (el ubicado al inicio del Stack), deberá finalizar la ejecución del programa.
-	 *
-	 * @sintax	TEXT_END (end)
-	 * @param	void
-	 * @return	void
-	 */
-	termino = true;
-	printf("Finalizar\n");
+	finished = true;
 }
 
 void cpu_retornar(t_valor_variable retorno) {
@@ -317,8 +277,7 @@ void kernel_liberar(t_puntero puntero) {
 	 */
 }
 
-t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion,
-		t_banderas flags) {
+t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion, t_banderas flags) {
 	/*
 	 * ABRIR ARCHIVO
 	 *
@@ -355,8 +314,7 @@ void kernel_cerrar(t_descriptor_archivo descriptor_archivo) {
 	 */
 }
 
-void kernel_moverCursor(t_descriptor_archivo descriptor_archivo,
-		t_valor_variable posicion) {
+void kernel_moverCursor(t_descriptor_archivo descriptor_archivo, t_valor_variable posicion) {
 	/*
 	 * MOVER CURSOR DE ARCHIVO
 	 *
@@ -369,8 +327,7 @@ void kernel_moverCursor(t_descriptor_archivo descriptor_archivo,
 	 */
 }
 
-void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
-		t_valor_variable tamanio) {
+void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion, t_valor_variable tamanio) {
 	/*
 	 * ESCRIBIR ARCHIVO
 	 *
@@ -386,8 +343,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 	 */
 }
 
-void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
-		t_valor_variable tamanio) {
+void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion, t_valor_variable tamanio) {
 	/*
 	 * LEER ARCHIVO
 	 *
@@ -402,6 +358,4 @@ void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 	 * @return	void
 	 */
 }
-
-
 

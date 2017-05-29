@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <math.h>
 #include <commons/collections/list.h>
 #include <commons/collections/queue.h>
 #include <commons/string.h>
@@ -32,9 +33,15 @@ void console_load_program(socket_connection* connection, char** args);
  */
 void memory_identify(socket_connection* connection, char** args);
 void memory_response_start_program(socket_connection* connection, char** args);
+void memory_response_add_pages_to_program(socket_connection* connection, char** args);
 void memory_page_size(socket_connection* connection, char** args);
 
-void cpu_received_page_size(socket_connection* connection, char** args);
+/*
+ * CPU
+ */
+void cpu_received_page_stack_size(socket_connection* connection, char** args);
+void cpu_get_shared_var(socket_connection* connection, char** args);
+void cpu_set_shared_var(socket_connection* connection, char** args);
 
 /*
  * SERVER

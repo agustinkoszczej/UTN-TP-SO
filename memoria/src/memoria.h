@@ -54,6 +54,7 @@ int frame_size;
 int mem_delay;
 int cache_size;
 int cache_x_proc;
+int stack_size;
 
 void start_program();
 char* read_bytes(int pid, int page, int offset, int size);

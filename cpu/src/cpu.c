@@ -2,59 +2,63 @@
 
 const char* CONFIG_FIELDS[] = { IP_KERNEL, PUERTO_KERNEL, IP_MEMORIA, PUERTO_MEMORIA };
 
-/*void connect_to_kernel() {
- if ((socket_server = connectServer(ip, port, fns, &server_connectionClosed, NULL)) == -1) {
- error_show(" al intentar conectar a servidor. IP = %s, Port = %d.\n", ip, port);
- exit(EXIT_FAILURE);
- }
- printf("Connected to server. Socket = %d, IP = %s, Port = %d.\n", socket_server, ip, port);
- }
+int calculate_offset_for_var() {
+	int space_occupied = 0;
+	int i, j;
+	for (i = 0; i < list_size(pcb_actual->i_stack); i++) {
+		t_stack* stack = list_get(pcb_actual->i_stack, i);
 
- void print_menu() {
- clear_screen();
- show_title("CPU - MAIN MENU");
- println("Enter your choice:");
- println("> START_CPU");
- println("> EXIT_CPU\n");
- }
+		for (j = 0; j < list_size(stack->vars); j++)
+			space_occupied += 4;
+	}
 
- void ask_option(char *sel) {
- print_menu();
- fgets(sel, sizeof(char) * 255, stdin);
- strtok(sel, "\n");
- string_to_upper(sel);
- }
+	int pages_used = ceil((double) space_occupied / frame_size);
 
- void do_ask_option(char* sel, int close_flag) {
- if (!close_flag)
- ask_option(sel);
- }
+	return space_occupied - pages_used * frame_size;
+}
 
- void do_start_cpu(char* sel) {
- if (!strcmp(sel, "START_CPU")) {
- println_with_clean(">>>> INITIATING CPU");
- connect_to_kernel();
- pthread_mutex_init(&mx_main, NULL);
- pthread_mutex_lock(&mx_main);
- pthread_mutex_lock(&mx_main);
- }
- }
+int calculate_page_for_var() {
+	int space_occupied = 0;
+	int i, j;
+	for (i = 0; i < list_size(pcb_actual->i_stack); i++) {
+		t_stack* stack = list_get(pcb_actual->i_stack, i);
 
- void do_exit_cpu(char* sel, int *close_flag) {
- if (!strcmp(sel, "EXIT_CPU")) {
- println_with_clean(">>>> CLOSING");
- *close_flag = 1;
- }
- }*/
+		for (j = 0; j < list_size(stack->vars); j++)
+			space_occupied += 4;
+	}
+
+	return ceil((double) space_occupied / frame_size);
+}
+
+int vars_in_stack() {
+	int vars_c = 0;
+	int i, j;
+	for (i = 0; i < list_size(pcb_actual->i_stack); i++) {
+		t_stack* stack = list_get(pcb_actual->i_stack, i);
+		for (j = 0; j < list_size(stack->vars); j++)
+			vars_c++;
+	}
+
+	return vars_c;
+}
+
+void wait_response() {
+	pthread_mutex_lock(&planning_mutex);
+	pthread_mutex_lock(&planning_mutex);
+}
 
 void create_function_dictionary() {
 	fns = dictionary_create();
 
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "kernel_receive_pcb", &kernel_receive_pcb);
+	dictionary_put(fns, "kernel_page_stack_size", &kernel_page_stack_size);
+	dictionary_put(fns, "kernel_response_get_shared_var", &kernel_response_get_shared_var);
+	dictionary_put(fns, "kernel_response_set_shared_var", &kernel_response_set_shared_var);
 	dictionary_put(fns, "memory_response_read_bytes_from_page", &memory_response_read_bytes_from_page);
-	dictionary_put(fns, "kernel_page_size", &kernel_page_size);
+	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
 }
+
 void connect_to_server(t_config* config, char* name) {
 	int port;
 	char* ip_server;
@@ -91,7 +95,7 @@ void init_cpu(t_config* config) {
 	connect_to_server(config, KERNEL);
 	connect_to_server(config, MEMORY);
 
-	FRAME_SIZE = 256;
+	finished = false;
 
 	functions.AnSISOP_definirVariable = cpu_definirVariable;
 	functions.AnSISOP_obtenerPosicionVariable = cpu_obtenerPosicionVariable;
@@ -122,7 +126,6 @@ void init_cpu(t_config* config) {
 
 int main(int argc, char *argv[]) {
 	clear_screen();
-	char sel[255];
 	t_config* config = malloc(sizeof(t_config));
 
 	remove("log");

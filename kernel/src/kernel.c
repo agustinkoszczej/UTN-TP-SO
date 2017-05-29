@@ -40,10 +40,7 @@ void short_planning() {
 
 		char* pcb_string = pcb_to_string(_pcb);
 
-		if (planning_alg == FIFO)
-			runFunction(free_cpu->socket, "kernel_receive_pcb", 2, string_itoa(FIFO), pcb_string);
-		else if (planning_alg == RR)
-			runFunction(free_cpu->socket, "kernel_receive_pcb", 3, string_itoa(RR), string_itoa(quantum), pcb_string);
+		runFunction(free_cpu->socket, "kernel_receive_pcb", 2, string_itoa(quantum), pcb_string);
 	}
 	pthread_mutex_unlock(&planning_mutex);
 }
@@ -203,8 +200,10 @@ void create_function_dictionary() {
 	dictionary_put(fns, "console_load_program", &console_load_program);
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
+	dictionary_put(fns, "memory_response_add_pages_to_program", &memory_response_add_pages_to_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);
-	dictionary_put(fns, "cpu_received_page_size", &cpu_received_page_size);
+	dictionary_put(fns, "cpu_received_page_stack_size", &cpu_received_page_stack_size);
+	dictionary_put(fns, "cpu_get_shared_var", &cpu_get_shared_var);
 }
 
 void open_socket(t_config* config, char* name) {
@@ -265,17 +264,18 @@ void init_kernel(t_config* config) {
 	pthread_mutex_init(&pcb_list_mutex, NULL);
 	pthread_mutex_init(&planning_mutex, NULL);
 	pthread_mutex_init(&process_in_memory_mutex, NULL);
+	pthread_mutex_init(&shared_vars_mutex, NULL);
 
 	port_con = config_get_int_value(config, PUERTO_PROG);
 	port_cpu = config_get_int_value(config, PUERTO_CPU);
 	multiprog = config_get_int_value(config, GRADO_MULTIPROG);
-	quantum = config_get_int_value(config, QUANTUM);
+	stack_size = config_get_int_value(config, STACK_SIZE);
 
 	shared_vars = dictionary_create();
 	char** global_vars_arr = config_get_array_value(config, SHARED_VARS);
 	int i = 0;
 	while (global_vars_arr[i] != NULL) {
-		dictionary_put(shared_vars, global_vars_arr[i], 0);
+		dictionary_put(shared_vars, string_substring_from(global_vars_arr[i], 1), 0);
 		i++;
 	}
 
@@ -291,11 +291,10 @@ void init_kernel(t_config* config) {
 	}
 
 	char* p = config_get_string_value(config, ALGORITMO);
-	if (!strcmp(p, "FIFO")) {
-		planning_alg = FIFO;
-	} else if (!strcmp(p, "RR")) {
-		planning_alg = RR;
-	}
+	if (!strcmp(p, "FIFO"))
+		quantum = 0;
+	else if (!strcmp(p, "RR"))
+		quantum = config_get_int_value(config, QUANTUM);
 
 	p_counter = 0;
 	process_in_memory = 0;

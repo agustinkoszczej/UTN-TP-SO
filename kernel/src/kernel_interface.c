@@ -12,7 +12,7 @@ void console_load_program(socket_connection* connection, char** args) {
 	new_pcb->pid = ++p_counter;
 	pthread_mutex_unlock(&p_counter_mutex);
 
-	new_pcb->page_c = 0;
+	new_pcb->page_c = ceil((double) string_length(program) / mem_page_size);
 	new_pcb->state = NEW_LIST;
 	new_pcb->i_code = list_create();
 	new_pcb->i_label = dictionary_create();
@@ -78,6 +78,37 @@ void console_load_program(socket_connection* connection, char** args) {
 }
 
 /*
+ * CPU
+ */
+void cpu_received_page_stack_size(socket_connection* connection, char** args) {
+	short_planning();
+}
+void cpu_get_shared_var(socket_connection* connection, char** args) {
+	char* var_name = args[0];
+	pthread_mutex_lock(&shared_vars_mutex);
+	int value = atoi(dictionary_get(shared_vars, var_name));
+	pthread_mutex_unlock(&shared_vars_mutex);
+
+	runFunction(connection->socket, "kernel_response_get_shared_var", 1, string_itoa(value));
+}
+void cpu_set_shared_var(socket_connection* connection, char** args) {
+	void free_var(void* v) {
+		int* val = v;
+		free(val);
+	}
+
+	char* var_name = args[0];
+	int* var_value = malloc(sizeof(int));
+	*var_value = atoi(args[1]);
+	pthread_mutex_lock(&shared_vars_mutex);
+	dictionary_remove_and_destroy(shared_vars, var_name, &free_var);
+	dictionary_put(shared_vars, var_name, var_value);
+	pthread_mutex_unlock(&shared_vars_mutex);
+
+	runFunction(connection->socket, "kernel_response_set_shared_var", 0);
+}
+
+/*
  * MEMORY
  */
 void memory_identify(socket_connection* connection, char** args) {
@@ -89,8 +120,18 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 	process_struct.pcb->exit_code = response;
 
 	if (response == NO_ERRORES) {
-		int n_frames = atoi(args[1]);
-		process_struct.pcb->page_c = n_frames;
+		runFunction(mem_socket, "i_add_pages_to_program", 2, string_itoa(process_struct.pcb->pid), string_itoa(stack_size));
+	} else {
+		move_to_list(process_struct.pcb, EXIT_LIST);
+		runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
+	}
+}
+void memory_response_add_pages_to_program(socket_connection* connection, char** args) {
+	int response = atoi(args[0]);
+
+	process_struct.pcb->exit_code = response;
+
+	if (response == NO_ERRORES) {
 		move_to_list(process_struct.pcb, READY_LIST);
 		add_process_in_memory();
 	} else {
@@ -103,9 +144,7 @@ void memory_page_size(socket_connection* connection, char** args) {
 	int page_size = atoi(args[0]);
 
 	mem_page_size = page_size;
-}
-void cpu_received_page_size(socket_connection* connection, char** args) {
-	short_planning();
+	runFunction(mem_socket, "kernel_stack_size", 1, string_itoa(stack_size));
 }
 
 /*
@@ -132,7 +171,7 @@ void newClient(socket_connection* connection) {
 		pthread_mutex_lock(&cpu_mutex);
 		list_add(cpu_list, cpu);
 		pthread_mutex_unlock(&cpu_mutex);
-		runFunction(connection->socket, "kernel_page_size", 1, mem_page_size);
+		runFunction(connection->socket, "kernel_page_stack_size", 2, string_itoa(mem_page_size), string_itoa(stack_size));
 	}
 }
 void connectionClosed(socket_connection* connection) {

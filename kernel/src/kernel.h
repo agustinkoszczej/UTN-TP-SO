@@ -51,8 +51,8 @@
 
 int p_counter;
 int multiprog;
-int planning_alg;
 int quantum;
+int stack_size;
 t_dictionary* shared_vars;
 t_dictionary* sem_ids;
 
@@ -93,6 +93,7 @@ pthread_mutex_t socket_pcb_mutex;
 pthread_mutex_t planning_mutex;
 pthread_mutex_t cpu_mutex;
 pthread_mutex_t process_in_memory_mutex;
+pthread_mutex_t shared_vars_mutex;
 
 bool planning_running;
 

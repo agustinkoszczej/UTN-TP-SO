@@ -10,7 +10,7 @@ void i_start_program(socket_connection* connection, char** args) {
 	int size_buffer = string_length(buffer);
 	int n_frames = ceil((float) size_buffer / frame_size);
 
-	if (has_available_frames(n_frames + 1)) {
+	if (has_available_frames(n_frames + stack_size)) {
 		start_program(pid, n_frames);
 		int i;
 		for (i = 0; i < n_frames; i++) {
@@ -19,7 +19,7 @@ void i_start_program(socket_connection* connection, char** args) {
 			store_bytes(pid, i, 0, size, buffer2);
 		}
 
-		runFunction(m_sockets.k_socket, "memory_response_start_program", 2, string_itoa(NO_ERRORES), string_itoa(n_frames + 1));
+		runFunction(m_sockets.k_socket, "memory_response_start_program", 1, string_itoa(NO_ERRORES));
 	} else
 		runFunction(m_sockets.k_socket, "memory_response_start_program", 1, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS));
 }
@@ -59,6 +59,12 @@ void i_finish_program(socket_connection* connection, char** args) {
 	int pid = string_length(args[0]);
 
 	finish_program(pid);
+}
+
+void kernel_stack_size(socket_connection* connection, char** args) {
+	int stack_s = atoi(args[0]);
+
+	stack_size = stack_s;
 }
 
 /*
