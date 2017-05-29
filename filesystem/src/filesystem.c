@@ -56,7 +56,7 @@ bool add_blocks_if_needed(char* path, int offset, int size) {
 
 	FILE* f = fopen(path_file, "w");
 	fputs(string_from_format("TAMANIO=%d\n", file_size), f);
-	fputs(string_from_format("BLOQUES=%s\n", buffer_blocks_array), f);
+	fputs(string_from_format("BLOQUES=%s", buffer_blocks_array), f);
 	fclose(f);
 
 	free(path_file);
@@ -76,8 +76,26 @@ void write_block(int block_pos, int offset, int length, char* buffer) {
 	fclose(block);
 }
 
+void update_file_size(char* path, int offset, int size) {
+	char* path_file = string_from_format("%s/Archivos/%s", mount_point, path);
+	t_config* config_file = config_create(path_file);
+
+	char* blocks_arr = config_get_string_value(config_file, BLOQUES);
+	int file_size = config_get_int_value(config_file, TAMANIO);
+	int diff = file_size - (offset + size);
+
+	if (diff < 0) {
+		file_size += abs(diff);
+
+		FILE* f = fopen(path_file, "w");
+		fputs(string_from_format("TAMANIO=%d\n", file_size), f);
+		fputs(string_from_format("BLOQUES=%s", blocks_arr), f);
+		fclose(f);
+	}
+}
+
 bool save_data(char* path, int offset, int size, char* buffer) {
-	if(!add_blocks_if_needed(path, offset, size))
+	if (!add_blocks_if_needed(path, offset, size))
 		return false;
 
 	char* path_file = string_from_format("%s/Archivos/%s", mount_point, path);
@@ -88,10 +106,10 @@ bool save_data(char* path, int offset, int size, char* buffer) {
 	int start_block = offset / block_size;
 	int end_block = ceil((double) (offset + size) / block_size);
 
-	offset -= start_block * block_size;
+	int offset2 = offset - start_block * block_size;
 	int len = (size > block_size) ? block_size : size;
-	len = -offset;
-	write_block(atoi(blocks_arr[start_block]), offset, len, string_substring_until(buffer, len));
+	len = -offset2;
+	write_block(atoi(blocks_arr[start_block]), offset2, len, string_substring_until(buffer, len));
 	free(blocks_arr[start_block]);
 	start_block++;
 	size -= len;
@@ -111,6 +129,8 @@ bool save_data(char* path, int offset, int size, char* buffer) {
 	free(blocks_arr);
 	config_destroy(config_file);
 	free(path_file);
+
+	update_file_size(path, offset, size);
 
 	return true;
 }
@@ -215,7 +235,7 @@ bool create_file(char* path) {
 
 	FILE* f = fopen(path_file, "w");
 	fputs("TAMANIO=0\n", f);
-	fputs(string_from_format("BLOQUES=[%d]\n", first_block_pos), f);
+	fputs(string_from_format("BLOQUES=[%d]", first_block_pos), f);
 	fclose(f);
 	return true;
 }
