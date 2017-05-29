@@ -30,13 +30,6 @@ t_cpu* get_cpu_free() {
 }
 
 void short_planning() {
-	// TODO borrar codigo dummy
-	t_cpu* cpu = malloc(sizeof(t_cpu));
-	cpu->busy = false;
-	pthread_mutex_lock(&cpu_mutex);
-	list_add(cpu_list, cpu);
-	pthread_mutex_unlock(&cpu_mutex);
-
 	pthread_mutex_lock(&planning_mutex);
 	if (planning_running && is_cpu_free() && list_size(ready_list) > 0) {
 		t_cpu* free_cpu = get_cpu_free();
