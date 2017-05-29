@@ -30,6 +30,7 @@ void console_load_program(socket_connection* connection, char** args) {
 
 	t_metadata_program* metadata = metadata_desde_literal(program);
 
+	new_pcb->pc = metadata->instruccion_inicio;
 	int i;
 
 	if (metadata->etiquetas_size > 0) {
@@ -90,7 +91,10 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 	if (response == NO_ERRORES) {
 		int n_frames = atoi(args[1]);
 		process_struct.pcb->page_c = n_frames;
+		move_to_list(process_struct.pcb, READY_LIST);
 		add_process_in_memory();
+	} else {
+		move_to_list(process_struct.pcb, EXIT_LIST);
 	}
 
 	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
@@ -99,6 +103,9 @@ void memory_page_size(socket_connection* connection, char** args) {
 	int page_size = atoi(args[0]);
 
 	mem_page_size = page_size;
+}
+void cpu_received_page_size(socket_connection* connection, char** args) {
+	short_planning();
 }
 
 /*
@@ -125,6 +132,7 @@ void newClient(socket_connection* connection) {
 		pthread_mutex_lock(&cpu_mutex);
 		list_add(cpu_list, cpu);
 		pthread_mutex_unlock(&cpu_mutex);
+		runFunction(connection->socket, "kernel_page_size", 1, mem_page_size);
 	}
 }
 void connectionClosed(socket_connection* connection) {

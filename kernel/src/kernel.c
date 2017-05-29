@@ -30,6 +30,14 @@ t_cpu* get_cpu_free() {
 }
 
 void short_planning() {
+	// TODO borrar codigo dummy
+	t_cpu* cpu = malloc(sizeof(t_cpu));
+	cpu->busy = false;
+	pthread_mutex_lock(&cpu_mutex);
+	list_add(cpu_list, cpu);
+	pthread_mutex_unlock(&cpu_mutex);
+
+	pthread_mutex_lock(&planning_mutex);
 	if (planning_running && is_cpu_free() && list_size(ready_list) > 0) {
 		t_cpu* free_cpu = get_cpu_free();
 		pcb* _pcb = list_get(ready_list, 0);
@@ -44,6 +52,7 @@ void short_planning() {
 		else if (planning_alg == RR)
 			runFunction(free_cpu->socket, "kernel_receive_pcb", 3, string_itoa(RR), string_itoa(quantum), pcb_string);
 	}
+	pthread_mutex_unlock(&planning_mutex);
 }
 
 void remove_cpu_from_cpu_list(t_cpu* cpu) {
@@ -189,9 +198,9 @@ void move_to_list(pcb* pcb, int list_name) {
 	pthread_mutex_unlock(&pcb_list_mutex);
 	pthread_mutex_unlock(&planning_mutex);
 
-	if(list_name == READY_LIST)
+	if (list_name == READY_LIST)
 		short_planning();
-	else if(list_name == EXIT_LIST)
+	else if (list_name == EXIT_LIST)
 		substract_process_in_memory();
 }
 
@@ -272,7 +281,7 @@ void init_kernel(t_config* config) {
 	shared_vars = dictionary_create();
 	char** global_vars_arr = config_get_array_value(config, SHARED_VARS);
 	int i = 0;
-	while(global_vars_arr[i] != NULL) {
+	while (global_vars_arr[i] != NULL) {
 		dictionary_put(shared_vars, global_vars_arr[i], 0);
 		i++;
 	}
@@ -281,7 +290,7 @@ void init_kernel(t_config* config) {
 	char** sem_ids_arr = config_get_array_value(config, SEM_IDS);
 	char** sem_vals_arr = config_get_array_value(config, SEM_INIT);
 	i = 0;
-	while(sem_ids_arr[i] != NULL) {
+	while (sem_ids_arr[i] != NULL) {
 		int* val = malloc(sizeof(int));
 		*val = atoi(sem_vals_arr[i]);
 		dictionary_put(sem_ids, sem_ids_arr[i], val);
@@ -496,7 +505,7 @@ void do_stop_process(char* sel) {
 void do_stop_planification(char* sel) {
 	if (!strcmp(sel, "P")) {
 		planning_running = !planning_running;
-		if(planning_running)
+		if (planning_running)
 			short_planning();
 	}
 }
