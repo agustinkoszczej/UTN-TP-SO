@@ -27,7 +27,7 @@ inventado y diseñado por la cátedra para fines didácticos.
 * File System
 
 ## **Checkpoints:**
-~~* Checkpoint 1 - Obligatorio~~
+* ~~Checkpoint 1 - Obligatorio~~
   * ~~Fecha: 15/04/2017~~
   
 * ~~Checkpoint 2~~
