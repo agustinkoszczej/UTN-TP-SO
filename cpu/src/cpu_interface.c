@@ -33,14 +33,14 @@ void kernel_page_size(socket_connection* connection, char** args) {
 	runFunction(connection->socket, "cpu_received_page_size", 0);
 }
 void kernel_receive_pcb(socket_connection* connection, char** args) {
-	char* algoritmo = args[0];
+	int algoritmo = atoi(args[0]);
 
 	int quantum;
 
-	if (!strcmp(algoritmo, "RR")) {
+	if (algoritmo == RR) {
 		quantum = atoi(args[1]);
 		pcbActual = string_to_pcb(args[2]);
-	} else if (!strcmp(algoritmo, "FIFO")) {
+	} else if (algoritmo == FIFO) {
 		pcbActual = string_to_pcb(args[1]);
 	}
 

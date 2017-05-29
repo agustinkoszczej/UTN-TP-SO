@@ -12,12 +12,12 @@
 #include <console.h>
 #include <config.h>
 #include <socket.h>
-
 #include <pcb.h>
-
 #include "cpu_interface.h"
-
 #include <parser/metadata_program.h>
+
+#define FIFO 1
+#define RR 2
 
 #define CPU "CPU"
 
