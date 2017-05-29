@@ -27,14 +27,14 @@ inventado y diseñado por la cátedra para fines didácticos.
 * File System
 
 ## **Checkpoints:**
-* Checkpoint 1 - Obligatorio
-  * Fecha: 15/04/2017
+~~* Checkpoint 1 - Obligatorio~~
+  * ~~Fecha: 15/04/2017~~
   
-* Checkpoint 2
-  * Fecha: 06/05/2017
+* ~~Checkpoint 2~~
+  * ~~Fecha: 06/05/2017~~
   
-* Checkpoint 3
-  * Fecha: 20/05/2017
+* ~~Checkpoint 3~~
+  * ~~Fecha: 20/05/2017~~
   
 * Checkpoint 4 - Obligatorio (En Laboratorio)
   * Fecha: 03/06/2017
