@@ -294,7 +294,7 @@ void init_kernel(t_config* config) {
 	if (!strcmp(p, "FIFO"))
 		quantum = 0;
 	else if (!strcmp(p, "RR"))
-		quantum = config_get_int_value(config, QUANTUM);
+		quantum = config_get_int_value(config, QUANTUM) - 1;
 
 	p_counter = 0;
 	process_in_memory = 0;
