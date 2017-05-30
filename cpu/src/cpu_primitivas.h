@@ -13,6 +13,12 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#define NO_ERRORES 0
+#define NO_SE_PUEDEN_RESERVAR_RECURSOS -1
+#define ERROR_SIN_DEFINIR -20
+#define DESCONEXION_CONSOLA -6
+#define STACK_OVERFLOW -10
+
 bool finished;
 
 /*
@@ -46,5 +52,9 @@ void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 
 AnSISOP_funciones functions;
 AnSISOP_kernel kernel_functions;
+
+t_stack* stack_create();
+
+t_puntero* malloc_pointer;
 
 #endif /* CPU_PRIMITIVAS_H_ */

@@ -56,9 +56,16 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 
 		runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(n_page), string_itoa(n_offset), string_itoa(n_size));
 		wait_response();
-		pcb_actual->pc++;
-		analizadorLinea(mem_buffer, &functions, &kernel_functions);
-	}
 
+		analizadorLinea(mem_buffer, &functions, &kernel_functions);
+		pcb_actual->pc++;
+	}
+	log_debug(logger, "cpu_task_finished");
 	runFunction(kernel_socket, "cpu_task_finished", 2, pcb_to_string(pcb_actual), string_itoa(finished));
+}
+
+void kernel_response_malloc_pointer(socket_connection* connection, char** args){
+	malloc_pointer = atoi(args[0]);
+	signal_response();
+
 }

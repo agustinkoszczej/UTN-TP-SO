@@ -25,14 +25,19 @@
 t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
 	bool is_digit = isdigit(identificador_variable) ? true : false;
 
-	t_stack* stack = list_get(pcb_actual->i_stack, list_size(pcb_actual->i_stack) - 1);
+	t_stack* stack = list_get(pcb_actual->i_stack,
+			list_size(pcb_actual->i_stack) - 1);
 
 	if (stack->vars == NULL)
 		stack->vars = list_create();
 
+	if (stack->args == NULL)
+		stack->args = list_create();
+
 	int vars_c = vars_in_stack();
+
 	int occupied_bytes = vars_c * 4;
-	int relative_page = vars_c * 4 / frame_size;
+	int relative_page = occupied_bytes / frame_size;
 
 	t_arg_var* n_var = malloc(sizeof(t_arg_var));
 	n_var->id = identificador_variable;
@@ -40,7 +45,17 @@ t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
 	n_var->off = occupied_bytes - relative_page * frame_size;
 	n_var->size = 4;
 
-	list_add(stack->vars, n_var);
+	if (!is_digit)
+		list_add(stack->vars, n_var);
+	else
+		list_add(stack->args, n_var);
+
+	log_debug(logger, "Definir variable '%c'", identificador_variable);
+
+	if (relative_page > stack_size) {
+		runFunction(kernel_socket, "cpu_error", 1, STACK_OVERFLOW); //TODO Agregar a interface de Kernel
+		cpu_finalizar();
+	}
 
 	return (int) n_var;
 }
@@ -64,9 +79,11 @@ t_puntero cpu_obtenerPosicionVariable(t_nombre_variable identificador_variable) 
 		for (j = 0; j < list_size(stack->vars); j++) {
 			t_arg_var* var = list_get(stack->vars, j);
 
-			if (var->id == identificador_variable)
+			if (var->id == identificador_variable) {
+				log_debug(logger, "Obtener Posicion Variable '%c'",
+						identificador_variable);
 				return space_occupied;
-			else
+			} else
 				space_occupied += 4;
 		}
 	}
@@ -92,8 +109,10 @@ t_valor_variable cpu_dereferenciar(t_puntero direccion_variable) {
 	char* offset = string_itoa(n_offset);
 	char* size = string_itoa(4);
 
-	runFunction(mem_socket, "i_read_bytes_from_page", 4, pid, page, offset, size);
+	runFunction(mem_socket, "i_read_bytes_from_page", 4, pid, page, offset,
+			size);
 	wait_response();
+	log_debug(logger, "Dereferenciar '%s'", mem_buffer);
 	return atoi(mem_buffer);
 }
 
@@ -117,8 +136,10 @@ void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
 	char* size = string_itoa(4);
 	char* buffer = string_itoa(valor);
 
-	runFunction(mem_socket, "i_store_bytes_in_page", 5, pid, page, offset, size, buffer);
+	runFunction(mem_socket, "i_store_bytes_in_page", 5, pid, page, offset, size,
+			buffer);
 	wait_response();
+	log_debug(logger, "Asignar '%s'", buffer);
 }
 
 /*
@@ -134,6 +155,8 @@ t_valor_variable cpu_obtenerValorCompartida(t_nombre_compartida variable) {
 	runFunction(kernel_socket, "cpu_get_shared_var", 1, variable);
 	wait_response();
 
+	log_debug(logger, "Obtener Valor Compartida '%d'", kernel_shared_var);
+
 	return atoi(kernel_shared_var);
 }
 
@@ -148,9 +171,12 @@ t_valor_variable cpu_obtenerValorCompartida(t_nombre_compartida variable) {
  * @param	valor	Valor que se le quire asignar
  * @return	Valor que se asigno
  */
-t_valor_variable cpu_asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
+t_valor_variable cpu_asignarValorCompartida(t_nombre_compartida variable,
+		t_valor_variable valor) {
 	runFunction(kernel_socket, "cpu_set_shared_var", 2, variable, valor);
 	wait_response();
+
+	log_debug(logger, "Asignar Valor Compartida '%d'", valor);
 
 	return valor;
 }
@@ -165,7 +191,12 @@ t_valor_variable cpu_asignarValorCompartida(t_nombre_compartida variable, t_valo
  * @return	void
  */
 void cpu_irAlLabel(t_nombre_etiqueta t_nombre_etiqueta) {
-	pcb_actual->pc = dictionary_get(pcb_actual->i_label, t_nombre_etiqueta);
+	if (dictionary_has_key(pcb_actual->i_label, t_nombre_etiqueta))
+		pcb_actual->pc = dictionary_get(pcb_actual->i_label, t_nombre_etiqueta);
+	else
+		pcb_actual->pc = -1; //TODO Ver que hacer cuando no existe la funcion
+
+	log_debug(logger, "Ir a Label '%d'", pcb_actual->pc);
 }
 
 /*
@@ -174,23 +205,30 @@ void cpu_irAlLabel(t_nombre_etiqueta t_nombre_etiqueta) {
  * Preserva el contexto de ejecución actual para poder retornar luego al mismo.
  * Modifica las estructuras correspondientes para mostrar un nuevo contexto vacío.
  *
- * Los parámetros serán definidos luego de esta instrucción de la misma manera que una variable local, con identificadores numéricos empezando por el 0.
+ * Los parámetros serán definidos luego de esta instrucción de la misma manera que una
+ * variable local, con identificadores numéricos empezando por el 0.
  *
  * @sintax	Sin sintaxis particular, se invoca cuando no coresponde a ninguna de las otras reglas sintacticas
  * @param	etiqueta	Nombre de la funcion
  * @return	void
  */
 void cpu_llamarSinRetorno(t_nombre_etiqueta etiqueta) {
+	t_stack* stack_aux = stack_create();
+	stack_aux->retpos = pcb_actual->pc;
+	list_add(pcb_actual->i_stack, stack_aux);
 
+	cpu_irAlLabel(etiqueta);
 }
 
 /*
  * LLAMAR CON RETORNO
  *
- * Preserva el contexto de ejecución actual para poder retornar luego al mismo, junto con la posicion de la variable entregada por donde_retornar.
+ * Preserva el contexto de ejecución actual para poder retornar luego al mismo,
+ * junto con la posicion de la variable entregada por donde_retornar.
  * Modifica las estructuras correspondientes para mostrar un nuevo contexto vacío.
  *
- * Los parámetros serán definidos luego de esta instrucción de la misma manera que una variable local, con identificadores numéricos empezando por el 0.
+ * Los parámetros serán definidos luego de esta instrucción de la misma manera que una
+ * variable local, con identificadores numéricos empezando por el 0.
  *
  * @sintax	TEXT_CALL (<-)
  * @param	etiqueta	Nombre de la funcion
@@ -198,14 +236,29 @@ void cpu_llamarSinRetorno(t_nombre_etiqueta etiqueta) {
  * @return	void
  */
 void cpu_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
+	t_stack* stack_aux = stack_create();
+	t_retvar* retvar_aux;
 
+	retvar_aux->pag = donde_retornar / frame_size + pcb_actual->page_c;
+	retvar_aux->off = donde_retornar % frame_size;
+	retvar_aux->size = 4;
+
+	stack_aux->retvar = retvar_aux;
+	stack_aux->retpos = pcb_actual->pc;
+
+	list_add(pcb_actual->i_stack, stack_aux);
+
+	cpu_irAlLabel(etiqueta);
 }
 
 /*
  * FINALIZAR
  *
- * Cambia el Contexto de Ejecución Actual para volver al Contexto anterior al que se está ejecutando, recuperando el Cursor de Contexto Actual y el Program Counter previamente apilados en el Stack.
- * En caso de estar finalizando el Contexto principal (el ubicado al inicio del Stack), deberá finalizar la ejecución del programa.
+ * Cambia el Contexto de Ejecución Actual para volver al Contexto anterior al que se
+ * está ejecutando, recuperando el Cursor de Contexto Actual y el Program Counter
+ * previamente apilados en el Stack.
+ * En caso de estar finalizando el Contexto principal (el ubicado al inicio del Stack),
+ * deberá finalizar la ejecución del programa.
  *
  * @sintax	TEXT_END (end)
  * @param	void
@@ -213,151 +266,187 @@ void cpu_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) 
  */
 void cpu_finalizar(void) {
 	finished = true;
+	log_debug(logger, "Finalizar Programa");
 }
 
+/*
+ * RETORNAR
+ *
+ * Cambia el Contexto de Ejecución Actual para volver al Contexto anterior
+ * al que se está ejecutando, recuperando el Cursor de Contexto Actual, el Program Counter
+ * y la direccion donde retornar, asignando el valor de retorno en esta, previamente
+ * apilados en el Stack.
+ *
+ * @sintax	TEXT_RETURN (return)
+ * @param	retorno	Valor a ingresar en la posicion corespondiente
+ * @return	void,
+ */
 void cpu_retornar(t_valor_variable retorno) {
-	/*
-	 * RETORNAR
-	 *
-	 * Cambia el Contexto de Ejecución Actual para volver al Contexto anterior al que se está ejecutando, recuperando el Cursor de Contexto Actual, el Program Counter y la direccion donde retornar, asignando el valor de retorno en esta, previamente apilados en el Stack.
-	 *
-	 * @sintax	TEXT_RETURN (return)
-	 * @param	retorno	Valor a ingresar en la posicion corespondiente
-	 * @return	void
-	 */
-}
+	t_stack* stack_aux = list_get(pcb_actual->i_stack,
+			pcb_actual->i_stack->elements_count - 1);
 
+	t_puntero offset_abs = ((stack_aux->retvar)->pag * frame_size)
+			+ (stack_aux->retvar)->off;
+	cpu_asignar(offset_abs, retorno);
+
+	cpu_finalizar();
+}
+/*
+ * WAIT
+ *
+ * Informa al kernel que ejecute la función wait para el semáforo con el nombre identificador_semaforo.
+ * El kernel deberá decidir si bloquearlo o no.
+ *
+ * @sintax	TEXT_WAIT (wait)
+ * @param	identificador_semaforo	Semaforo a aplicar WAIT
+ * @return	void
+ */
 void kernel_wait(t_nombre_semaforo identificador_semaforo) {
-	/*
-	 * WAIT
-	 *
-	 * Informa al kernel que ejecute la función wait para el semáforo con el nombre identificador_semaforo.
-	 * El kernel deberá decidir si bloquearlo o no.
-	 *
-	 * @sintax	TEXT_WAIT (wait)
-	 * @param	identificador_semaforo	Semaforo a aplicar WAIT
-	 * @return	void
-	 */
+	runFunction(kernel_socket, "cpu_wait_sem", 1, identificador_semaforo); //TODO Agregar a interface de Kernel
+	wait_response();
 }
-
+/*
+ * SIGNAL
+ *
+ * Informa al kernel que ejecute la función signal para el semáforo con el nombre identificador_semaforo.
+ * El kernel deberá decidir si desbloquear otros procesos o no.
+ *
+ * @sintax	TEXT_SIGNAL (signal)
+ * @param	identificador_semaforo	Semaforo a aplicar SIGNAL
+ * @return	void
+ */
 void kernel_signal(t_nombre_semaforo identificador_semaforo) {
-	/*
-	 * SIGNAL
-	 *
-	 * Informa al kernel que ejecute la función signal para el semáforo con el nombre identificador_semaforo.
-	 * El kernel deberá decidir si desbloquear otros procesos o no.
-	 *
-	 * @sintax	TEXT_SIGNAL (signal)
-	 * @param	identificador_semaforo	Semaforo a aplicar SIGNAL
-	 * @return	void
-	 */
+	runFunction(kernel_socket, "cpu_wait_sem", 1, identificador_semaforo); //TODO Agregar a interface de Kernel
+	wait_response();
 }
 
+/*
+ * RESERVAR MEMORIA
+ *
+ * Informa al kernel que reserve en el Heap una cantidad de memoria
+ * acorde al espacio recibido como parametro.
+ *
+ * @sintax	TEXT_MALLOC (alocar)
+ * @param	valor_variable Cantidad de espacio
+ * @return	puntero a donde esta reservada la memoria
+ */
 t_puntero kernel_reservar(t_valor_variable espacio) {
-	/*
-	 * RESERVAR MEMORIA
-	 *
-	 * Informa al kernel que reserve en el Heap una cantidad de memoria
-	 * acorde al espacio recibido como parametro.
-	 *
-	 * @sintax	TEXT_MALLOC (alocar)
-	 * @param	valor_variable Cantidad de espacio
-	 * @return	puntero a donde esta reservada la memoria
-	 */
+	runFunction(kernel_socket, "cpu_malloc", 1, string_itoa(espacio)); //TODO Agregar a interface de Kernel
+	wait_response();
+	return malloc_pointer;
 }
 
+/*
+ * LIBERAR MEMORIA
+ *
+ * Informa al kernel que libera la memoria previamente reservada con RESERVAR.
+ * Solo se podra liberar memoria previamente asignada con RESERVAR.
+ *
+ * @sintax	TEXT_FREE (liberar)
+ * @param	puntero Inicio de espacio de memoria a liberar (previamente retornado por RESERVAR)
+ * @return	void
+ */
 void kernel_liberar(t_puntero puntero) {
-	/*
-	 * LIBERAR MEMORIA
-	 *
-	 * Informa al kernel que libera la memoria previamente reservada con RESERVAR.
-	 * Solo se podra liberar memoria previamente asignada con RESERVAR.
-	 *
-	 * @sintax	TEXT_FREE (liberar)
-	 * @param	puntero Inicio de espacio de memoria a liberar (previamente retornado por RESERVAR)
-	 * @return	void
-	 */
+	runFunction(kernel_socket, "cpu_free", 1, string_itoa(puntero)); //TODO Agregar a interface de Kernel
+	wait_response();
 }
 
-t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion, t_banderas flags) {
-	/*
-	 * ABRIR ARCHIVO
-	 *
-	 * Informa al Kernel que el proceso requiere que se abra un archivo.
-	 *
-	 * @syntax 	TEXT_OPEN_FILE (abrir)
-	 * @param	direccion		Ruta al archivo a abrir
-	 * @param	banderas		String que contiene los permisos con los que se abre el archivo
-	 * @return	El valor del descriptor de archivo abierto por el sistema
-	 */
+/*
+ * ABRIR ARCHIVO
+ *
+ * Informa al Kernel que el proceso requiere que se abra un archivo.
+ *
+ * @syntax 	TEXT_OPEN_FILE (abrir)
+ * @param	direccion		Ruta al archivo a abrir
+ * @param	banderas		String que contiene los permisos con los que se abre el archivo
+ * @return	El valor del descriptor de archivo abierto por el sistema
+ */
+t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion,
+		t_banderas flags) {
+	runFunction(kernel_socket, "cpu_open_file", 2, string_itoa(direccion), flags); //TODO Agregar a interface de Kernel
+	wait_response();
 }
 
+/*
+ * BORRAR ARCHIVO
+ *
+ * Informa al Kernel que el proceso requiere que se borre un archivo.
+ *
+ * @syntax 	TEXT_DELETE_FILE (borrar)
+ * @param	descriptor_archivo		Descriptor de archivo del archivo a borrar
+ * @return	void
+ */
 void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
-	/*
-	 * BORRAR ARCHIVO
-	 *
-	 * Informa al Kernel que el proceso requiere que se borre un archivo.
-	 *
-	 * @syntax 	TEXT_DELETE_FILE (borrar)
-	 * @param	descriptor_archivo		Descriptor de archivo del archivo a borrar
-	 * @return	void
-	 */
+
 }
 
+/*
+ * CERRAR ARCHIVO
+ *
+ * Informa al Kernel que el proceso requiere que se cierre un archivo.
+ *
+ * @syntax 	TEXT_CLOSE_FILE (cerrar)
+ * @param	descriptor_archivo		Descriptor de archivo del archivo abierto
+ * @return	void
+ */
 void kernel_cerrar(t_descriptor_archivo descriptor_archivo) {
-	/*
-	 * CERRAR ARCHIVO
-	 *
-	 * Informa al Kernel que el proceso requiere que se cierre un archivo.
-	 *
-	 * @syntax 	TEXT_CLOSE_FILE (cerrar)
-	 * @param	descriptor_archivo		Descriptor de archivo del archivo abierto
-	 * @return	void
-	 */
+
 }
 
-void kernel_moverCursor(t_descriptor_archivo descriptor_archivo, t_valor_variable posicion) {
-	/*
-	 * MOVER CURSOR DE ARCHIVO
-	 *
-	 * Informa al Kernel que el proceso requiere que se mueva el cursor a la posicion indicada.
-	 *
-	 * @syntax 	TEXT_SEEK_FILE (buscar)
-	 * @param	descriptor_archivo		Descriptor de archivo del archivo abierto
-	 * @param	posicion			Posicion a donde mover el cursor
-	 * @return	void
-	 */
+/*
+ * MOVER CURSOR DE ARCHIVO
+ *
+ * Informa al Kernel que el proceso requiere que se mueva el cursor a la posicion indicada.
+ *
+ * @syntax 	TEXT_SEEK_FILE (buscar)
+ * @param	descriptor_archivo		Descriptor de archivo del archivo abierto
+ * @param	posicion			Posicion a donde mover el cursor
+ * @return	void
+ */
+void kernel_moverCursor(t_descriptor_archivo descriptor_archivo,
+		t_valor_variable posicion) {
+
 }
 
-void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion, t_valor_variable tamanio) {
-	/*
-	 * ESCRIBIR ARCHIVO
-	 *
-	 * Informa al Kernel que el proceso requiere que se escriba un archivo previamente abierto.
-	 * El mismo escribira "tamanio" de bytes de "informacion" luego del cursor
-	 * No es necesario mover el cursor luego de esta operación
-	 *
-	 * @syntax 	TEXT_WRITE_FILE (escribir)
-	 * @param	descriptor_archivo		Descriptor de archivo del archivo abierto
-	 * @param	informacion			Informacion a ser escrita
-	 * @param	tamanio				Tamanio de la informacion a enviar
-	 * @return	void
-	 */
+/*
+ * ESCRIBIR ARCHIVO
+ *
+ * Informa al Kernel que el proceso requiere que se escriba un archivo previamente abierto.
+ * El mismo escribira "tamanio" de bytes de "informacion" luego del cursor
+ * No es necesario mover el cursor luego de esta operación
+ *
+ * @syntax 	TEXT_WRITE_FILE (escribir)
+ * @param	descriptor_archivo		Descriptor de archivo del archivo abierto
+ * @param	informacion			Informacion a ser escrita
+ * @param	tamanio				Tamanio de la informacion a enviar
+ * @return	void
+ */
+void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
+		t_valor_variable tamanio) {
+
 }
 
-void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion, t_valor_variable tamanio) {
-	/*
-	 * LEER ARCHIVO
-	 *
-	 * Informa al Kernel que el proceso requiere que se lea un archivo previamente abierto.
-	 * El mismo leera "tamanio" de bytes luego del cursor.
-	 * No es necesario mover el cursor luego de esta operación
-	 *
-	 * @syntax 	TEXT_READ_FILE (leer)
-	 * @param	descriptor_archivo		Descriptor de archivo del archivo abierto
-	 * @param	informacion			Puntero que indica donde se guarda la informacion leida
-	 * @param	tamanio				Tamanio de la informacion a leer
-	 * @return	void
-	 */
+/*
+ * LEER ARCHIVO
+ *
+ * Informa al Kernel que el proceso requiere que se lea un archivo previamente abierto.
+ * El mismo leera "tamanio" de bytes luego del cursor.
+ * No es necesario mover el cursor luego de esta operación
+ *
+ * @syntax 	TEXT_READ_FILE (leer)
+ * @param	descriptor_archivo		Descriptor de archivo del archivo abierto
+ * @param	informacion			Puntero que indica donde se guarda la informacion leida
+ * @param	tamanio				Tamanio de la informacion a leer
+ * @return	void
+ */
+void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
+		t_valor_variable tamanio) {
+
 }
 
+t_stack* stack_create() {
+	t_stack* stack = malloc(sizeof(t_stack));
+	/*stack->args = list_create();
+	 stack->vars = list_create();*/
+	return stack;
+}
