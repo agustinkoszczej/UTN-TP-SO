@@ -65,7 +65,7 @@ t_cpu* find_cpu_by_socket(int socket) {
 		return cpu->socket == socket;
 	}
 
-	t_cpu* cpu = list_find(cpu_list, find);
+	t_cpu* cpu = list_find(cpu_list, &find);
 	pthread_mutex_unlock(&cpu_mutex);
 
 	return cpu;
@@ -347,6 +347,7 @@ void show_active_process(char option) {
 			j = queue_size(new_queue);
 			for (i = 0; i < j; i++) {
 				pcb* n_pcb = queue_pop(new_queue);
+				queue_push(new_queue, n_pcb);
 				list_add(list, n_pcb);
 			}
 
@@ -357,6 +358,7 @@ void show_active_process(char option) {
 			j = queue_size(exit_queue);
 			for (i = 0; i < j; i++) {
 				pcb* n_pcb = queue_pop(exit_queue);
+				queue_push(exit_queue, n_pcb);
 				list_add(list, n_pcb);
 			}
 			break;
@@ -365,6 +367,7 @@ void show_active_process(char option) {
 			int i, j = queue_size(new_queue);
 			for (i = 0; i < j; i++) {
 				pcb* n_pcb = queue_pop(new_queue);
+				queue_push(new_queue, n_pcb);
 				list_add(list, n_pcb);
 			}
 			break;
@@ -377,6 +380,7 @@ void show_active_process(char option) {
 			j = queue_size(exit_queue);
 			for (i = 0; i < j; i++) {
 				pcb* n_pcb = queue_pop(exit_queue);
+				queue_push(exit_queue, n_pcb);
 				list_add(list, n_pcb);
 			}
 			break;

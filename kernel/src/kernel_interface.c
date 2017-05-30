@@ -187,13 +187,15 @@ void connectionClosed(socket_connection* connection) {
 
 	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n", client, connection->socket, connection->ip, connection->port);
 
-	if (strcmp(client, CONSOLE)) {
+	if (!strcmp(client, CONSOLE)) {
 		pcb* l_pcb = find_pcb_by_socket(connection->socket);
 		move_to_list(l_pcb, EXIT_LIST);
 		substract_process_in_memory();
 		remove_pcb_from_socket_pcb_list(l_pcb);
+		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 	} else if (!strcmp(client, CPU)) {
 		t_cpu* cpu = find_cpu_by_socket(connection->socket);
 		remove_cpu_from_cpu_list(cpu);
+		free(cpu);
 	}
 }

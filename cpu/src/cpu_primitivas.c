@@ -31,11 +31,13 @@ t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
 		stack->vars = list_create();
 
 	int vars_c = vars_in_stack();
+	int occupied_bytes = vars_c * 4;
+	int relative_page = vars_c * 4 / frame_size;
 
 	t_arg_var* n_var = malloc(sizeof(t_arg_var));
 	n_var->id = identificador_variable;
-	n_var->pag = pcb_actual->page_c + ceil((double) vars_c * 4 / frame_size);
-	n_var->off = vars_c * 4 - n_var->pag * frame_size;
+	n_var->pag = pcb_actual->page_c + relative_page;
+	n_var->off = occupied_bytes - relative_page * frame_size;
 	n_var->size = 4;
 
 	list_add(stack->vars, n_var);
