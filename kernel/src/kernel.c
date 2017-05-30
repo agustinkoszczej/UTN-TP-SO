@@ -144,6 +144,9 @@ void add_process_in_memory() {
 void move_to_list(pcb* pcb, int list_name) {
 	int pos;
 
+	if(pcb->state == list_name)
+		return;
+
 	pthread_mutex_lock(&pcb_list_mutex);
 	switch (pcb->state) {
 		case NEW_LIST:
@@ -184,6 +187,8 @@ void move_to_list(pcb* pcb, int list_name) {
 			queue_push(exit_queue, pcb);
 			break;
 	}
+
+	find_pcb_by_pid(pcb->pid)->state = list_name;
 	pthread_mutex_unlock(&pcb_list_mutex);
 }
 
@@ -395,6 +400,7 @@ void show_active_process(char option) {
 	}
 
 	clear_screen();
+	printf("%s", list_name);
 	for (i = 0; i < list_size(list); i++) {
 		pcb* n_pcb = list_get(list, i);
 		printf("%d ", n_pcb->pid);
