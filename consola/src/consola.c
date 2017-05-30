@@ -9,7 +9,7 @@ t_process* find_process_by_socket(int socket) {
 		return process->socket == socket;
 	}
 
-	t_process* process = list_find(process_list, find);
+	t_process* process = list_find(process_list, &find);
 	pthread_mutex_unlock(&process_list_mutex);
 
 	return process;
@@ -22,7 +22,7 @@ t_process* find_process_by_pid(int pid) {
 		return p->pid == pid;
 	}
 
-	t_process* process = list_find(process_list, find_pid);
+	t_process* process = list_find(process_list, &find_pid);
 	pthread_mutex_unlock(&process_list_mutex);
 	return process;
 }
@@ -149,7 +149,7 @@ void do_disconnect_console(char* sel) {
 			pthread_mutex_lock(&process_list_mutex);
 			t_process* process = list_get(process_list, i);
 			pthread_mutex_unlock(&process_list_mutex);
-			abort_program(process, DESCONEXION_CONSOLA);
+			abort_program(process, ABORTO_POR_CONSOLA);
 		}
 		pthread_mutex_lock(&process_list_mutex);
 		list_clean(process_list);
@@ -185,6 +185,9 @@ void abort_program(t_process* process, int exit_code) {
 		p_counter--;
 		pthread_mutex_unlock(&p_counter_mutex);
 
+		process->pid = -1;
+		process->socket = -1;
+
 		//log_debug(logger, dictionary_get(message_map, string_itoa(exit_code)));
 		//runFunction(process->socket, "console_abort_program", 2, CONSOLE, string_itoa(process->pid));
 	}
@@ -211,12 +214,7 @@ void do_abort_program(char* sel) {
 			pthread_mutex_unlock(&process_list_mutex);
 
 			if (!strcmp(string_itoa(process->pid), pid)) {
-				abort_program(process, DESCONEXION_CONSOLA);
-
-				pthread_mutex_lock(&process_list_mutex);
-				list_remove(process_list, i);
-				pthread_mutex_unlock(&process_list_mutex);
-
+				abort_program(process, ABORTO_POR_CONSOLA);
 				break;
 			}
 			pthread_mutex_lock(&process_list_mutex);
@@ -251,10 +249,11 @@ void init_console() {
 	process_list = list_create();
 	message_map = dictionary_create();
 
-	dictionary_put(message_map, string_itoa(NO_ERRORES), "Successfull exit.");
+	dictionary_put(message_map, string_itoa(NO_ERRORES), "Successful exit.");
 	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), "Can not reserve resources.");
 	dictionary_put(message_map, string_itoa(ERROR_SIN_DEFINIR), "Unknown error.");
 	dictionary_put(message_map, string_itoa(DESCONEXION_CONSOLA), "Console disconnected.");
+	dictionary_put(message_map, string_itoa(ABORTO_POR_CONSOLA), "Aborted.");
 }
 
 int main(int argc, char *argv[]) {

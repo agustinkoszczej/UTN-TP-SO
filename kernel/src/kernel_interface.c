@@ -6,6 +6,11 @@
 void console_load_program(socket_connection* connection, char** args) {
 	char* program = args[0];
 
+	if(process_in_memory + 1 > multiprog) {
+		runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), string_itoa(-1));
+		return;
+	}
+
 	pcb* new_pcb = malloc(sizeof(pcb));
 
 	pthread_mutex_lock(&p_counter_mutex);
@@ -53,20 +58,23 @@ void console_load_program(socket_connection* connection, char** args) {
 
 	metadata_destruir(metadata);
 
+	pthread_mutex_lock(&console_mutex);
+
 	pthread_mutex_lock(&pcb_list_mutex);
 	queue_push(new_queue, new_pcb);
 	pthread_mutex_unlock(&pcb_list_mutex);
 
 	t_socket_pcb* socket_pcb = malloc(sizeof(t_socket_pcb));
-	socket_pcb->pcb = new_pcb;
+	socket_pcb->pid = new_pcb->pid;
+	socket_pcb->state = new_pcb->state;
 	socket_pcb->socket = connection->socket;
 	pthread_mutex_lock(&socket_pcb_mutex);
 	list_add(socket_pcb_list, socket_pcb);
 	pthread_mutex_unlock(&socket_pcb_mutex);
 
-	pthread_mutex_lock(&console_mutex);
 	process_struct.socket = connection->socket;
-	process_struct.pcb = new_pcb;
+	process_struct.pid = new_pcb->pid;
+	process_struct.state = new_pcb->state;
 
 	runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program);
 }
@@ -135,14 +143,15 @@ void memory_identify(socket_connection* connection, char** args) {
 void memory_response_start_program(socket_connection* connection, char** args) {
 	int response = atoi(args[0]);
 
-	process_struct.pcb->exit_code = response;
+	pcb* n_pcb = find_pcb_by_pid(process_struct.pid);
+	n_pcb->exit_code = response;
 
 	if (response == NO_ERRORES) {
-		move_to_list(process_struct.pcb, READY_LIST);
+		move_to_list(n_pcb, READY_LIST);
 		add_process_in_memory();
 		short_planning();
 	} else {
-		move_to_list(process_struct.pcb, EXIT_LIST);
+		move_to_list(n_pcb, EXIT_LIST);
 		substract_process_in_memory();
 	}
 
@@ -191,7 +200,6 @@ void connectionClosed(socket_connection* connection) {
 		pcb* l_pcb = find_pcb_by_socket(connection->socket);
 		move_to_list(l_pcb, EXIT_LIST);
 		substract_process_in_memory();
-		remove_pcb_from_socket_pcb_list(l_pcb);
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 	} else if (!strcmp(client, CPU)) {
 		t_cpu* cpu = find_cpu_by_socket(connection->socket);

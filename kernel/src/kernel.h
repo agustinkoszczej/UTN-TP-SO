@@ -80,7 +80,8 @@ t_list* cpu_list;
 
 typedef struct {
 	int socket;
-	pcb* pcb;
+	int pid;
+	int state;
 } t_socket_pcb;
 
 t_socket_pcb process_struct;
