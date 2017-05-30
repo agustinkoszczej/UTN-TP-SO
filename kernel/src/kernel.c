@@ -45,6 +45,17 @@ void short_planning() {
 	pthread_mutex_unlock(&planning_mutex);
 }
 
+int find_pcb_pos_in_list(t_list* list, int pid) {
+	int i;
+	for (i = 0; i < list_size(list); i++) {
+		pcb* f_pcb = list_get(list, i);
+		if (f_pcb->pid == pid)
+			return i;
+	}
+
+	return -1;
+}
+
 void remove_cpu_from_cpu_list(t_cpu* cpu) {
 	pthread_mutex_lock(&cpu_mutex);
 	int i;
@@ -71,30 +82,42 @@ t_cpu* find_cpu_by_socket(int socket) {
 	return cpu;
 }
 
-void remove_pcb_from_socket_pcb_list(pcb* n_pcb) {
-	pthread_mutex_lock(&socket_pcb_mutex);
-	int i;
-	for (i = 0; i < list_size(socket_pcb_list); i++) {
-		t_socket_pcb* socket_pcb = list_get(socket_pcb_list, i);
-		if (socket_pcb->pcb->pid == n_pcb->pid) {
-			list_remove(socket_pcb_list, i);
-			break;
-		}
-	}
-	pthread_mutex_unlock(&socket_pcb_mutex);
-}
-
 pcb* find_pcb_by_pid(int pid) {
 	pthread_mutex_lock(&socket_pcb_mutex);
 	bool find(void* element) {
 		t_socket_pcb* n_pcb = element;
-		return n_pcb->pcb->pid == pid;
+		return n_pcb->pid == pid;
 	}
 
-	t_socket_pcb* n_pcb = list_find(socket_pcb_list, &find);
+	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find);
+
+	pthread_mutex_lock(&pcb_list_mutex);
+	int pos;
+	pcb* n_pcb = malloc(sizeof(pcb));
+	switch (socket_pcb->state) {
+		case NEW_LIST:
+			n_pcb = queue_peek(new_queue);
+			break;
+		case READY_LIST:
+			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
+			n_pcb = list_get(ready_list, pos);
+			break;
+		case EXEC_LIST:
+			pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
+			n_pcb = list_get(exec_list, pos);
+			break;
+		case BLOCK_LIST:
+			pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
+			n_pcb = list_get(block_list, pos);
+			break;
+		case EXIT_LIST:
+			n_pcb = queue_peek(exit_queue);
+			break;
+	}
+	pthread_mutex_unlock(&pcb_list_mutex);
 	pthread_mutex_unlock(&socket_pcb_mutex);
 
-	return n_pcb->pcb;
+	return n_pcb;
 }
 
 pcb* find_pcb_by_socket(int socket) {
@@ -104,21 +127,35 @@ pcb* find_pcb_by_socket(int socket) {
 		return n_pcb->socket == socket;
 	}
 
-	t_socket_pcb* n_pcb = list_find(socket_pcb_list, &find);
+	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find);
+
+	pthread_mutex_lock(&pcb_list_mutex);
+	int pos;
+	pcb* n_pcb = malloc(sizeof(pcb));
+	switch (socket_pcb->state) {
+		case NEW_LIST:
+			n_pcb = queue_peek(new_queue);
+			break;
+		case READY_LIST:
+			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
+			n_pcb = list_get(ready_list, pos);
+			break;
+		case EXEC_LIST:
+			pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
+			n_pcb = list_get(exec_list, pos);
+			break;
+		case BLOCK_LIST:
+			pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
+			n_pcb = list_get(block_list, pos);
+			break;
+		case EXIT_LIST:
+			n_pcb = queue_peek(exit_queue);
+			break;
+	}
+	pthread_mutex_unlock(&pcb_list_mutex);
 	pthread_mutex_unlock(&socket_pcb_mutex);
 
-	return n_pcb->pcb;
-}
-
-int find_pcb_pos_in_list(t_list* list, pcb* l_pcb) {
-	int i;
-	for (i = 0; i < list_size(list); i++) {
-		pcb* f_pcb = list_get(list, i);
-		if (f_pcb->pid == l_pcb->pid)
-			return i;
-	}
-
-	return -1;
+	return n_pcb;
 }
 
 void substract_process_in_memory() {
@@ -144,21 +181,24 @@ void add_process_in_memory() {
 void move_to_list(pcb* pcb, int list_name) {
 	int pos;
 
+	if (pcb->state == list_name)
+		return;
+
 	pthread_mutex_lock(&pcb_list_mutex);
 	switch (pcb->state) {
 		case NEW_LIST:
 			queue_pop(new_queue);
 			break;
 		case READY_LIST:
-			pos = find_pcb_pos_in_list(ready_list, pcb);
+			pos = find_pcb_pos_in_list(ready_list, pcb->pid);
 			list_remove(ready_list, pos);
 			break;
 		case EXEC_LIST:
-			pos = find_pcb_pos_in_list(exec_list, pcb);
+			pos = find_pcb_pos_in_list(exec_list, pcb->pid);
 			list_remove(exec_list, pos);
 			break;
 		case BLOCK_LIST:
-			pos = find_pcb_pos_in_list(block_list, pcb);
+			pos = find_pcb_pos_in_list(block_list, pcb->pid);
 			list_remove(block_list, pos);
 			break;
 		case EXIT_LIST:
@@ -185,6 +225,17 @@ void move_to_list(pcb* pcb, int list_name) {
 			break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
+
+	pthread_mutex_lock(&socket_pcb_mutex);
+	int i;
+	for(i = 0; i < list_size(socket_pcb_list); i++) {
+		t_socket_pcb* socket_pcb = list_get(socket_pcb_list, i);
+		if(socket_pcb->pid == pcb->pid) {
+			socket_pcb->state = list_name;
+			break;
+		}
+	}
+	pthread_mutex_unlock(&socket_pcb_mutex);
 }
 
 void create_function_dictionary() {
@@ -395,6 +446,7 @@ void show_active_process(char option) {
 	}
 
 	clear_screen();
+	printf("%s", list_name);
 	for (i = 0; i < list_size(list); i++) {
 		pcb* n_pcb = list_get(list, i);
 		printf("%d ", n_pcb->pid);
@@ -471,7 +523,7 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 	pthread_mutex_lock(&socket_pcb_mutex);
 	bool find(void* element) {
 		t_socket_pcb* n_socket_pcb = element;
-		return n_socket_pcb->pcb->pid == pid;
+		return n_socket_pcb->pid == pid;
 	}
 
 	t_socket_pcb* n_socket_pcb = list_find(socket_pcb_list, find);
@@ -481,8 +533,9 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 
 void stop_process(int pid) {
 	t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
-	n_socket_pcb->pcb->exit_code = ERROR_SIN_DEFINIR;
-	runFunction(n_socket_pcb->socket, "kernel_stop_process", 2, n_socket_pcb->pcb->pid, n_socket_pcb->pcb->exit_code);
+	pcb* n_pcb = find_pcb_by_pid(pid);
+	n_pcb->exit_code = ERROR_SIN_DEFINIR;
+	runFunction(n_socket_pcb->socket, "kernel_stop_process", 2, n_socket_pcb->pid, n_pcb->exit_code);
 }
 
 void do_stop_process(char* sel) {
