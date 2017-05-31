@@ -125,6 +125,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	if (finished) {
 		move_to_list(n_pcb, EXIT_LIST);
 		substract_process_in_memory();
+		runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 		t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
 		runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
 	} else {
@@ -152,7 +153,6 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 		short_planning();
 	} else {
 		move_to_list(n_pcb, EXIT_LIST);
-		substract_process_in_memory();
 	}
 
 	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));

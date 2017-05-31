@@ -264,6 +264,7 @@ void init_bitmap() {
 	buffer = string_substring_until(buffer, size);
 
 	bitmap = bitarray_create_with_mode(buffer, block_quantity, LSB_FIRST);
+	free(buffer);
 	fclose(bitmap_f);
 }
 

@@ -96,6 +96,13 @@ void create_function_dictionary() {
 }
 
 void start_program(char* location) {
+	FILE* file = fopen(string_from_format("resources/%s", location), "r");
+	if (file == NULL) {
+		log_error(logger, "Couldn't open file %s", location);
+		new_message("Couldn't open file", -1);
+		return;
+	}
+
 	char* buffer;
 	int size;
 	t_process* process = malloc(sizeof(t_process));
@@ -113,13 +120,6 @@ void start_program(char* location) {
 		return;
 	}
 	//log_debug(logger, "Connected to KERNEL. Socket = %d, IP = %s, Port = %d.", process->socket, ip, port);
-
-	FILE* file = fopen(string_from_format("resources/%s", location), "r");
-	if (file == NULL) {
-		log_error(logger, "Couldn't open file %s", location);
-		new_message("Couldn't open file", -1);
-		return;
-	}
 
 	fseek(file, 0L, SEEK_END);
 	size = ftell(file);
@@ -172,25 +172,25 @@ void do_start_program(char* sel) {
 }
 
 void abort_program(t_process* process, int exit_code) {
+	char* time_finish = temporal_get_string_time();
+	process->time_finish = malloc(string_length(time_finish));
+	process->time_finish = time_finish;
+
+	new_message(dictionary_get(message_map, string_itoa(exit_code)), process->pid);
+	char* message = string_from_format("[%s] [%s] [%d]", process->time_start, process->time_finish, process->c_message);
+	new_message(message, process->pid);
+
 	if (process->pid > 0) {
-		char* time_finish = temporal_get_string_time();
-		process->time_finish = malloc(string_length(time_finish));
-		process->time_finish = time_finish;
-
-		new_message(dictionary_get(message_map, string_itoa(exit_code)), process->pid);
-		char* message = string_from_format("[%s] [%s] [%d]", process->time_start, process->time_finish, process->c_message);
-		new_message(message, process->pid);
-
 		pthread_mutex_lock(&p_counter_mutex);
 		p_counter--;
 		pthread_mutex_unlock(&p_counter_mutex);
-
-		process->pid = -1;
-		process->socket = -1;
-
-		//log_debug(logger, dictionary_get(message_map, string_itoa(exit_code)));
-		//runFunction(process->socket, "console_abort_program", 2, CONSOLE, string_itoa(process->pid));
 	}
+
+	process->pid = -1;
+	process->socket = -1;
+
+	//log_debug(logger, dictionary_get(message_map, string_itoa(exit_code)));
+	//runFunction(process->socket, "console_abort_program", 2, CONSOLE, string_itoa(process->pid));
 	close(process->socket);
 }
 
