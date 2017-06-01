@@ -41,6 +41,13 @@ void cpu_get_shared_var(socket_connection* connection, char** args);
 void cpu_set_shared_var(socket_connection* connection, char** args);
 void cpu_task_finished(socket_connection* connection, char** args);
 
+void cpu_error(socket_connection* connection, char** args);
+void cpu_wait_sem(socket_connection* connection, char** args);
+void cpu_signal_sem(socket_connection* connection, char** args);
+void cpu_malloc(socket_connection* connection, char** args);
+void cpu_free(socket_connection* connection, char** args);
+void cpu_open_file(socket_connection* connection, char** args);
+
 /*
  * SERVER
  */

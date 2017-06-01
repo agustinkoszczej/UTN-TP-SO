@@ -246,8 +246,18 @@ void create_function_dictionary() {
 	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);
 	dictionary_put(fns, "cpu_received_page_stack_size", &cpu_received_page_stack_size);
-	dictionary_put(fns, "cpu_get_shared_var", &cpu_get_shared_var);
 	dictionary_put(fns, "cpu_task_finished", &cpu_task_finished);
+
+	dictionary_put(fns, "cpu_error", &cpu_error);
+	dictionary_put(fns, "cpu_get_shared_var", &cpu_get_shared_var);
+	dictionary_put(fns, "cpu_set_shared_var", &cpu_set_shared_var);
+	dictionary_put(fns, "cpu_wait_sem", &cpu_wait_sem);
+	dictionary_put(fns, "cpu_signal_sem", &cpu_signal_sem);
+	dictionary_put(fns, "cpu_malloc", &cpu_malloc);
+	dictionary_put(fns, "cpu_free", &cpu_free);
+	dictionary_put(fns, "cpu_open_file", &cpu_open_file);
+
+
 }
 
 void open_socket(t_config* config, char* name) {

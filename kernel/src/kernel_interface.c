@@ -135,6 +135,40 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	short_planning();
 }
 
+void cpu_error(socket_connection* connection, char** args){
+	//TODO
+
+	//En cpu: runFunction(kernel_socket, "cpu_error", 1, STACK_OVERFLOW)
+	//
+	switch(args[0]){
+		case STACK_OVERFLOW:
+			log_debug(logger, "Error: Stack Overflow. CPU socket: %d, IP = %s, Port = %d.\n", connection->socket, connection->ip, connection->port);
+		break;
+		//Agregar mas casos si los hay
+	}
+}
+
+void cpu_wait_sem(socket_connection* connection, char** args){
+	//TODO
+}
+
+void cpu_signal_sem(socket_connection* connection, char** args){
+	//TODO
+}
+
+void cpu_malloc(socket_connection* connection, char** args){
+	//TODO
+}
+
+void cpu_free(socket_connection* connection, char** args){
+	//TODO
+}
+
+void cpu_open_file(socket_connection* connection, char** args){
+	//TODO
+}
+
+
 /*
  * MEMORY
  */
