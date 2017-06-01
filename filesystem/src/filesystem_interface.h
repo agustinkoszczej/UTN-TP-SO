@@ -16,10 +16,15 @@ int k_socket;
 void newClient(socket_connection* connection);
 void connectionClosed(socket_connection* connection);
 
-void validateFile(socket_connection* connection, char** args);
-void createFile(socket_connection* connection, char** args);
-void deleteFile(socket_connection* connection, char** args);
-void getData(socket_connection* connection, char** args);
-void saveData(socket_connection* connection, char** args);
+/*
+ * KERNEL
+ */
+void kernel_validate_file(socket_connection* connection, char** args);
+void kernel_create_file(socket_connection* connection, char** args);
+void kernel_delete_file(socket_connection* connection, char** args);
+void kernel_get_data(socket_connection* connection, char** args);
+void kernel_save_data(socket_connection* connection, char** args);
+
+
 
 #endif /* FILESYSTEM_INTERFACE_H_ */

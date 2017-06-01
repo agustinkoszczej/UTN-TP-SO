@@ -11,31 +11,31 @@ void connectionClosed(socket_connection * connection) {
 	log_debug(logger, "KERNEL has disconnected. Socket = %d, IP = %s, Port = %d.\n", connection->socket, connection->ip, connection->port);
 }
 
-void validateFile(socket_connection* connection, char** args) {
+void kernel_validate_file(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&request_mutex);
 	char* path = args[0];
 
 	bool result = validate_file(path);
-	runFunction(connection->socket, "fs_validate_file", 1, string_itoa(result));
+	runFunction(connection->socket, "fs_response_file", 1, string_itoa(result));
 	pthread_mutex_unlock(&request_mutex);
 }
-void createFile(socket_connection* connection, char** args) {
+void kernel_create_file(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&request_mutex);
 	char* path = args[0];
 
 	bool result = create_file(path);
-	runFunction(connection->socket, "fs_create_file", 1, string_itoa(result));
+	runFunction(connection->socket, "fs_response_file", 1, string_itoa(result));
 	pthread_mutex_unlock(&request_mutex);
 }
-void deleteFile(socket_connection* connection, char** args) {
+void kernel_delete_file(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&request_mutex);
 	char* path = args[0];
 
 	bool result = delete_file(path);
-	runFunction(connection->socket, "fs_delete_file", 1, string_itoa(result));
+	runFunction(connection->socket, "fs_response_file", 1, string_itoa(result));
 	pthread_mutex_unlock(&request_mutex);
 }
-void getData(socket_connection* connection, char** args) {
+void kernel_get_data(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&request_mutex);
 	char* path = args[0];
 	int offset = atoi(args[1]);
@@ -45,7 +45,7 @@ void getData(socket_connection* connection, char** args) {
 	runFunction(connection->socket, "fs_get_data", 1, result);
 	pthread_mutex_unlock(&request_mutex);
 }
-void saveData(socket_connection* connection, char** args) {
+void kernel_save_data(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&request_mutex);
 	char* path = args[0];
 	int offset = atoi(args[1]);
@@ -56,3 +56,8 @@ void saveData(socket_connection* connection, char** args) {
 	runFunction(connection->socket, "fs_save_data", 1, string_itoa(result));
 	pthread_mutex_unlock(&request_mutex);
 }
+
+
+/*
+ * KERNEL
+ */

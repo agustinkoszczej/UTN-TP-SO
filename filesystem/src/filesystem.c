@@ -243,11 +243,11 @@ bool create_file(char* path) {
 void create_function_dictionary() {
 	fns = dictionary_create();
 
-	dictionary_put(fns, "validateFile", &validateFile);
-	dictionary_put(fns, "createFile", &createFile);
-	dictionary_put(fns, "deleteFile", &deleteFile);
-	dictionary_put(fns, "getData", &getData);
-	dictionary_put(fns, "saveData", &saveData);
+	dictionary_put(fns, "kernel_validate_file", &kernel_validate_file);
+	dictionary_put(fns, "kernel_create_file", &kernel_create_file);
+	dictionary_put(fns, "kernel_delete_file", &kernel_delete_file);
+	dictionary_put(fns, "kernel_get_data", &kernel_get_data);
+	dictionary_put(fns, "kernel_save_data", &kernel_save_data);
 }
 
 void init_bitmap() {

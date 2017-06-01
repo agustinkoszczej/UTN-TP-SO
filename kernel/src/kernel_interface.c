@@ -140,7 +140,7 @@ void cpu_error(socket_connection* connection, char** args){
 
 	//En cpu: runFunction(kernel_socket, "cpu_error", 1, STACK_OVERFLOW)
 	//
-	switch(args[0]){
+	switch(atoi(args[0])){
 		case STACK_OVERFLOW:
 			log_debug(logger, "Error: Stack Overflow. CPU socket: %d, IP = %s, Port = %d.\n", connection->socket, connection->ip, connection->port);
 		break;
@@ -164,10 +164,59 @@ void cpu_free(socket_connection* connection, char** args){
 	//TODO
 }
 
+//TODO FALTA DE VER LOS PERMISOS DE ARCHIVOS
 void cpu_open_file(socket_connection* connection, char** args){
-	//TODO
-}
+	char* path = args[0];
+	char* flags = args[1];
+	int pid = atoi(args[2]);
 
+	validate_file(path);
+
+	if(!fs_response){//Si no existe archivo
+			runFunction(fs_socket, "kernel_create_file", 1, flags);
+			wait_response(fs_mutex);
+			if(!fs_response){ // No se crea bien
+				//TODO Loguear o informar que no se creo el archivo correctamente
+				runFunction(connection->socket, "kernel_finalizar_cpu", 0);
+				return;
+			}
+	}
+		int global_fd = add_file_in_global_table(path);
+		add_file_in_process_table(global_fd, flags, pid);
+		runFunction(connection->socket, "kernel_response_file", 1, string_itoa(global_fd));
+
+}
+void cpu_close_file(socket_connection* connection, char** args){
+	int fd_close = atoi(args[0]);
+	int pid = atoi(args[1]);
+	char* path = get_path(pid, fd_close);
+
+	validate_file(path);
+
+	if (!fs_response_file){
+		//TODO Loguear o informar que no se existe el archivo
+		runFunction(connection->socket, "kernel_finalizar_cpu", 0);
+					return;
+	}
+	close_file(fd_close, pid);
+	runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd_close));
+
+}
+void cpu_delete_file(socket_connection* connection, char** args){
+	int fd_delete = atoi(args[0]);
+	int pid = atoi(args[1]);
+	char* path = get_path(pid, fd_delete);
+
+	validate_file(path);
+
+	if(!fs_response){ //Si existe archivo
+		delete_file(fd_delete);
+	}
+	else{
+		cpu_error(connection->socket, string_itoa(NO_EXISTE_ARCHIVO));
+		runFunction(connection->socket, "kernel_finalizar_cpu", 0);
+	}
+}
 
 /*
  * MEMORY
@@ -196,6 +245,15 @@ void memory_page_size(socket_connection* connection, char** args) {
 
 	mem_page_size = page_size;
 	runFunction(mem_socket, "kernel_stack_size", 1, string_itoa(stack_size));
+}
+
+
+/*
+ * FILESYSTEM
+ */
+void fs_response_file(socket_connection* connection, char** args){
+	fs_response = atoi(args[0]);
+	signal_response(fs_mutex);
 }
 
 /*

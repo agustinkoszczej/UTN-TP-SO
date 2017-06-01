@@ -69,3 +69,13 @@ void kernel_response_malloc_pointer(socket_connection* connection, char** args){
 	signal_response();
 
 }
+
+void kernel_response_file(socket_connection* connection, char** args){
+	kernel_file_descriptor = atoi(args[0]);
+	signal_response();
+}
+void kernel_finalizar_cpu(socket_connection* connection, char** args){
+	cpu_finalizar();
+	kernel_file_descriptor = -1;
+	signal_response();
+}

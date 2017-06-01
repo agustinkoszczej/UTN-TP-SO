@@ -50,16 +50,32 @@ void signal_response() {
 	pthread_mutex_unlock(&planning_mutex);
 }
 
+char* get_flag(t_banderas flags){
+	if(flags.creacion){
+		return CREATE;
+	}else if(flags.lectura){
+		if(flags.escritura){
+			return string_from_format("%s%s",READ, WRITE);
+		}
+		return READ;
+	}
+	return WRITE;
+}
+
 void create_function_dictionary() {
 	fns = dictionary_create();
 
 	dictionary_put(fns, "memory_identify", &memory_identify);
+	dictionary_put(fns, "memory_response_read_bytes_from_page", &memory_response_read_bytes_from_page);
+	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
+
 	dictionary_put(fns, "kernel_receive_pcb", &kernel_receive_pcb);
 	dictionary_put(fns, "kernel_page_stack_size", &kernel_page_stack_size);
 	dictionary_put(fns, "kernel_response_get_shared_var", &kernel_response_get_shared_var);
 	dictionary_put(fns, "kernel_response_set_shared_var", &kernel_response_set_shared_var);
-	dictionary_put(fns, "memory_response_read_bytes_from_page", &memory_response_read_bytes_from_page);
-	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
+	dictionary_put(fns, "kernel_response_file", &kernel_response_file);
+	dictionary_put(fns, "kernel_finalizar_cpu", &kernel_finalizar_cpu);
+
 }
 
 void connect_to_server(t_config* config, char* name) {

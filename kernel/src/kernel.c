@@ -40,7 +40,8 @@ void short_planning() {
 
 		char* pcb_string = pcb_to_string(_pcb);
 
-		runFunction(free_cpu->socket, "kernel_receive_pcb", 3, string_itoa(planning_alg), string_itoa(quantum), pcb_string);
+		runFunction(free_cpu->socket, "kernel_receive_pcb", 3,
+				string_itoa(planning_alg), string_itoa(quantum), pcb_string);
 	}
 	pthread_mutex_unlock(&planning_mutex);
 }
@@ -95,24 +96,24 @@ pcb* find_pcb_by_pid(int pid) {
 	int pos;
 	pcb* n_pcb = malloc(sizeof(pcb));
 	switch (socket_pcb->state) {
-		case NEW_LIST:
-			n_pcb = queue_peek(new_queue);
-			break;
-		case READY_LIST:
-			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
-			n_pcb = list_get(ready_list, pos);
-			break;
-		case EXEC_LIST:
-			pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
-			n_pcb = list_get(exec_list, pos);
-			break;
-		case BLOCK_LIST:
-			pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
-			n_pcb = list_get(block_list, pos);
-			break;
-		case EXIT_LIST:
-			n_pcb = queue_peek(exit_queue);
-			break;
+	case NEW_LIST:
+		n_pcb = queue_peek(new_queue);
+		break;
+	case READY_LIST:
+		pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
+		n_pcb = list_get(ready_list, pos);
+		break;
+	case EXEC_LIST:
+		pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
+		n_pcb = list_get(exec_list, pos);
+		break;
+	case BLOCK_LIST:
+		pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
+		n_pcb = list_get(block_list, pos);
+		break;
+	case EXIT_LIST:
+		n_pcb = queue_peek(exit_queue);
+		break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
 	pthread_mutex_unlock(&socket_pcb_mutex);
@@ -133,24 +134,24 @@ pcb* find_pcb_by_socket(int socket) {
 	int pos;
 	pcb* n_pcb = malloc(sizeof(pcb));
 	switch (socket_pcb->state) {
-		case NEW_LIST:
-			n_pcb = queue_peek(new_queue);
-			break;
-		case READY_LIST:
-			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
-			n_pcb = list_get(ready_list, pos);
-			break;
-		case EXEC_LIST:
-			pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
-			n_pcb = list_get(exec_list, pos);
-			break;
-		case BLOCK_LIST:
-			pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
-			n_pcb = list_get(block_list, pos);
-			break;
-		case EXIT_LIST:
-			n_pcb = queue_peek(exit_queue);
-			break;
+	case NEW_LIST:
+		n_pcb = queue_peek(new_queue);
+		break;
+	case READY_LIST:
+		pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
+		n_pcb = list_get(ready_list, pos);
+		break;
+	case EXEC_LIST:
+		pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
+		n_pcb = list_get(exec_list, pos);
+		break;
+	case BLOCK_LIST:
+		pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
+		n_pcb = list_get(block_list, pos);
+		break;
+	case EXIT_LIST:
+		n_pcb = queue_peek(exit_queue);
+		break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
 	pthread_mutex_unlock(&socket_pcb_mutex);
@@ -186,51 +187,51 @@ void move_to_list(pcb* pcb, int list_name) {
 
 	pthread_mutex_lock(&pcb_list_mutex);
 	switch (pcb->state) {
-		case NEW_LIST:
-			queue_pop(new_queue);
-			break;
-		case READY_LIST:
-			pos = find_pcb_pos_in_list(ready_list, pcb->pid);
-			list_remove(ready_list, pos);
-			break;
-		case EXEC_LIST:
-			pos = find_pcb_pos_in_list(exec_list, pcb->pid);
-			list_remove(exec_list, pos);
-			break;
-		case BLOCK_LIST:
-			pos = find_pcb_pos_in_list(block_list, pcb->pid);
-			list_remove(block_list, pos);
-			break;
-		case EXIT_LIST:
-			queue_pop(exit_queue);
-			break;
+	case NEW_LIST:
+		queue_pop(new_queue);
+		break;
+	case READY_LIST:
+		pos = find_pcb_pos_in_list(ready_list, pcb->pid);
+		list_remove(ready_list, pos);
+		break;
+	case EXEC_LIST:
+		pos = find_pcb_pos_in_list(exec_list, pcb->pid);
+		list_remove(exec_list, pos);
+		break;
+	case BLOCK_LIST:
+		pos = find_pcb_pos_in_list(block_list, pcb->pid);
+		list_remove(block_list, pos);
+		break;
+	case EXIT_LIST:
+		queue_pop(exit_queue);
+		break;
 	}
 
 	pcb->state = list_name;
 	switch (list_name) {
-		case NEW_LIST:
-			queue_push(new_queue, pcb);
-			break;
-		case READY_LIST:
-			list_add(ready_list, pcb);
-			break;
-		case EXEC_LIST:
-			list_add(exec_list, pcb);
-			break;
-		case BLOCK_LIST:
-			list_add(block_list, pcb);
-			break;
-		case EXIT_LIST:
-			queue_push(exit_queue, pcb);
-			break;
+	case NEW_LIST:
+		queue_push(new_queue, pcb);
+		break;
+	case READY_LIST:
+		list_add(ready_list, pcb);
+		break;
+	case EXEC_LIST:
+		list_add(exec_list, pcb);
+		break;
+	case BLOCK_LIST:
+		list_add(block_list, pcb);
+		break;
+	case EXIT_LIST:
+		queue_push(exit_queue, pcb);
+		break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
 
 	pthread_mutex_lock(&socket_pcb_mutex);
 	int i;
-	for(i = 0; i < list_size(socket_pcb_list); i++) {
+	for (i = 0; i < list_size(socket_pcb_list); i++) {
 		t_socket_pcb* socket_pcb = list_get(socket_pcb_list, i);
-		if(socket_pcb->pid == pcb->pid) {
+		if (socket_pcb->pid == pcb->pid) {
 			socket_pcb->state = list_name;
 			break;
 		}
@@ -238,170 +239,265 @@ void move_to_list(pcb* pcb, int list_name) {
 	pthread_mutex_unlock(&socket_pcb_mutex);
 }
 
-void create_function_dictionary() {
-	fns = dictionary_create();
-
-	dictionary_put(fns, "console_load_program", &console_load_program);
-	dictionary_put(fns, "memory_identify", &memory_identify);
-	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
-	dictionary_put(fns, "memory_page_size", &memory_page_size);
-	dictionary_put(fns, "cpu_received_page_stack_size", &cpu_received_page_stack_size);
-	dictionary_put(fns, "cpu_task_finished", &cpu_task_finished);
-
-	dictionary_put(fns, "cpu_error", &cpu_error);
-	dictionary_put(fns, "cpu_get_shared_var", &cpu_get_shared_var);
-	dictionary_put(fns, "cpu_set_shared_var", &cpu_set_shared_var);
-	dictionary_put(fns, "cpu_wait_sem", &cpu_wait_sem);
-	dictionary_put(fns, "cpu_signal_sem", &cpu_signal_sem);
-	dictionary_put(fns, "cpu_malloc", &cpu_malloc);
-	dictionary_put(fns, "cpu_free", &cpu_free);
-	dictionary_put(fns, "cpu_open_file", &cpu_open_file);
-
-
+/*
+ * FILESYSTEM
+ */
+int find_file_pos_in_global_table(char* path) {
+	int i;
+	for (i = 0; i < list_size(fs_global_table); i++) {
+		t_global_file_table* file = list_get(fs_global_table, i);
+		if (!strcmp(file->path, path))
+			return i;
+	}
+	return -1; //No existe File en la table
 }
 
-void open_socket(t_config* config, char* name) {
-	int port;
+void add_file_in_process_table(int global_fd, char* flag, int pid) {
+	t_list* files_open_process = list_get(fs_process_table, pid);
+	t_process_file_table* n_file = malloc(sizeof(t_process_file_table));
+	n_file->global_fd = global_fd;
+	n_file->flag=flag;
 
-	if (!strcmp(name, CONSOLE))
-		port = config_get_int_value(config, PUERTO_PROG);
-	else if (!strcmp(name, CPU))
-		port = config_get_int_value(config, PUERTO_CPU);
-	else {
-		log_error(logger, "Error at creating listener for %s", name);
-		error_show(" at creating listener for %s", name);
-		exit(EXIT_FAILURE);
-	}
-
-	if (createListen(port, &newClient, fns, &connectionClosed, NULL) == -1) {
-		log_error(logger, "Error at creating listener for %s", name);
-		error_show(" at creating listener for %s", name);
-		exit(EXIT_FAILURE);
-	}
-	log_debug(logger, "Listening new clients of %s at %d.\n", name, port);
+	pthread_mutex_lock(&fs_mutex);
+	list_add(files_open_process, n_file);
+	list_replace(fs_process_table, pid, files_open_process);
+	pthread_mutex_unlock(&fs_mutex);
 }
 
-void connect_to_server(t_config* config, char* name) {
-	int port;
-	char* ip_server;
-	int* socket;
-
-	if (!strcmp(name, FILESYSTEM)) {
-		ip_server = config_get_string_value(config, IP_FILESYSTEM);
-		port = config_get_int_value(config, PUERTO_FS);
-		socket = &fs_socket;
-	} else if (!strcmp(name, MEMORY)) {
-		ip_server = config_get_string_value(config, IP_MEMORIA);
-		port = config_get_int_value(config, PUERTO_MEMORIA);
-		socket = &mem_socket;
+int add_file_in_global_table(char* path) {
+	t_global_file_table* n_file = malloc(sizeof(t_global_file_table));
+	n_file->path = path;
+	pthread_mutex_lock(&fs_mutex);
+	int pos = find_file_pos_in_global_table(path);
+	if (pos == -1) {//No existe
+		n_file->path = string_new();
+		string_append(n_file->path, path);
+		n_file->open = 1;
+		list_add(fs_global_table, n_file);
 	} else {
-		log_error(logger, "Error at connecting to %s.", name);
-		error_show(" at connecting to %s.\n", name);
-		exit(EXIT_FAILURE);
+		n_file = list_get(fs_global_table, pos);
+		n_file->open++;
+		list_replace(fs_global_table, pos, n_file);
 	}
-
-	if ((*socket = connectServer(ip_server, port, fns, &server_connectionClosed, NULL)) == -1) {
-		log_error(logger, "Error at connecting to %s.", name);
-		error_show(" at connecting to %s.\n", name);
-		exit(EXIT_FAILURE);
-	}
-	log_debug(logger, "Connected to %s.", name);
+		free(n_file);
+		pthread_mutex_unlock(&fs_mutex);
 }
 
-void init_kernel(t_config* config) {
-	log_debug(logger, "Initiating KERNEL");
+bool close_file(int fd_close, int pid){
+	fd_close -= 3;
+	t_list* files_open_process = list_get(fs_process_table, pid);
+	t_process_file_table* process_file_to_close = list_get(files_open_process, fd_close);
+	int gfd_to_close = process_file_to_close->global_fd;
 
-	pthread_mutex_init(&cpu_mutex, NULL);
-	pthread_mutex_init(&p_counter_mutex, NULL);
-	pthread_mutex_init(&socket_pcb_mutex, NULL);
-	pthread_mutex_init(&console_mutex, NULL);
-	pthread_mutex_init(&pcb_list_mutex, NULL);
-	pthread_mutex_init(&planning_mutex, NULL);
-	pthread_mutex_init(&process_in_memory_mutex, NULL);
-	pthread_mutex_init(&shared_vars_mutex, NULL);
-
-	port_con = config_get_int_value(config, PUERTO_PROG);
-	port_cpu = config_get_int_value(config, PUERTO_CPU);
-	multiprog = config_get_int_value(config, GRADO_MULTIPROG);
-	stack_size = config_get_int_value(config, STACK_SIZE);
-
-	shared_vars = dictionary_create();
-	char** global_vars_arr = config_get_array_value(config, SHARED_VARS);
-	int i = 0;
-	while (global_vars_arr[i] != NULL) {
-		dictionary_put(shared_vars, string_substring_from(global_vars_arr[i], 1), 0);
-		i++;
+	if(process_file_to_close == NULL){
+		return false;
 	}
+	else{
+			list_remove(fs_process_table, fd_close);
 
-	sem_ids = dictionary_create();
-	char** sem_ids_arr = config_get_array_value(config, SEM_IDS);
-	char** sem_vals_arr = config_get_array_value(config, SEM_INIT);
-	i = 0;
-	while (sem_ids_arr[i] != NULL) {
-		int* val = malloc(sizeof(int));
-		*val = atoi(sem_vals_arr[i]);
-		dictionary_put(sem_ids, sem_ids_arr[i], val);
-		i++;
+			t_global_file_table* global_file_to_decrement = list_get(fs_global_table, gfd_to_close);
+			global_file_to_decrement->open--;
+
+			if(global_file_to_decrement->open == 0) //Si es 0 lo borro de la Global File Table
+				list_remove(fs_global_table, gfd_to_close);
+			else
+				list_replace(fs_global_table, gfd_to_close, global_file_to_decrement);
 	}
-
-	char* p = config_get_string_value(config, ALGORITMO);
-	if (!strcmp(p, "FIFO")) {
-		planning_alg = FIFO;
-		quantum = 0;
-	} else if (!strcmp(p, "RR")) {
-		planning_alg = RR;
-		quantum = config_get_int_value(config, QUANTUM) - 1;
-	}
-
-	p_counter = 0;
-	process_in_memory = 0;
-	planning_running = true;
-
-	new_queue = queue_create();
-	ready_list = list_create();
-	exec_list = list_create();
-	block_list = list_create();
-	exit_queue = queue_create();
-
-	socket_pcb_list = list_create();
-
-	cpu_list = list_create();
-
-	open_socket(config, CONSOLE);
-	open_socket(config, CPU);
-	connect_to_server(config, FILESYSTEM);
-	connect_to_server(config, MEMORY);
+	return true;
 }
 
-void print_menu() {
-	clear_screen();
-
-	show_title("KERNEL - MAIN MENU");
-	println("Enter your choice:");
-	println("> ACTIVE_PROCESS");
-	println("> INFO");
-	println("> FILE_TABLE");
-	println("> MULTIPROGRAMMING");
-	println("> STOP_PROCESS");
-	if (planning_running)
-		println("> STOP_PLANIFICATION\n");
-	else
-		println("> CONTINUE_PLANIFICATION\n");
+void delete_file(char* path){
+	//TODO
+}
+char* get_path(int pid, int fd){
+	//TODO
 }
 
-void ask_option(char *sel) {
-	print_menu();
-	fgets(sel, 255, stdin);
-	strtok(sel, "\n");
-	string_to_upper(sel);
+bool validate_file(char* path){
+	runFunction(fs_socket, "kernel_validate_file", 1, path);
+	wait_response(fs_mutex);
 }
 
-void show_active_process(char option) {
-	pthread_mutex_lock(&pcb_list_mutex);
-	t_list* list = list_create();
-	char* list_name = string_new();
-	int i, j;
-	switch (option) {
+void wait_response(pthread_mutex_t mutex) {
+	pthread_mutex_lock(&mutex);
+}
+
+void signal_response(pthread_mutex_t mutex) {
+	pthread_mutex_unlock(&mutex);
+}
+
+	void create_function_dictionary() {
+		fns = dictionary_create();
+
+		dictionary_put(fns, "console_load_program", &console_load_program);
+		dictionary_put(fns, "memory_identify", &memory_identify);
+		dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
+		dictionary_put(fns, "memory_page_size", &memory_page_size);
+		dictionary_put(fns, "cpu_received_page_stack_size", &cpu_received_page_stack_size);
+		dictionary_put(fns, "cpu_task_finished", &cpu_task_finished);
+
+		dictionary_put(fns, "cpu_error", &cpu_error);
+		dictionary_put(fns, "cpu_get_shared_var", &cpu_get_shared_var);
+		dictionary_put(fns, "cpu_set_shared_var", &cpu_set_shared_var);
+		dictionary_put(fns, "cpu_wait_sem", &cpu_wait_sem);
+		dictionary_put(fns, "cpu_signal_sem", &cpu_signal_sem);
+		dictionary_put(fns, "cpu_malloc", &cpu_malloc);
+		dictionary_put(fns, "cpu_free", &cpu_free);
+		dictionary_put(fns, "cpu_open_file", &cpu_open_file);
+		dictionary_put(fns, "cpu_close_file", &cpu_close_file);
+		dictionary_put(fns, "cpu_delete_file", &cpu_delete_file);
+
+		dictionary_put(fns, "fs_response_file", &fs_response_file);
+
+	}
+
+	void open_socket(t_config* config, char* name) {
+		int port;
+
+		if (!strcmp(name, CONSOLE))
+			port = config_get_int_value(config, PUERTO_PROG);
+		else if (!strcmp(name, CPU))
+			port = config_get_int_value(config, PUERTO_CPU);
+		else {
+			log_error(logger, "Error at creating listener for %s", name);
+			error_show(" at creating listener for %s", name);
+			exit(EXIT_FAILURE);
+		}
+
+		if (createListen(port, &newClient, fns, &connectionClosed, NULL)
+				== -1) {
+			log_error(logger, "Error at creating listener for %s", name);
+			error_show(" at creating listener for %s", name);
+			exit(EXIT_FAILURE);
+		}
+		log_debug(logger, "Listening new clients of %s at %d.\n", name, port);
+	}
+
+	void connect_to_server(t_config* config, char* name) {
+		int port;
+		char* ip_server;
+		int* socket;
+
+		if (!strcmp(name, FILESYSTEM)) {
+			ip_server = config_get_string_value(config, IP_FILESYSTEM);
+			port = config_get_int_value(config, PUERTO_FS);
+			socket = &fs_socket;
+		} else if (!strcmp(name, MEMORY)) {
+			ip_server = config_get_string_value(config, IP_MEMORIA);
+			port = config_get_int_value(config, PUERTO_MEMORIA);
+			socket = &mem_socket;
+		} else {
+			log_error(logger, "Error at connecting to %s.", name);
+			error_show(" at connecting to %s.\n", name);
+			exit(EXIT_FAILURE);
+		}
+
+		if ((*socket = connectServer(ip_server, port, fns,
+				&server_connectionClosed, NULL)) == -1) {
+			log_error(logger, "Error at connecting to %s.", name);
+			error_show(" at connecting to %s.\n", name);
+			exit(EXIT_FAILURE);
+		}
+		log_debug(logger, "Connected to %s.", name);
+	}
+
+	void init_kernel(t_config* config) {
+		log_debug(logger, "Initiating KERNEL");
+
+		pthread_mutex_init(&cpu_mutex, NULL);
+		pthread_mutex_init(&p_counter_mutex, NULL);
+		pthread_mutex_init(&socket_pcb_mutex, NULL);
+		pthread_mutex_init(&console_mutex, NULL);
+		pthread_mutex_init(&pcb_list_mutex, NULL);
+		pthread_mutex_init(&planning_mutex, NULL);
+		pthread_mutex_init(&process_in_memory_mutex, NULL);
+		pthread_mutex_init(&shared_vars_mutex, NULL);
+
+		pthread_mutex_init(&fs_mutex, NULL);
+
+		port_con = config_get_int_value(config, PUERTO_PROG);
+		port_cpu = config_get_int_value(config, PUERTO_CPU);
+		multiprog = config_get_int_value(config, GRADO_MULTIPROG);
+		stack_size = config_get_int_value(config, STACK_SIZE);
+
+		shared_vars = dictionary_create();
+		char** global_vars_arr = config_get_array_value(config, SHARED_VARS);
+		int i = 0;
+		while (global_vars_arr[i] != NULL) {
+			dictionary_put(shared_vars,
+					string_substring_from(global_vars_arr[i], 1), 0);
+			i++;
+		}
+
+		sem_ids = dictionary_create();
+		char** sem_ids_arr = config_get_array_value(config, SEM_IDS);
+		char** sem_vals_arr = config_get_array_value(config, SEM_INIT);
+		i = 0;
+		while (sem_ids_arr[i] != NULL) {
+			int* val = malloc(sizeof(int));
+			*val = atoi(sem_vals_arr[i]);
+			dictionary_put(sem_ids, sem_ids_arr[i], val);
+			i++;
+		}
+
+		char* p = config_get_string_value(config, ALGORITMO);
+		if (!strcmp(p, "FIFO")) {
+			planning_alg = FIFO;
+			quantum = 0;
+		} else if (!strcmp(p, "RR")) {
+			planning_alg = RR;
+			quantum = config_get_int_value(config, QUANTUM) - 1;
+		}
+
+		p_counter = 0;
+		process_in_memory = 0;
+		planning_running = true;
+
+		new_queue = queue_create();
+		ready_list = list_create();
+		exec_list = list_create();
+		block_list = list_create();
+		exit_queue = queue_create();
+
+		socket_pcb_list = list_create();
+
+		cpu_list = list_create();
+
+		open_socket(config, CONSOLE);
+		open_socket(config, CPU);
+		connect_to_server(config, FILESYSTEM);
+		connect_to_server(config, MEMORY);
+	}
+
+	void print_menu() {
+		clear_screen();
+
+		show_title("KERNEL - MAIN MENU");
+		println("Enter your choice:");
+		println("> ACTIVE_PROCESS");
+		println("> INFO");
+		println("> FILE_TABLE");
+		println("> MULTIPROGRAMMING");
+		println("> STOP_PROCESS");
+		if (planning_running)
+			println("> STOP_PLANIFICATION\n");
+		else
+			println("> CONTINUE_PLANIFICATION\n");
+	}
+
+	void ask_option(char *sel) {
+		print_menu();
+		fgets(sel, 255, stdin);
+		strtok(sel, "\n");
+		string_to_upper(sel);
+	}
+
+	void show_active_process(char option) {
+		pthread_mutex_lock(&pcb_list_mutex);
+		t_list* list = list_create();
+		char* list_name = string_new();
+		int i, j;
+		switch (option) {
 		case 'A':
 			string_append(&list_name, "PROCESS IN ALL\n");
 
@@ -453,146 +549,149 @@ void show_active_process(char option) {
 			string_append(&list_name, "PROCESS IN BLOCK\n");
 			list_add_all(list, block_list);
 			break;
+		}
+
+		clear_screen();
+		printf("%s", list_name);
+		for (i = 0; i < list_size(list); i++) {
+			pcb* n_pcb = list_get(list, i);
+			printf("%d ", n_pcb->pid);
+		}
+
+		pthread_mutex_unlock(&pcb_list_mutex);
+		wait_any_key();
 	}
 
-	clear_screen();
-	printf("%s", list_name);
-	for (i = 0; i < list_size(list); i++) {
-		pcb* n_pcb = list_get(list, i);
-		printf("%d ", n_pcb->pid);
+	void do_show_active_process(char* sel) {
+		if (!strcmp(sel, "A")) {
+			char queue[255];
+			println("> [A] ALL");
+			println("> [N] NEW");
+			println("> [R] READY");
+			println("> [E] EXIT");
+			println("> [X] EXEC");
+			println("> [B] BLOCK");
+			printf("> QUEUE: ");
+			fgets(queue, sizeof(queue), stdin);
+			strtok(queue, "\n");
+			string_to_upper(queue);
+
+			show_active_process(queue[0]);
+		}
 	}
 
-	pthread_mutex_unlock(&pcb_list_mutex);
-	wait_any_key();
-}
+	void show_info(int pid) {
+		pcb* n_pcb = find_pcb_by_pid(pid);
+		char* info = string_new();
+		string_append_with_format(&info, "PID: %d\n", n_pcb->pid);
+		string_append_with_format(&info, "RAFAGAS EJECUTADAS: %d\n",
+				n_pcb->statistics.cycles);
+		string_append_with_format(&info, "OP. PRIVILEGIADAS: %d\n",
+				n_pcb->statistics.op_priviliges);
+		// TODO tabla de archivos abiertos
+		// Cantidad de páginas de Heap
+		// Cantidad de acciones alocar en operaciones y bytes
+		// Cantidad de acciones liberar en operaciones y bytes
+		// Cantidad de syscalls
 
-void do_show_active_process(char* sel) {
-	if (!strcmp(sel, "A")) {
-		char queue[255];
-		println("> [A] ALL");
-		println("> [N] NEW");
-		println("> [R] READY");
-		println("> [E] EXIT");
-		println("> [X] EXEC");
-		println("> [B] BLOCK");
-		printf("> QUEUE: ");
-		fgets(queue, sizeof(queue), stdin);
-		strtok(queue, "\n");
-		string_to_upper(queue);
-
-		show_active_process(queue[0]);
-	}
-}
-
-void show_info(int pid) {
-	pcb* n_pcb = find_pcb_by_pid(pid);
-	char* info = string_new();
-	string_append_with_format(&info, "PID: %d\n", n_pcb->pid);
-	string_append_with_format(&info, "RAFAGAS EJECUTADAS: %d\n", n_pcb->statistics.cycles);
-	string_append_with_format(&info, "OP. PRIVILEGIADAS: %d\n", n_pcb->statistics.op_priviliges);
-	// TODO tabla de archivos abiertos
-	// Cantidad de páginas de Heap
-	// Cantidad de acciones alocar en operaciones y bytes
-	// Cantidad de acciones liberar en operaciones y bytes
-	// Cantidad de syscalls
-
-	clear_screen();
-	printf("%s\n", info);
-	wait_any_key();
-}
-
-void do_show_info(char* sel) {
-	if (!strcmp(sel, "I")) {
-		char pid[255];
-		printf("> PID: ");
-		fgets(pid, sizeof(pid), stdin);
-		strtok(pid, "\n");
-
-		show_info(atoi(pid));
-	}
-}
-
-void do_show_file_table(char* sel) {
-	if (!strcmp(sel, "F")) {
-		// TODO
-	}
-}
-
-void do_change_multiprogramming(char* sel) {
-	if (!strcmp(sel, "M")) {
-		char multi[255];
-		printf("> Num Multiprog [%d]: ", multiprog);
-		fgets(multi, sizeof(multi), stdin);
-		strtok(multi, "\n");
-
-		multiprog = atoi(multi);
-	}
-}
-
-t_socket_pcb* find_socket_by_pid(int pid) {
-	pthread_mutex_lock(&socket_pcb_mutex);
-	bool find(void* element) {
-		t_socket_pcb* n_socket_pcb = element;
-		return n_socket_pcb->pid == pid;
+		clear_screen();
+		printf("%s\n", info);
+		wait_any_key();
 	}
 
-	t_socket_pcb* n_socket_pcb = list_find(socket_pcb_list, find);
-	pthread_mutex_unlock(&socket_pcb_mutex);
-	return n_socket_pcb;
-}
+	void do_show_info(char* sel) {
+		if (!strcmp(sel, "I")) {
+			char pid[255];
+			printf("> PID: ");
+			fgets(pid, sizeof(pid), stdin);
+			strtok(pid, "\n");
 
-void stop_process(int pid) {
-	t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
-	pcb* n_pcb = find_pcb_by_pid(pid);
-	n_pcb->exit_code = ERROR_SIN_DEFINIR;
-	runFunction(n_socket_pcb->socket, "kernel_stop_process", 2, n_socket_pcb->pid, n_pcb->exit_code);
-}
-
-void do_stop_process(char* sel) {
-	if (!strcmp(sel, "S")) {
-		char pid[255];
-		printf("> PID: ");
-		fgets(pid, sizeof(pid), stdin);
-		strtok(pid, "\n");
-
-		stop_process(atoi(pid));
+			show_info(atoi(pid));
+		}
 	}
-}
 
-void do_stop_planification(char* sel) {
-	if (!strcmp(sel, "P")) {
-		planning_running = !planning_running;
-		if (planning_running)
-			short_planning();
+	void do_show_file_table(char* sel) {
+		if (!strcmp(sel, "F")) {
+			// TODO
+		}
 	}
-}
 
-int main(int argc, char *argv[]) {
-	clear_screen();
-	char sel[255];
-	t_config *config = malloc(sizeof(t_config));
+	void do_change_multiprogramming(char* sel) {
+		if (!strcmp(sel, "M")) {
+			char multi[255];
+			printf("> Num Multiprog [%d]: ", multiprog);
+			fgets(multi, sizeof(multi), stdin);
+			strtok(multi, "\n");
 
-	remove("log");
-	logger = log_create("log", "KERNEL", false, LOG_LEVEL_DEBUG);
-	create_function_dictionary();
+			multiprog = atoi(multi);
+		}
+	}
 
-	load_config(&config, argc, argv[1]);
-	print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
+	t_socket_pcb* find_socket_by_pid(int pid) {
+		pthread_mutex_lock(&socket_pcb_mutex);
+		bool find(void* element) {
+			t_socket_pcb* n_socket_pcb = element;
+			return n_socket_pcb->pid == pid;
+		}
 
-	init_kernel(config);
+		t_socket_pcb* n_socket_pcb = list_find(socket_pcb_list, find);
+		pthread_mutex_unlock(&socket_pcb_mutex);
+		return n_socket_pcb;
+	}
 
-	wait_any_key();
+	void stop_process(int pid) {
+		t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
+		pcb* n_pcb = find_pcb_by_pid(pid);
+		n_pcb->exit_code = ERROR_SIN_DEFINIR;
+		runFunction(n_socket_pcb->socket, "kernel_stop_process", 2,
+				n_socket_pcb->pid, n_pcb->exit_code);
+	}
 
-	ask_option(sel);
-	do {
-		do_show_active_process(sel);
-		do_show_info(sel);
-		do_show_file_table(sel);
-		do_change_multiprogramming(sel);
-		do_stop_process(sel);
-		do_stop_planification(sel);
+	void do_stop_process(char* sel) {
+		if (!strcmp(sel, "S")) {
+			char pid[255];
+			printf("> PID: ");
+			fgets(pid, sizeof(pid), stdin);
+			strtok(pid, "\n");
+
+			stop_process(atoi(pid));
+		}
+	}
+
+	void do_stop_planification(char* sel) {
+		if (!strcmp(sel, "P")) {
+			planning_running = !planning_running;
+			if (planning_running)
+				short_planning();
+		}
+	}
+
+	int main(int argc, char *argv[]) {
+		clear_screen();
+		char sel[255];
+		t_config *config = malloc(sizeof(t_config));
+
+		remove("log");
+		logger = log_create("log", "KERNEL", false, LOG_LEVEL_DEBUG);
+		create_function_dictionary();
+
+		load_config(&config, argc, argv[1]);
+		print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
+
+		init_kernel(config);
+
+		wait_any_key();
+
 		ask_option(sel);
-	} while (true);
+		do {
+			do_show_active_process(sel);
+			do_show_info(sel);
+			do_show_file_table(sel);
+			do_change_multiprogramming(sel);
+			do_stop_process(sel);
+			do_stop_planification(sel);
+			ask_option(sel);
+		} while (true);
 
-	return EXIT_SUCCESS;
-}
+		return EXIT_SUCCESS;
+	}

@@ -47,6 +47,14 @@ void cpu_signal_sem(socket_connection* connection, char** args);
 void cpu_malloc(socket_connection* connection, char** args);
 void cpu_free(socket_connection* connection, char** args);
 void cpu_open_file(socket_connection* connection, char** args);
+void cpu_close_file(socket_connection* connection, char** args);
+void cpu_delete_file(socket_connection* connection, char** args);
+
+/*
+ * FILESYSTEM
+ */
+
+void fs_response_file(socket_connection* connection, char** args);
 
 /*
  * SERVER

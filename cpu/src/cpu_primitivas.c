@@ -363,8 +363,10 @@ void kernel_liberar(t_puntero puntero) {
  */
 t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion,
 		t_banderas flags) {
-	runFunction(kernel_socket, "cpu_open_file", 2, string_itoa(direccion), flags); //TODO Agregar a interface de Kernel
+	char* n_flag = get_flag(flags);
+	runFunction(kernel_socket, "cpu_open_file", 3, string_itoa(direccion), n_flag, string_itoa(pcb_actual->pid));
 	wait_response();
+	return kernel_file_descriptor;
 }
 
 /*
@@ -377,7 +379,8 @@ t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion,
  * @return	void
  */
 void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
-
+	runFunction(kernel_socket, "cpu_delete_file", 2, string_itoa(descriptor_archivo), string_itoa(pcb_actual->pid));
+	wait_response();
 }
 
 /*
@@ -390,7 +393,8 @@ void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
  * @return	void
  */
 void kernel_cerrar(t_descriptor_archivo descriptor_archivo) {
-
+	runFunction(kernel_socket, "cpu_close_file", 2, string_itoa(descriptor_archivo), string_itoa(pcb_actual->pid));
+	wait_response();
 }
 
 /*
@@ -405,7 +409,7 @@ void kernel_cerrar(t_descriptor_archivo descriptor_archivo) {
  */
 void kernel_moverCursor(t_descriptor_archivo descriptor_archivo,
 		t_valor_variable posicion) {
-
+	//TODO
 }
 
 /*
@@ -423,7 +427,7 @@ void kernel_moverCursor(t_descriptor_archivo descriptor_archivo,
  */
 void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 		t_valor_variable tamanio) {
-
+	//TODO
 }
 
 /*
@@ -441,7 +445,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
  */
 void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 		t_valor_variable tamanio) {
-
+	//TODO
 }
 
 t_stack* stack_create() {

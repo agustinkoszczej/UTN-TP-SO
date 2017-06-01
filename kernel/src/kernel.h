@@ -17,11 +17,7 @@
 #include <pcb.h>
 #include "kernel_interface.h"
 
-#define NO_ERRORES 0
-#define NO_SE_PUEDEN_RESERVAR_RECURSOS -1
-#define ERROR_SIN_DEFINIR -20
-#define DESCONEXION_CONSOLA -6
-#define STACK_OVERFLOW -10
+#include<exit_codes.h>
 
 #define NEW_LIST 1
 #define READY_LIST 2
@@ -63,6 +59,23 @@ t_list* exec_list;
 t_list* block_list;
 t_queue* exit_queue;
 
+int fs_response;
+
+
+typedef struct {
+	char* flag;
+	int global_fd;
+	//int process_fd;  no hace falta, lo obtengo de la posicion de la lista + 3
+}t_process_file_table;
+t_list* fs_process_table;
+
+
+typedef struct {
+	char* path;
+	int open;
+}t_global_file_table;
+t_list* fs_global_table;
+
 /*
 typedef struct {
 	int socket;
@@ -97,6 +110,8 @@ pthread_mutex_t cpu_mutex;
 pthread_mutex_t process_in_memory_mutex;
 pthread_mutex_t shared_vars_mutex;
 
+pthread_mutex_t fs_mutex;
+
 bool planning_running;
 
 t_dictionary * fns;
@@ -111,9 +126,21 @@ pcb* find_pcb_by_pid(int pid);
 void remove_pcb_from_socket_pcb_list(pcb* n_pcb);
 void remove_cpu_from_cpu_list(t_cpu* cpu);
 t_cpu* find_cpu_by_socket(int socket);
-t_socket_pcb* find_socket_by_pid(int pid);
+t_socket_pcb* find_socket_bpathy_pid(int pid);
 void add_process_in_memory();
 void substract_process_in_memory();
 void short_planning();
+
+/*
+ * FILESYSTEM
+ */
+int find_file_pos_in_global_table(char* path);
+int add_file_in_global_table(char* path); //Retorna la posicion en la lista (FD=esa posicion + 3)
+void wait_response(pthread_mutex_t mutex);
+void add_file_in_process_table(int global_fd, char* flag, int pid);
+bool close_file(int fd_close, int pid);
+void delete_file(char* path);
+bool validate_file(char* path);
+char* get_path(int pid, int fd);
 
 #endif /* KERNEL_H_ */

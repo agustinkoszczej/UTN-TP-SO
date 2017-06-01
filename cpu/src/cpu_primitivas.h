@@ -13,11 +13,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define NO_ERRORES 0
-#define NO_SE_PUEDEN_RESERVAR_RECURSOS -1
-#define ERROR_SIN_DEFINIR -20
-#define DESCONEXION_CONSOLA -6
-#define STACK_OVERFLOW -10
+#include<exit_codes.h>
 
 bool finished;
 
