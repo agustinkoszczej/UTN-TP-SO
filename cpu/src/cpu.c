@@ -3,6 +3,8 @@
 const char* CONFIG_FIELDS[] = { IP_KERNEL, PUERTO_KERNEL, IP_MEMORIA, PUERTO_MEMORIA };
 
 int calculate_offset_for_var() {
+	log_debug(logger, "calculate_offset_for_var: void");
+
 	int space_occupied = 0;
 	int i, j;
 	for (i = 0; i < list_size(pcb_actual->i_stack); i++) {
@@ -14,10 +16,13 @@ int calculate_offset_for_var() {
 
 	int pages_used = ceil((double) space_occupied / frame_size);
 
+	log_debug(logger, "calculate_offset_for_var: int=%d", space_occupied - pages_used * frame_size);
 	return space_occupied - pages_used * frame_size;
 }
 
 int calculate_page_for_var() {
+	log_debug(logger, "calculate_page_for_var: void");
+
 	int space_occupied = 0;
 	int i, j;
 	for (i = 0; i < list_size(pcb_actual->i_stack); i++) {
@@ -27,10 +32,13 @@ int calculate_page_for_var() {
 			space_occupied += 4;
 	}
 
+	log_debug(logger, "calculate_page_for_var: int=%d", ceil((double) space_occupied / frame_size));
 	return ceil((double) space_occupied / frame_size);
 }
 
 int vars_in_stack() {
+	log_debug(logger, "calculate_page_for_var: void");
+
 	int vars_c = 0;
 	int i, j;
 	for (i = 0; i < list_size(pcb_actual->i_stack); i++) {
@@ -39,30 +47,42 @@ int vars_in_stack() {
 			vars_c++;
 	}
 
+	log_debug(logger, "calculate_page_for_var: int=%d", vars_c);
 	return vars_c;
 }
 
 void wait_response() {
+	log_debug(logger, "wait_response: void");
 	pthread_mutex_lock(&planning_mutex);
+	log_debug(logger, "wait_response: void");
 }
 
 void signal_response() {
+	log_debug(logger, "signal_response: void");
 	pthread_mutex_unlock(&planning_mutex);
+	log_debug(logger, "signal_response: void");
 }
 
-char* get_flag(t_banderas flags){
-	if(flags.creacion){
+char* get_flag(t_banderas flags) {
+	log_debug(logger, "get_flag: t_banderas");
+	if (flags.creacion) {
+		log_debug(logger, "get_flag: char*=%s", CREATE);
 		return CREATE;
-	}else if(flags.lectura){
-		if(flags.escritura){
-			return string_from_format("%s%s",READ, WRITE);
+	} else if (flags.lectura) {
+		if (flags.escritura) {
+			log_debug(logger, "get_flag: char*=%s", string_from_format("%s%s", READ, WRITE));
+			return string_from_format("%s%s", READ, WRITE);
 		}
+		log_debug(logger, "get_flag: char*=%s", READ);
 		return READ;
 	}
+	log_debug(logger, "get_flag: char*=%s", WRITE);
 	return WRITE;
 }
 
 void create_function_dictionary() {
+	log_debug(logger, "create_function_dictionary: void");
+
 	fns = dictionary_create();
 
 	dictionary_put(fns, "memory_identify", &memory_identify);
@@ -76,9 +96,12 @@ void create_function_dictionary() {
 	dictionary_put(fns, "kernel_response_file", &kernel_response_file);
 	dictionary_put(fns, "kernel_finalizar_cpu", &kernel_finalizar_cpu);
 
+	log_debug(logger, "create_function_dictionary: void");
 }
 
 void connect_to_server(t_config* config, char* name) {
+	log_debug(logger, "connect_to_server: t_config*, name=%s", name);
+
 	int port;
 	char* ip_server;
 	int* socket;
@@ -103,10 +126,11 @@ void connect_to_server(t_config* config, char* name) {
 		exit(EXIT_FAILURE);
 	}
 	log_debug(logger, "Connected to %s.", name);
+	log_debug(logger, "connect_to_server: void");
 }
 
 void init_cpu(t_config* config) {
-	log_debug(logger, "Initiating CPU");
+	log_debug(logger, "init_cpu: void");
 
 	pthread_mutex_init(&mx_main, NULL);
 	pthread_mutex_init(&planning_mutex, NULL);
@@ -142,6 +166,8 @@ void init_cpu(t_config* config) {
 	pthread_mutex_lock(&planning_mutex);
 	pthread_mutex_lock(&mx_main);
 	pthread_mutex_lock(&mx_main);
+
+	log_debug(logger, "init_cpu: void");
 }
 
 int main(int argc, char *argv[]) {
@@ -157,5 +183,5 @@ int main(int argc, char *argv[]) {
 
 	init_cpu(config);
 
-	return EXIT_SUCCESS; // Fin exitoso
+	return EXIT_SUCCESS;
 }

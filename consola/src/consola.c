@@ -3,6 +3,8 @@
 const char* CONFIG_FIELDS[] = { IP_KERNEL, PUERTO_KERNEL };
 
 t_process* find_process_by_socket(int socket) {
+	log_debug(logger,"find_process_by_socket: socket=%d", socket);
+
 	pthread_mutex_lock(&process_list_mutex);
 	bool find(void* element) {
 		t_process* process = element;
@@ -12,10 +14,13 @@ t_process* find_process_by_socket(int socket) {
 	t_process* process = list_find(process_list, &find);
 	pthread_mutex_unlock(&process_list_mutex);
 
+	log_debug(logger, "find_process_by_socket: t_process*");
 	return process;
 }
 
 t_process* find_process_by_pid(int pid) {
+	log_debug(logger, "find_process_by_pid: pid: %d", pid);
+
 	pthread_mutex_lock(&process_list_mutex);
 	bool find_pid(void* element) {
 		t_process* p = element;
@@ -24,10 +29,14 @@ t_process* find_process_by_pid(int pid) {
 
 	t_process* process = list_find(process_list, &find_pid);
 	pthread_mutex_unlock(&process_list_mutex);
+
+	log_debug(logger, "find_process_by_pid: t_process*");
 	return process;
 }
 
 void remove_from_process_list(t_process* process) {
+	log_debug(logger, "remove_from_process_list: t_process*");
+
 	int i;
 	pthread_mutex_lock(&process_list_mutex);
 	for (i = 0; i < list_size(process_list); i++) {
@@ -38,14 +47,22 @@ void remove_from_process_list(t_process* process) {
 		}
 	}
 	pthread_mutex_unlock(&process_list_mutex);
+
+	log_debug(logger, "remove_from_process_list: void");
 }
 
 void show_message(int i) {
+	log_debug(logger, "show_message: i=%d", i);
+
 	t_message* message = list_get(messages_list, i);
 	printf("[%s] [%d] %s\n", message->time, message->pid, message->message);
+
+	log_debug(logger, "show_message: void");
 }
 
 void print_menu() {
+	log_debug(logger, "print_menu: void");
+
 	int i;
 	pthread_mutex_lock(&print_menu_mutex);
 	clear_screen();
@@ -67,9 +84,13 @@ void print_menu() {
 	println("> DISCONNECT_CONSOLE");
 	println("> CLEAR_MESSAGES\n");
 	pthread_mutex_unlock(&print_menu_mutex);
+
+	log_debug(logger, "print_menu: void");
 }
 
 void new_message(char* text, int pid) {
+	log_debug(logger, "new_message: text=%s, pid=%d", text, pid);
+
 	t_message* message = malloc(sizeof(t_message));
 	message->pid = pid;
 	message->message = text;
@@ -85,17 +106,25 @@ void new_message(char* text, int pid) {
 	pthread_mutex_unlock(&messages_list_mutex);
 
 	print_menu();
+
+	log_debug(logger, "new_message: void");
 }
 
 void create_function_dictionary() {
+	log_debug(logger, "create_function_dictionary: void");
+
 	fns = dictionary_create();
 
 	dictionary_put(fns, "kernel_print_message", &kernel_print_message);
 	dictionary_put(fns, "kernel_response_load_program", &kernel_response_load_program);
 	dictionary_put(fns, "kernel_stop_process", &kernel_stop_process);
+
+	log_debug(logger, "create_function_dictionary: void");
 }
 
 void start_program(char* location) {
+	log_debug(logger, "start_program: location=%s", location);
+
 	FILE* file = fopen(string_from_format("resources/%s", location), "r");
 	if (file == NULL) {
 		log_error(logger, "Couldn't open file %s", location);
@@ -134,15 +163,22 @@ void start_program(char* location) {
 	pthread_mutex_unlock(&process_list_mutex);
 
 	runFunction(process->socket, "console_load_program", 1, buffer);
+	log_debug(logger, "start_program: void");
 }
 
 void ask_option(char *sel) {
+	log_debug(logger, "ask_option: sel=%s", sel);
+
 	fgets(sel, 255, stdin);
 	strtok(sel, "\n");
 	string_to_upper(sel);
+
+	log_debug(logger, "ask_option: void");
 }
 
 void do_disconnect_console(char* sel) {
+	log_debug(logger, "do_disconnect_console: sel=%s", sel);
+
 	if (!strcmp(sel, "D")) {
 		int i;
 		for (i = 0; i < list_size(process_list); i++) {
@@ -155,9 +191,13 @@ void do_disconnect_console(char* sel) {
 		list_clean(process_list);
 		pthread_mutex_unlock(&process_list_mutex);
 	}
+
+	log_debug(logger, "do_disconnect_console: void");
 }
 
 void do_start_program(char* sel) {
+	log_debug(logger, "do_start_program: sel=%s", sel);
+
 	if (!strcmp(sel, "S")) {
 		char location[255];
 
@@ -169,9 +209,13 @@ void do_start_program(char* sel) {
 
 		start_program(location);
 	}
+
+	log_debug(logger, "do_start_program: void");
 }
 
 void abort_program(t_process* process, int exit_code) {
+	log_debug(logger, "abort_program: exit_code=%d", exit_code);
+
 	char* time_finish = temporal_get_string_time();
 	process->time_finish = malloc(string_length(time_finish));
 	process->time_finish = time_finish;
@@ -192,9 +236,13 @@ void abort_program(t_process* process, int exit_code) {
 	//log_debug(logger, dictionary_get(message_map, string_itoa(exit_code)));
 	//runFunction(process->socket, "console_abort_program", 2, CONSOLE, string_itoa(process->pid));
 	close(process->socket);
+
+	log_debug(logger, "abort_program: void");
 }
 
 void do_abort_program(char* sel) {
+	log_debug(logger, "do_abort_program: sel=%s", sel);
+
 	if (!strcmp(sel, "A")) {
 		char pid[255];
 
@@ -221,24 +269,36 @@ void do_abort_program(char* sel) {
 		}
 		pthread_mutex_unlock(&process_list_mutex);
 	}
+
+	log_debug(logger, "do_abort_program: void");
 }
 
 void do_clear_messages(char* sel) {
+	log_debug(logger, "do_clear_messages: sel=%s", sel);
+
 	if (!strcmp(sel, "C")) {
 		pthread_mutex_lock(&messages_list_mutex);
 		list_clean(messages_list);
 		pthread_mutex_unlock(&messages_list_mutex);
 	}
+
+	log_debug(logger, "do_clear_messages: void");
 }
 
 void config_connection(t_config* config) {
+	log_debug(logger, "config_connection: void");
+
 	if (config_has_property(config, IP_KERNEL) && config_has_property(config, PUERTO_KERNEL)) {
 		ip = config_get_string_value(config, IP_KERNEL);
 		port = config_get_int_value(config, PUERTO_KERNEL);
 	}
+
+	log_debug(logger, "config_connection: void");
 }
 
 void init_console() {
+	log_debug(logger, "init_console: void");
+
 	p_counter = 0;
 	pthread_mutex_init(&p_counter_mutex, NULL);
 	pthread_mutex_init(&process_list_mutex, NULL);
@@ -254,6 +314,8 @@ void init_console() {
 	dictionary_put(message_map, string_itoa(ERROR_SIN_DEFINIR), "Unknown error.");
 	dictionary_put(message_map, string_itoa(DESCONEXION_CONSOLA), "Console disconnected.");
 	dictionary_put(message_map, string_itoa(ABORTO_POR_CONSOLA), "Aborted.");
+
+	log_debug(logger, "init_console: void");
 }
 
 int main(int argc, char *argv[]) {
@@ -261,8 +323,8 @@ int main(int argc, char *argv[]) {
 	char sel[255];
 	t_config* config = malloc(sizeof(t_config));
 
-	//remove("log");
-	//logger = log_create("log", "CONSOLE", false, LOG_LEVEL_DEBUG);
+	remove("log");
+	logger = log_create("log", "CONSOLE", false, LOG_LEVEL_DEBUG);
 
 	create_function_dictionary();
 

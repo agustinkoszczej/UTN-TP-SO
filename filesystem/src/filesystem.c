@@ -3,26 +3,36 @@
 const char * CONFIG_FIELDS[] = { PORT, MOUNT_POINT };
 
 void update_bitmap_file() {
+	log_debug(logger, "update_bitmap_file: void");
+
 	FILE* bitmap_f = fopen(string_from_format("%s/Metadata/Bitmap.bin", mount_point), "w");
 	fputs(bitmap->bitarray, bitmap_f);
 	fclose(bitmap_f);
+
+	log_debug(logger, "update_bitmap_file: void");
 }
 
 int create_block() {
+	log_debug(logger, "create_block: void");
+
 	int i;
 	for (i = 0; i < bitmap->size; i++) {
 		if (bitarray_test_bit(bitmap, i)) {
 			bitarray_set_bit(bitmap, i);
 			mkdir(string_from_format("%s/Bloques/%d.bin", mount_point, i), 0777);
 			update_bitmap_file();
+			log_debug(logger, "create_block: int=%d", i);
 			return i;
 		}
 	}
 
+	log_debug(logger, "create_block: int=%d", -1);
 	return -1;
 }
 
 bool add_blocks_if_needed(char* path, int offset, int size) {
+	log_debug(logger, "add_blocks_if_needed: path=%s, offset=%d, size=%d", path, offset, size);
+
 	char* path_file = string_from_format("%s/Archivos/%s", mount_point, path);
 	t_config* config_file = config_create(path_file);
 
@@ -44,9 +54,10 @@ bool add_blocks_if_needed(char* path, int offset, int size) {
 		for (i = 0; i < blocks_to_add; i++) {
 			int new_block_pos = create_block();
 
-			if (new_block_pos < 0)
+			if (new_block_pos < 0) {
+				log_debug(logger, "add_blocks_if_needed: bool=%d", false);
 				return false;
-			else
+			} else
 				string_append_with_format(&buffer_blocks_array, ",%d", new_block_pos);
 		}
 	}
@@ -66,17 +77,25 @@ bool add_blocks_if_needed(char* path, int offset, int size) {
 	while (blocks_arr[i] != NULL)
 		free(blocks_arr[++i]);
 	free(blocks_arr);
+
+	log_debug(logger, "add_blocks_if_needed: bool=%d", true);
 	return true;
 }
 
 void write_block(int block_pos, int offset, int length, char* buffer) {
+	log_debug(logger, "write_block: block_pos=%d, offset=%d, length=%d, buffer=%s", block_pos, offset, length, buffer);
+
 	FILE* block = fopen(string_from_format("%s/Bloques/%d.bin", mount_point, block_pos), "r+");
 	fseek(block, offset, SEEK_SET);
 	fwrite(buffer, 1, length, block);
 	fclose(block);
+
+	log_debug(logger, "write_block: void");
 }
 
 void update_file_size(char* path, int offset, int size) {
+	log_debug(logger, "update_file_size: path=%s, offset=%d, size=%d", path, offset, size);
+
 	char* path_file = string_from_format("%s/Archivos/%s", mount_point, path);
 	t_config* config_file = config_create(path_file);
 
@@ -92,11 +111,17 @@ void update_file_size(char* path, int offset, int size) {
 		fputs(string_from_format("BLOQUES=%s", blocks_arr), f);
 		fclose(f);
 	}
+
+	log_debug(logger, "update_file_size: void");
 }
 
 bool save_data(char* path, int offset, int size, char* buffer) {
-	if (!add_blocks_if_needed(path, offset, size))
+	log_debug(logger, "save_data: path=%s, offset=%d, size=%d, buffer=%s", path, offset, size, buffer);
+
+	if (!add_blocks_if_needed(path, offset, size)) {
+		log_debug(logger, "save_data: bool=%d", false);
 		return false;
+	}
 
 	char* path_file = string_from_format("%s/Archivos/%s", mount_point, path);
 	t_config* config_file = config_create(path_file);
@@ -132,10 +157,13 @@ bool save_data(char* path, int offset, int size, char* buffer) {
 
 	update_file_size(path, offset, size);
 
+	log_debug(logger, "save_data: bool=%d", true);
 	return true;
 }
 
 char* get_block_data(int pos) {
+	log_debug(logger, "get_block_data: pos=%d", pos);
+
 	FILE* block_f = fopen(string_from_format("%s/Bloques/%d.bin", mount_point, pos), "r");
 
 	int size;
@@ -150,10 +178,13 @@ char* get_block_data(int pos) {
 
 	fclose(block_f);
 
+	log_debug(logger, "get_block_data: char*=%s", buffer);
 	return buffer;
 }
 
 char* get_data(char* path, int offset, int size) {
+	log_debug(logger, "get_data: path=%s, offset=%d, size=%d", path, offset, size);
+
 	char* path_file = string_from_format("%s/Archivos/%s", mount_point, path);
 	t_config* config_file = config_create(path_file);
 
@@ -183,10 +214,13 @@ char* get_data(char* path, int offset, int size) {
 	free(blocks_arr);
 	config_destroy(config_file);
 
+	log_debug(logger, "get_data: char*=%s", buffer);
 	return buffer;
 }
 
 bool validate_file(char* path) {
+	log_debug(logger, "validate_file: path=%s", path);
+
 	FILE* file = fopen(path, "r");
 	bool result = false;
 
@@ -195,10 +229,13 @@ bool validate_file(char* path) {
 		fclose(file);
 	}
 
+	log_debug(logger, "validate_file: bool=%d", result);
 	return result;
 }
 
 void free_blocks(char** blocks_arr) {
+	log_debug(logger, "free_blocks: blocks_arr**");
+
 	int i = 0;
 	while (blocks_arr[i] != NULL) {
 		int bit_pos = atoi(blocks_arr[i]);
@@ -206,9 +243,13 @@ void free_blocks(char** blocks_arr) {
 	}
 
 	update_bitmap_file();
+
+	log_debug(logger, "free_blocks: void");
 }
 
 bool delete_file(char* path) {
+	log_debug(logger, "delete_file: path=%s", path);
+
 	char* path_file = string_from_format("%s/Archivos/%s", mount_point, path);
 	if (validate_file(path_file)) {
 		t_config* config_file = config_create(path_file);
@@ -218,29 +259,39 @@ bool delete_file(char* path) {
 		free_blocks(blocks_arr);
 		remove(path_file);
 
+		log_debug(logger, "delete_file: bool=%d", true);
 		return true;
 	}
 
+	log_debug(logger, "delete_file: bool=%d", false);
 	return false;
 }
 
 bool create_file(char* path) {
+	log_debug(logger, "create_file: path=%s", path);
+
 	char* path_file = string_from_format("%s/Archivos/%s", mount_point, path);
 	mkdir(path_file, 0777);
 
 	int first_block_pos = create_block();
 
-	if (first_block_pos < 0)
+	if (first_block_pos < 0) {
+		log_debug(logger, "create_file: bool=%d", false);
 		return false;
+	}
 
 	FILE* f = fopen(path_file, "w");
 	fputs("TAMANIO=0\n", f);
 	fputs(string_from_format("BLOQUES=[%d]", first_block_pos), f);
 	fclose(f);
+
+	log_debug(logger, "create_file: bool=%d", true);
 	return true;
 }
 
 void create_function_dictionary() {
+	log_debug(logger, "create_function_dictionary: void");
+
 	fns = dictionary_create();
 
 	dictionary_put(fns, "kernel_validate_file", &kernel_validate_file);
@@ -248,9 +299,13 @@ void create_function_dictionary() {
 	dictionary_put(fns, "kernel_delete_file", &kernel_delete_file);
 	dictionary_put(fns, "kernel_get_data", &kernel_get_data);
 	dictionary_put(fns, "kernel_save_data", &kernel_save_data);
+
+	log_debug(logger, "create_function_dictionary: void");
 }
 
 void init_bitmap() {
+	log_debug(logger, "init_bitmap: void");
+
 	FILE* bitmap_f = fopen(string_from_format("%s/Metadata/Bitmap.bin", mount_point), "r");
 
 	int size;
@@ -266,18 +321,24 @@ void init_bitmap() {
 	bitmap = bitarray_create_with_mode(buffer, block_quantity, LSB_FIRST);
 	free(buffer);
 	fclose(bitmap_f);
+
+	log_debug(logger, "init_bitmap: void");
 }
 
 void init_metadata() {
+	log_debug(logger, "init_metadata: void");
+
 	t_config* config_meta = config_create(string_from_format("%s/Metadata/Metadata.bin", mount_point));
 	block_size = config_get_int_value(config_meta, TAMANIO_BLOQUES);
 	block_quantity = config_get_int_value(config_meta, CANTIDAD_BLOQUES);
 
 	config_destroy(config_meta);
+
+	log_debug(logger, "init_metadata: void");
 }
 
 void init_filesystem(t_config* config) {
-	log_debug(logger, "Initiating FILESYSTEM.");
+	log_debug(logger, "init_filesystem: t_config*");
 
 	int port = config_get_int_value(config, PORT);
 	char* mnt = string_substring_from(config_get_string_value(config, MOUNT_POINT), 1);
@@ -297,6 +358,8 @@ void init_filesystem(t_config* config) {
 	pthread_mutex_init(&request_mutex, NULL);
 	pthread_mutex_lock(&mx_main);
 	pthread_mutex_lock(&mx_main);
+
+	log_debug(logger, "init_filesystem: void");
 }
 
 int main(int argc, char *argv[]) {
