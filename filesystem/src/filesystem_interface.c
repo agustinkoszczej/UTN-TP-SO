@@ -53,7 +53,7 @@ void kernel_get_data(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&request_mutex);
 
 	char* result = get_data(path, offset, size);
-	runFunction(connection->socket, "fs_get_data", 1, result);
+	runFunction(connection->socket, "fs_response_get_data", 1, result);
 
 	pthread_mutex_unlock(&request_mutex);
 }
@@ -67,7 +67,7 @@ void kernel_save_data(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&request_mutex);
 
 	bool result = save_data(path, offset, size, buffer);
-	runFunction(connection->socket, "fs_save_data", 1, string_itoa(result));
+	runFunction(connection->socket, "fs_response_file", 1, string_itoa(result));
 
 	pthread_mutex_unlock(&request_mutex);
 }

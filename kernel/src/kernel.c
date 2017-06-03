@@ -241,7 +241,15 @@ void move_to_list(pcb* pcb, int list_name) {
 /*
  * FILESYSTEM
  */
-int find_file_pos_in_global_table(char* path) {
+
+bool validate_file_from_fs(char* path) {
+	runFunction(fs_socket, "kernel_validate_file", 1, path);
+	wait_response(fs_mutex);
+	return fs_response;
+
+}
+
+int find_file_pos_in_global_table_by_path(char* path) {
 	int i;
 	for (i = 0; i < list_size(fs_global_table); i++) {
 		t_global_file_table* file = list_get(fs_global_table, i);
@@ -251,28 +259,34 @@ int find_file_pos_in_global_table(char* path) {
 	return -1; //No existe File en la table
 }
 
-void add_file_in_process_table(int global_fd, char* flag, int pid) {
+int add_file_in_process_table(int global_fd, char* flag, int pid) {
 	t_list* files_open_process = list_get(fs_process_table, pid);
 	t_process_file_table* n_file = malloc(sizeof(t_process_file_table));
 	n_file->global_fd = global_fd;
 	n_file->flag = flag;
+	n_file->pointer = 0;
 
 	pthread_mutex_lock(&fs_mutex);
-	list_add(files_open_process, n_file);
+	list_add_in_index(files_open_process, pid, n_file);
 	list_replace(fs_process_table, pid, files_open_process);
+	/*t_global_file_table* n_global = list_get(fs_global_table, global_fd);
+	n_global->open++;
+	list_replace(fs_global_table, global_fd, n_global);*/
+	return list_size(files_open_process);//TODO ver si es +3
 	pthread_mutex_unlock(&fs_mutex);
 }
 
-int add_file_in_global_table(char* path) {
+void  add_file_in_global_table(char* path) {
 	t_global_file_table* n_file = malloc(sizeof(t_global_file_table));
-	n_file->path = path;
+
 	pthread_mutex_lock(&fs_mutex);
-	int pos = find_file_pos_in_global_table(path);
-	if (pos == -1) { //No existe
+	int pos = find_file_pos_in_global_table_by_path(path);
+	if (pos == -1) { //No existe*/
 		n_file->path = string_new();
 		string_append(n_file->path, path);
 		n_file->open = 1;
 		list_add(fs_global_table, n_file);
+		//return list_size(fs_global_table);
 	} else {
 		n_file = list_get(fs_global_table, pos);
 		n_file->open++;
@@ -280,17 +294,17 @@ int add_file_in_global_table(char* path) {
 	}
 	free(n_file);
 	pthread_mutex_unlock(&fs_mutex);
+	//return pos;
 }
 
-bool close_file(int fd_close, int pid) {
+void close_file(int fd_close, int pid) {
 	fd_close -= 3;
-	t_list* files_open_process = list_get(fs_process_table, pid);
-	t_process_file_table* process_file_to_close = list_get(files_open_process, fd_close);
+	t_process_file_table* process_file_to_close = get_process_file_by_fd(fd_close, pid);
 	int gfd_to_close = process_file_to_close->global_fd;
 
-	if (process_file_to_close == NULL) {
+	/*if (process_file_to_close == NULL) {
 		return false;
-	} else {
+	} else {*/
 		list_remove(fs_process_table, fd_close);
 
 		t_global_file_table* global_file_to_decrement = list_get(fs_global_table, gfd_to_close);
@@ -300,20 +314,62 @@ bool close_file(int fd_close, int pid) {
 			list_remove(fs_global_table, gfd_to_close);
 		else
 			list_replace(fs_global_table, gfd_to_close, global_file_to_decrement);
+	//}
+	//return true;
+}
+
+void delete_file_from_global_table(int gfd) {
+	list_remove(fs_global_table, gfd); // lo borro de la global
+	int i,j;
+	//ahora de la de de procesos
+	for(i=0; i<list_size(fs_process_table);i++){
+		t_list* process_table = list_get(fs_process_table,i);
+		for(j=0; j<list_size(process_table);j++){
+			t_process_file_table* process= list_get(process_table,j);
+			if(process->global_fd == gfd){
+				list_remove(process_table,j);
+			}
+		}
 	}
-	return true;
 }
 
-void delete_file(char* path) {
-	//TODO
-}
-char* get_path(int pid, int fd) {
-	//TODO
+bool isAllowed(int pid, int fd, char* flag){
+	t_process_file_table* process = get_process_file_by_fd(fd, pid);
+	return string_contains(process->flag, flag);
 }
 
-bool validate_file(char* path) {
-	runFunction(fs_socket, "kernel_validate_file", 1, path);
-	wait_response(fs_mutex);
+char* get_path_by_gfd(int gfd){
+	t_global_file_table* n_file = list_get(fs_global_table, gfd);
+	return n_file->path;
+}
+
+int get_gfd_by_path(char* path){
+	int i;
+	for(i=0; i< list_size(fs_process_table); i++){
+		t_global_file_table* n_file = list_get(fs_process_table, i);
+		if(!strcmp(n_file->path,path)) return i;
+	}
+
+	return -1;
+}
+
+t_process_file_table* get_process_file_by_fd(int fd, int pid){
+	t_list* files_open_process = list_get(fs_process_table, pid);
+	t_process_file_table* process = list_get(files_open_process, fd);
+	return process;
+}
+
+void set_process_file_by_fd(int fd, int pid, t_process_file_table* n_file){
+	t_list* files_open_process = list_get(fs_process_table, pid);
+
+	list_replace(files_open_process, fd, n_file);
+	list_replace(fs_process_table, pid, files_open_process);
+}
+
+void set_pointer(int n_pointer, int fd, int pid){
+	t_process_file_table* process = get_process_file_by_fd(fd, pid);
+	process->pointer = n_pointer;
+	set_process_file_by_fd(fd, pid, process);
 }
 
 void wait_response(pthread_mutex_t mutex) {
@@ -331,9 +387,9 @@ void create_function_dictionary() {
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);
+
 	dictionary_put(fns, "cpu_received_page_stack_size", &cpu_received_page_stack_size);
 	dictionary_put(fns, "cpu_task_finished", &cpu_task_finished);
-
 	dictionary_put(fns, "cpu_error", &cpu_error);
 	dictionary_put(fns, "cpu_get_shared_var", &cpu_get_shared_var);
 	dictionary_put(fns, "cpu_set_shared_var", &cpu_set_shared_var);
@@ -344,8 +400,12 @@ void create_function_dictionary() {
 	dictionary_put(fns, "cpu_open_file", &cpu_open_file);
 	dictionary_put(fns, "cpu_close_file", &cpu_close_file);
 	dictionary_put(fns, "cpu_delete_file", &cpu_delete_file);
+	dictionary_put(fns, "cpu_write_file", &cpu_write_file);
+	dictionary_put(fns, "cpu_read_file", &cpu_read_file);
+	dictionary_put(fns, "cpu_seek_file", &cpu_seek_file);
 
 	dictionary_put(fns, "fs_response_file", &fs_response_file);
+	dictionary_put(fns, "fs_response_get_data", &fs_response_get_data);
 
 }
 
@@ -457,6 +517,10 @@ void init_kernel(t_config* config) {
 	socket_pcb_list = list_create();
 
 	cpu_list = list_create();
+
+	fs_process_table = list_create();
+	list_add(fs_process_table, list_create());
+	fs_global_table = list_create();
 
 	open_socket(config, CONSOLE);
 	open_socket(config, CPU);

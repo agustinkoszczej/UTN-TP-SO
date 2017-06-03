@@ -28,6 +28,10 @@
 #define FIFO 1
 #define RR 2
 
+#define CREATE "c"
+#define READ "r"
+#define WRITE "w"
+
 #define PUERTO_PROG "PUERTO_PROG"
 #define PUERTO_CPU "PUERTO_CPU"
 #define IP_MEMORIA "IP_MEMORIA"
@@ -60,11 +64,13 @@ t_list* block_list;
 t_queue* exit_queue;
 
 int fs_response;
+char* fs_buffer;
 
 
 typedef struct {
 	char* flag;
 	int global_fd;
+	int pointer;
 	//int process_fd;  no hace falta, lo obtengo de la posicion de la lista + 3
 }t_process_file_table;
 t_list* fs_process_table;
@@ -134,13 +140,17 @@ void short_planning();
 /*
  * FILESYSTEM
  */
-int find_file_pos_in_global_table(char* path);
-int add_file_in_global_table(char* path); //Retorna la posicion en la lista (FD=esa posicion + 3)
+bool validate_file_from_fs(char* path);
+int find_file_pos_in_global_table_by_path(char* path);
+void add_file_in_global_table(char* path);
 void wait_response(pthread_mutex_t mutex);
-void add_file_in_process_table(int global_fd, char* flag, int pid);
-bool close_file(int fd_close, int pid);
-void delete_file(char* path);
-bool validate_file(char* path);
-char* get_path(int pid, int fd);
+int add_file_in_process_table(int global_fd, char* flag, int pid);
+void close_file(int fd_close, int pid);
+void delete_file_from_global_table(int gfd);
+bool isAllowed(int pid, int fd, char* flag);
+char* get_path_by_gfd(int gfd);
+t_process_file_table* get_process_file_by_fd(int fd, int pid);
+void set_process_file_by_fd(int fd, int pid, t_process_file_table* n_file);
+void set_pointer(int n_pointer, int fd, int pid);
 
 #endif /* KERNEL_H_ */

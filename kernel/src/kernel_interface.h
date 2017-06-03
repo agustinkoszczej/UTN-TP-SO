@@ -49,12 +49,16 @@ void cpu_free(socket_connection* connection, char** args);
 void cpu_open_file(socket_connection* connection, char** args);
 void cpu_close_file(socket_connection* connection, char** args);
 void cpu_delete_file(socket_connection* connection, char** args);
+void cpu_write_file(socket_connection* connection, char** args);
+void cpu_read_file(socket_connection* connection, char** args);
+void cpu_seek_file(socket_connection* connection, char** args);
 
 /*
  * FILESYSTEM
  */
 
 void fs_response_file(socket_connection* connection, char** args);
+void fs_response_get_data(socket_connection* connection, char** args);
 
 /*
  * SERVER

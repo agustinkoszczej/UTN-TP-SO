@@ -16,14 +16,12 @@ void kernel_stop_process(socket_connection* connection, char** args) {
 }
 
 void kernel_print_message(socket_connection* connection, char** args) {
-	char* sender = args[0];
-	char* message = args[1];
-	int pid = atoi(args[2]);
+	char* message = args[0];
+	int pid = atoi(args[1]);
 
-	log_debug(logger, "kernel_print_message: sender=%s, message=%s, pid=%d", sender, message, pid);
+	log_debug(logger, "kernel_print_message: message=%s, pid=%d", message, pid);
 
-	if (!strcmp(sender, KERNEL))
-		new_message(message, pid);
+	new_message(message, pid);
 }
 
 void kernel_response_load_program(socket_connection* connection, char** args) {

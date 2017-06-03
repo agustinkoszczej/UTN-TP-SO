@@ -6,8 +6,9 @@
 void console_load_program(socket_connection* connection, char** args) {
 	char* program = args[0];
 
-	if(process_in_memory + 1 > multiprog) {
-		runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), string_itoa(-1));
+	if (process_in_memory + 1 > multiprog) {
+		runFunction(process_struct.socket, "kernel_response_load_program", 2,
+				string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), string_itoa(-1));
 		return;
 	}
 
@@ -42,8 +43,10 @@ void console_load_program(socket_connection* connection, char** args) {
 		char** labels = string_split(metadata->etiquetas, "\0");
 		for (i = 0; i < metadata->etiquetas_size; i++) {
 			char* label = labels[i];
-			t_puntero_instruccion* instruction = malloc(sizeof(t_puntero_instruccion));
-			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas, metadata->etiquetas_size);
+			t_puntero_instruccion* instruction = malloc(
+					sizeof(t_puntero_instruccion));
+			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas,
+					metadata->etiquetas_size);
 			dictionary_put(new_pcb->i_label, label, instruction);
 		}
 	}
@@ -76,7 +79,8 @@ void console_load_program(socket_connection* connection, char** args) {
 	process_struct.pid = new_pcb->pid;
 	process_struct.state = new_pcb->state;
 
-	runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program);
+	runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid),
+			program);
 }
 
 /*
@@ -91,7 +95,8 @@ void cpu_get_shared_var(socket_connection* connection, char** args) {
 	int value = atoi(dictionary_get(shared_vars, var_name));
 	pthread_mutex_unlock(&shared_vars_mutex);
 
-	runFunction(connection->socket, "kernel_response_get_shared_var", 1, string_itoa(value));
+	runFunction(connection->socket, "kernel_response_get_shared_var", 1,
+			string_itoa(value));
 }
 void cpu_set_shared_var(socket_connection* connection, char** args) {
 	void free_var(void* v) {
@@ -127,7 +132,8 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 		t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
-		runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
+		runFunction(socket_pcb->socket, "kernel_stop_process", 2,
+				string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
 	} else {
 		move_to_list(n_pcb, READY_LIST);
 	}
@@ -135,87 +141,165 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	short_planning();
 }
 
-void cpu_error(socket_connection* connection, char** args){
-	//TODO
+void cpu_error(socket_connection* connection, char** args) {
 
-	//En cpu: runFunction(kernel_socket, "cpu_error", 1, STACK_OVERFLOW)
-	//
-	switch(atoi(args[0])){
-		case STACK_OVERFLOW:
-			log_debug(logger, "Error: Stack Overflow. CPU socket: %d, IP = %s, Port = %d.\n", connection->socket, connection->ip, connection->port);
+	switch (atoi(args[0])) {
+	//TODO Falta settear el exit code para cada proceso y liberar la CPU
+	case NO_EXISTE_ARCHIVO:
+		log_debug(logger,
+				"Error: No existe archivo. CPU socket: %d, IP = %s, Port = %d.\n",
+				connection->socket, connection->ip, connection->port);
 		break;
-		//Agregar mas casos si los hay
+
+	case LEER_SIN_PERMISOS:
+		log_debug(logger,
+				"Error: Leer sin permisos. CPU socket: %d, IP = %s, Port = %d.\n",
+				connection->socket, connection->ip, connection->port);
+		break;
+
+	case ESCRIBIR_SIN_PERMISOS:
+		log_debug(logger,
+				"Error: Escribir sin permisos. CPU socket: %d, IP = %s, Port = %d.\n",
+				connection->socket, connection->ip, connection->port);
+		break;
+
+	case STACK_OVERFLOW:
+		log_debug(logger,
+				"Error: Stack Overflow. CPU socket: %d, IP = %s, Port = %d.\n",
+				connection->socket, connection->ip, connection->port);
+		break;
 	}
 }
 
-void cpu_wait_sem(socket_connection* connection, char** args){
+void cpu_wait_sem(socket_connection* connection, char** args) {
 	//TODO
 }
 
-void cpu_signal_sem(socket_connection* connection, char** args){
+void cpu_signal_sem(socket_connection* connection, char** args) {
 	//TODO
 }
 
-void cpu_malloc(socket_connection* connection, char** args){
+void cpu_malloc(socket_connection* connection, char** args) {
 	//TODO
 }
 
-void cpu_free(socket_connection* connection, char** args){
+void cpu_free(socket_connection* connection, char** args) {
 	//TODO
 }
 
-//TODO FALTA DE VER LOS PERMISOS DE ARCHIVOS
-void cpu_open_file(socket_connection* connection, char** args){
+void cpu_open_file(socket_connection* connection, char** args) {
 	char* path = args[0];
 	char* flags = args[1];
 	int pid = atoi(args[2]);
 
-	validate_file(path);
+	bool validate = validate_file_from_fs(path);
+	int global_fd;
 
-	if(!fs_response){//Si no existe archivo
-			runFunction(fs_socket, "kernel_create_file", 1, flags);
-			wait_response(fs_mutex);
-			if(!fs_response){ // No se crea bien
-				//TODO Loguear o informar que no se creo el archivo correctamente
-				runFunction(connection->socket, "kernel_finalizar_cpu", 0);
-				return;
-			}
-	}
-		int global_fd = add_file_in_global_table(path);
-		add_file_in_process_table(global_fd, flags, pid);
-		runFunction(connection->socket, "kernel_response_file", 1, string_itoa(global_fd));
+	if (!strcmp(flags, "c")) {
+		runFunction(fs_socket, "kernel_create_file", 1, path);
+		wait_response(fs_mutex);
+		if (fs_response == 0) {
+			//TODO aca llega cuando no hay lugar disponible en FILESYSTEM (create_file = false);
+			return;
+		}
+	} else if (!validate)
+		runFunction(connection->socket, "kernel_response_file", 1,
+				string_itoa(NO_EXISTE_ARCHIVO));
 
+	add_file_in_global_table(path);
+	global_fd = get_gfd_by_path(path);
+	int fd_file = add_file_in_process_table(global_fd, flags, pid);
+	runFunction(connection->socket, "kernel_response_file", 1,
+			string_itoa(fd_file));
 }
-void cpu_close_file(socket_connection* connection, char** args){
+
+void cpu_close_file(socket_connection* connection, char** args) {
 	int fd_close = atoi(args[0]);
 	int pid = atoi(args[1]);
-	char* path = get_path(pid, fd_close);
 
-	validate_file(path);
-
-	if (!fs_response_file){
-		//TODO Loguear o informar que no se existe el archivo
-		runFunction(connection->socket, "kernel_finalizar_cpu", 0);
-					return;
-	}
 	close_file(fd_close, pid);
-	runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd_close));
+	runFunction(connection->socket, "kernel_response_file", 1,
+			string_itoa(fd_close));
 
 }
-void cpu_delete_file(socket_connection* connection, char** args){
+
+void cpu_delete_file(socket_connection* connection, char** args) {
 	int fd_delete = atoi(args[0]);
-	int pid = atoi(args[1]);
-	char* path = get_path(pid, fd_delete);
+	t_global_file_table* global_file = list_get(fs_global_table, fd_delete);
+	delete_file_from_global_table(fd_delete);
+	runFunction(fs_socket, "kernel_delete_file", 1, global_file->path);
+	runFunction(connection->socket, "kernel_response_file", 1,
+			string_itoa(fd_delete));
+}
 
-	validate_file(path);
+void cpu_write_file(socket_connection* connection, char** args) {
+	int fd = atoi(args[0]);
+	char* info = args[1];
+	int size = atoi(args[2]);
+	int pid = atoi(args[3]);
 
-	if(!fs_response){ //Si existe archivo
-		delete_file(fd_delete);
+	t_process_file_table* process;
+
+	char* path;
+	char* flags;
+	int offset;
+
+	log_debug(logger, "Kernel Escribir");
+
+	t_socket_pcb* socket_console = find_socket_by_pid(pid);
+	if (fd == 1)
+		runFunction(socket_console->socket, "kernel_print_message", 2, info,
+				string_itoa(pid));
+	else {
+		t_process_file_table* process = get_process_file_by_fd(fd, pid);
+
+		path = get_path_by_gfd(process->global_fd);
+		flags = process->flag;
+		offset = process->pointer;
+
+		if (isAllowed(pid, fd, flags)) {
+			runFunction(fs_socket, "kernel_save_data", 4, path, offset, size,
+					info);
+			wait_response(fs_mutex);
+			if (!fs_response) {
+				//TODO overflow al escribir? en FILESYSTEM (esto llega aca cuando save_data = false)
+
+			}
+		}
+		else
+			fd = ESCRIBIR_SIN_PERMISOS;
 	}
-	else{
-		cpu_error(connection->socket, string_itoa(NO_EXISTE_ARCHIVO));
-		runFunction(connection->socket, "kernel_finalizar_cpu", 0);
-	}
+
+	bool r = runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
+	log_debug(logger, "Kernel Response Escribir Socket '%d' bool '%d'", connection->socket, r);
+}
+
+void cpu_read_file(socket_connection* connection, char** args) {
+
+	int fd = atoi(args[0]);
+	int offset = atoi(args[1]);
+	int size = atoi(args[2]);
+	int pid = atoi(args[3]) - 1;
+
+	t_process_file_table* process = get_process_file_by_fd(fd, pid);
+	char* path = get_path_by_gfd(process->global_fd);
+	char* flags = process->flag;
+
+	if (isAllowed(pid, fd, flags)) {
+		runFunction(fs_socket, "kernel_get_data", 3, path, offset, size);
+		wait_response(fs_mutex);
+	} else
+		fd = LEER_SIN_PERMISOS;
+	runFunction(connection->socket, "kernel_response_file", 1, fd);
+}
+
+void cpu_seek_file(socket_connection* connection, char** args) {
+	int fd = atoi(args[0]);
+	int pos = atoi(args[1]);
+	int pid = atoi(args[2]);
+
+	set_pointer(pos, fd, pid);
+	runFunction(connection->socket, "kernel_response_file", 1, fd);
 }
 
 /*
@@ -238,7 +322,8 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 		move_to_list(n_pcb, EXIT_LIST);
 	}
 
-	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
+	runFunction(process_struct.socket, "kernel_response_load_program", 2,
+			string_itoa(response), string_itoa(p_counter));
 }
 void memory_page_size(socket_connection* connection, char** args) {
 	int page_size = atoi(args[0]);
@@ -247,12 +332,16 @@ void memory_page_size(socket_connection* connection, char** args) {
 	runFunction(mem_socket, "kernel_stack_size", 1, string_itoa(stack_size));
 }
 
-
 /*
  * FILESYSTEM
  */
-void fs_response_file(socket_connection* connection, char** args){
+void fs_response_file(socket_connection* connection, char** args) {
 	fs_response = atoi(args[0]);
+	signal_response(fs_mutex);
+}
+
+void fs_response_get_data(socket_connection* connection, char** args) {
+	fs_buffer = args[0];
 	signal_response(fs_mutex);
 }
 
@@ -261,7 +350,8 @@ void fs_response_file(socket_connection* connection, char** args){
  */
 void server_connectionClosed(socket_connection* connection) {
 	char* client = (connection->socket == fs_socket) ? FILESYSTEM : MEMORY;
-	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n", client, connection->socket, connection->ip, connection->port);
+	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n",
+			client, connection->socket, connection->ip, connection->port);
 	exit(EXIT_FAILURE);
 }
 
@@ -271,7 +361,8 @@ void server_connectionClosed(socket_connection* connection) {
 void newClient(socket_connection* connection) {
 	char* client = (connection->port == port_cpu) ? CPU : CONSOLE;
 
-	log_debug(logger, "%s has connected. Socket = %d, IP = %s, Port = %d.\n", client, connection->socket, connection->ip, connection->port);
+	log_debug(logger, "%s has connected. Socket = %d, IP = %s, Port = %d.\n",
+			client, connection->socket, connection->ip, connection->port);
 
 	if (!strcmp(client, CPU)) {
 		t_cpu* cpu = malloc(sizeof(t_cpu));
@@ -280,13 +371,15 @@ void newClient(socket_connection* connection) {
 		pthread_mutex_lock(&cpu_mutex);
 		list_add(cpu_list, cpu);
 		pthread_mutex_unlock(&cpu_mutex);
-		runFunction(connection->socket, "kernel_page_stack_size", 2, string_itoa(mem_page_size), string_itoa(stack_size));
+		runFunction(connection->socket, "kernel_page_stack_size", 2,
+				string_itoa(mem_page_size), string_itoa(stack_size));
 	}
 }
 void connectionClosed(socket_connection* connection) {
 	char* client = (connection->port == port_cpu) ? CPU : CONSOLE;
 
-	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n", client, connection->socket, connection->ip, connection->port);
+	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n",
+			client, connection->socket, connection->ip, connection->port);
 
 	if (!strcmp(client, CONSOLE)) {
 		pcb* l_pcb = find_pcb_by_socket(connection->socket);

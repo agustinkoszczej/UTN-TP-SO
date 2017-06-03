@@ -57,7 +57,7 @@ t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
 		cpu_finalizar();
 	}
 
-	return (int) n_var;
+	return n_var;
 }
 
 /*
@@ -80,8 +80,8 @@ t_puntero cpu_obtenerPosicionVariable(t_nombre_variable identificador_variable) 
 			t_arg_var* var = list_get(stack->vars, j);
 
 			if (var->id == identificador_variable) {
-				log_debug(logger, "Obtener Posicion Variable '%c'",
-						identificador_variable);
+				log_debug(logger, "Obtener Posicion Variable '%c' en '%d'",
+						identificador_variable, space_occupied);
 				return space_occupied;
 			} else
 				space_occupied += 4;
@@ -112,7 +112,8 @@ t_valor_variable cpu_dereferenciar(t_puntero direccion_variable) {
 	runFunction(mem_socket, "i_read_bytes_from_page", 4, pid, page, offset,
 			size);
 	wait_response();
-	log_debug(logger, "Dereferenciar '%s'", mem_buffer);
+	log_debug(logger, "Dereferenciar en '%d', valor = '%s'", direccion_variable,
+			mem_buffer);
 	return atoi(mem_buffer);
 }
 
@@ -139,7 +140,7 @@ void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
 	runFunction(mem_socket, "i_store_bytes_in_page", 5, pid, page, offset, size,
 			buffer);
 	wait_response();
-	log_debug(logger, "Asignar '%s'", buffer);
+	log_debug(logger, "Asignar '%s' en '%d'", buffer, direccion_variable);
 }
 
 /*
@@ -213,6 +214,7 @@ void cpu_irAlLabel(t_nombre_etiqueta t_nombre_etiqueta) {
  * @return	void
  */
 void cpu_llamarSinRetorno(t_nombre_etiqueta etiqueta) {
+	log_debug(logger, "Llamada sin retorno");
 	t_stack* stack_aux = stack_create();
 	stack_aux->retpos = pcb_actual->pc;
 	list_add(pcb_actual->i_stack, stack_aux);
@@ -363,10 +365,19 @@ void kernel_liberar(t_puntero puntero) {
  */
 t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion,
 		t_banderas flags) {
+	log_debug(logger, "CPU Abrir");
 	char* n_flag = get_flag(flags);
-	runFunction(kernel_socket, "cpu_open_file", 3, string_itoa(direccion), n_flag, string_itoa(pcb_actual->pid));
+
+	runFunction(kernel_socket, "cpu_open_file", 3, string_itoa(direccion),
+			n_flag, string_itoa(pcb_actual->pid));
 	wait_response();
-	return kernel_file_descriptor;
+	if (kernel_file_descriptor == NO_EXISTE_ARCHIVO) {
+		runFunction(kernel_socket, "cpu_error", 1,
+				string_itoa(kernel_file_descriptor));
+		cpu_finalizar();
+		return NO_EXISTE_ARCHIVO;
+	} else
+		return kernel_file_descriptor;
 }
 
 /*
@@ -379,7 +390,17 @@ t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion,
  * @return	void
  */
 void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
-	runFunction(kernel_socket, "cpu_delete_file", 2, string_itoa(descriptor_archivo), string_itoa(pcb_actual->pid));
+	log_debug(logger, "CPU Borrar");
+	/*runFunction(kernel_socket, "kernel_validate_file", 1, path);
+	 wait_response();
+	 if (kernel_file_descriptor == NO_EXISTE_ARCHIVO) {
+	 runFunction(kernel_socket, "cpu_error", 1,
+	 string_itoa(kernel_file_descriptor));
+	 cpu_finalizar();
+	 return;
+	 }*/
+	runFunction(kernel_socket, "cpu_delete_file", 1,
+			string_itoa(descriptor_archivo));
 	wait_response();
 }
 
@@ -393,8 +414,24 @@ void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
  * @return	void
  */
 void kernel_cerrar(t_descriptor_archivo descriptor_archivo) {
-	runFunction(kernel_socket, "cpu_close_file", 2, string_itoa(descriptor_archivo), string_itoa(pcb_actual->pid));
+	log_debug(logger, "CPU Cerrar");
+	/*runFunction(kernel_socket, "kernel_validate_file", 1);
+	 wait_response();
+	 if (kernel_file_descriptor == NO_EXISTE_ARCHIVO) {
+	 runFunction(kernel_socket, "cpu_error", 1,
+	 string_itoa(kernel_file_descriptor));
+	 cpu_finalizar();
+	 return;
+	 }*/
+
+	runFunction(kernel_socket, "cpu_close_file", 2,
+			string_itoa(descriptor_archivo), string_itoa(pcb_actual->pid));
 	wait_response();
+	/*if (kernel_file_descriptor == NO_SE_ABRIO_EL_ARCHIVO) {
+	 runFunction(kernel_socket, "cpu_error", 1,
+	 string_itoa(kernel_file_descriptor));
+	 cpu_finalizar();
+	 }*/
 }
 
 /*
@@ -409,7 +446,11 @@ void kernel_cerrar(t_descriptor_archivo descriptor_archivo) {
  */
 void kernel_moverCursor(t_descriptor_archivo descriptor_archivo,
 		t_valor_variable posicion) {
-	//TODO
+	log_debug(logger, "CPU Mover Cursor");
+	runFunction(kernel_socket, "cpu_seek_file", 3,
+			string_itoa(descriptor_archivo), string_itoa(posicion),
+			string_itoa(pcb_actual->pid));
+	wait_response();
 }
 
 /*
@@ -427,7 +468,19 @@ void kernel_moverCursor(t_descriptor_archivo descriptor_archivo,
  */
 void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 		t_valor_variable tamanio) {
-	//TODO
+	log_debug(logger, "CPU Escribir");
+	char* buffer = string_new();
+	memcpy(buffer, informacion, tamanio);
+	log_debug(logger, "%s", buffer);
+	runFunction(kernel_socket, "cpu_write_file", 4,
+			string_itoa(descriptor_archivo), buffer,
+			string_itoa(tamanio), string_itoa(pcb_actual->pid));
+	wait_response();
+	if (kernel_file_descriptor == ESCRIBIR_SIN_PERMISOS) {
+		runFunction(kernel_socket, "cpu_error", 1,
+				string_itoa(kernel_file_descriptor));
+		cpu_finalizar();
+	}
 }
 
 /*
@@ -445,7 +498,16 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
  */
 void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 		t_valor_variable tamanio) {
-	//TODO
+	log_debug(logger, "CPU Leer");
+	runFunction(kernel_socket, "cpu_read_file", 4,
+			string_itoa(descriptor_archivo), string_itoa(informacion),
+			string_itoa(tamanio), string_itoa(pcb_actual->pid));
+	wait_response();
+	if (kernel_file_descriptor == LEER_SIN_PERMISOS) {
+		runFunction(kernel_socket, "cpu_error", 1,
+				string_itoa(kernel_file_descriptor));
+		cpu_finalizar();
+	}
 }
 
 t_stack* stack_create() {

@@ -35,6 +35,5 @@ void kernel_page_stack_size(socket_connection* connection, char** args);
 void kernel_response_get_shared_var(socket_connection* connection, char** args);
 void kernel_response_set_shared_var(socket_connection* connection, char** args);
 void kernel_response_file(socket_connection* connection, char** args);
-void kernel_finalizar_cpu(socket_connection* connection, char** args);
 
 #endif /* CPU_INTERFACE_H_ */

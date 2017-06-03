@@ -1,0 +1,7 @@
+#!/usr/bin/ansisop
+begin
+	variables a
+	a = 3
+	prints n a
+	prints l Holitas
+end
