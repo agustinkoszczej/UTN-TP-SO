@@ -220,15 +220,15 @@ void abort_program(t_process* process, int exit_code) {
 	process->time_finish = malloc(string_length(time_finish));
 	process->time_finish = time_finish;
 
-	new_message(dictionary_get(message_map, string_itoa(exit_code)), process->pid);
-	char* message = string_from_format("[%s] [%s] [%d]", process->time_start, process->time_finish, process->c_message);
-	new_message(message, process->pid);
-
 	if (process->pid > 0) {
 		pthread_mutex_lock(&p_counter_mutex);
 		p_counter--;
 		pthread_mutex_unlock(&p_counter_mutex);
 	}
+
+	new_message(dictionary_get(message_map, string_itoa(exit_code)), process->pid);
+	char* message = string_from_format("[%s] [%s] [%d]", process->time_start, process->time_finish, process->c_message);
+	new_message(message, process->pid);
 
 	process->pid = -1;
 	process->socket = -1;
