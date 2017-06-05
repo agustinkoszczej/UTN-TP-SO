@@ -94,3 +94,15 @@ void kernel_response_file(socket_connection* connection, char** args) {
 	signal_response();
 }
 
+void kernel_response(socket_connection* connection, char** args) {
+	log_debug(logger, "kernel_response");
+	signal_kernel_response();
+}
+
+void kernel_response_validate_file(socket_connection* connection, char** args) {
+	log_debug(logger, "kernel_response_file: kernel_file_descriptor=%s", args[0]);
+
+	validate_file = atoi(args[0]);
+	signal_kernel_response();
+}
+

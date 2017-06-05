@@ -43,11 +43,14 @@ int stack_size;
  */
 int kernel_shared_var;
 int kernel_file_descriptor;
+bool validate_file;
+
 pcb* pcb_actual;
 
 t_dictionary * fns;
 pthread_mutex_t mx_main;
 pthread_mutex_t planning_mutex;
+pthread_mutex_t kernel_response_mutex;
 t_log* logger;
 
 int vars_in_stack();
@@ -55,6 +58,9 @@ int calculate_page_for_var();
 int calculate_offset_for_var();
 void wait_response();
 void signal_response();
+
+void wait_kernel_response();
+void signal_kernel_response();
 
 char* get_flag(t_banderas flags);
 

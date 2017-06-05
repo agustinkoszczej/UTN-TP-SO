@@ -40,7 +40,8 @@ void short_planning() {
 
 		char* pcb_string = pcb_to_string(_pcb);
 
-		runFunction(free_cpu->socket, "kernel_receive_pcb", 3, string_itoa(planning_alg), string_itoa(quantum), pcb_string);
+		runFunction(free_cpu->socket, "kernel_receive_pcb", 3,
+				string_itoa(planning_alg), string_itoa(quantum), pcb_string);
 	}
 	pthread_mutex_unlock(&planning_mutex);
 }
@@ -95,24 +96,24 @@ pcb* find_pcb_by_pid(int pid) {
 	int pos;
 	pcb* n_pcb = malloc(sizeof(pcb));
 	switch (socket_pcb->state) {
-		case NEW_LIST:
-			n_pcb = queue_peek(new_queue);
-			break;
-		case READY_LIST:
-			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
-			n_pcb = list_get(ready_list, pos);
-			break;
-		case EXEC_LIST:
-			pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
-			n_pcb = list_get(exec_list, pos);
-			break;
-		case BLOCK_LIST:
-			pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
-			n_pcb = list_get(block_list, pos);
-			break;
-		case EXIT_LIST:
-			n_pcb = queue_peek(exit_queue);
-			break;
+	case NEW_LIST:
+		n_pcb = queue_peek(new_queue);
+		break;
+	case READY_LIST:
+		pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
+		n_pcb = list_get(ready_list, pos);
+		break;
+	case EXEC_LIST:
+		pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
+		n_pcb = list_get(exec_list, pos);
+		break;
+	case BLOCK_LIST:
+		pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
+		n_pcb = list_get(block_list, pos);
+		break;
+	case EXIT_LIST:
+		n_pcb = queue_peek(exit_queue);
+		break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
 	pthread_mutex_unlock(&socket_pcb_mutex);
@@ -133,24 +134,24 @@ pcb* find_pcb_by_socket(int socket) {
 	int pos;
 	pcb* n_pcb = malloc(sizeof(pcb));
 	switch (socket_pcb->state) {
-		case NEW_LIST:
-			n_pcb = queue_peek(new_queue);
-			break;
-		case READY_LIST:
-			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
-			n_pcb = list_get(ready_list, pos);
-			break;
-		case EXEC_LIST:
-			pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
-			n_pcb = list_get(exec_list, pos);
-			break;
-		case BLOCK_LIST:
-			pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
-			n_pcb = list_get(block_list, pos);
-			break;
-		case EXIT_LIST:
-			n_pcb = queue_peek(exit_queue);
-			break;
+	case NEW_LIST:
+		n_pcb = queue_peek(new_queue);
+		break;
+	case READY_LIST:
+		pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
+		n_pcb = list_get(ready_list, pos);
+		break;
+	case EXEC_LIST:
+		pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
+		n_pcb = list_get(exec_list, pos);
+		break;
+	case BLOCK_LIST:
+		pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
+		n_pcb = list_get(block_list, pos);
+		break;
+	case EXIT_LIST:
+		n_pcb = queue_peek(exit_queue);
+		break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
 	pthread_mutex_unlock(&socket_pcb_mutex);
@@ -186,43 +187,43 @@ void move_to_list(pcb* pcb, int list_name) {
 
 	pthread_mutex_lock(&pcb_list_mutex);
 	switch (pcb->state) {
-		case NEW_LIST:
-			queue_pop(new_queue);
-			break;
-		case READY_LIST:
-			pos = find_pcb_pos_in_list(ready_list, pcb->pid);
-			list_remove(ready_list, pos);
-			break;
-		case EXEC_LIST:
-			pos = find_pcb_pos_in_list(exec_list, pcb->pid);
-			list_remove(exec_list, pos);
-			break;
-		case BLOCK_LIST:
-			pos = find_pcb_pos_in_list(block_list, pcb->pid);
-			list_remove(block_list, pos);
-			break;
-		case EXIT_LIST:
-			queue_pop(exit_queue);
-			break;
+	case NEW_LIST:
+		queue_pop(new_queue);
+		break;
+	case READY_LIST:
+		pos = find_pcb_pos_in_list(ready_list, pcb->pid);
+		list_remove(ready_list, pos);
+		break;
+	case EXEC_LIST:
+		pos = find_pcb_pos_in_list(exec_list, pcb->pid);
+		list_remove(exec_list, pos);
+		break;
+	case BLOCK_LIST:
+		pos = find_pcb_pos_in_list(block_list, pcb->pid);
+		list_remove(block_list, pos);
+		break;
+	case EXIT_LIST:
+		queue_pop(exit_queue);
+		break;
 	}
 
 	pcb->state = list_name;
 	switch (list_name) {
-		case NEW_LIST:
-			queue_push(new_queue, pcb);
-			break;
-		case READY_LIST:
-			list_add(ready_list, pcb);
-			break;
-		case EXEC_LIST:
-			list_add(exec_list, pcb);
-			break;
-		case BLOCK_LIST:
-			list_add(block_list, pcb);
-			break;
-		case EXIT_LIST:
-			queue_push(exit_queue, pcb);
-			break;
+	case NEW_LIST:
+		queue_push(new_queue, pcb);
+		break;
+	case READY_LIST:
+		list_add(ready_list, pcb);
+		break;
+	case EXEC_LIST:
+		list_add(exec_list, pcb);
+		break;
+	case BLOCK_LIST:
+		list_add(block_list, pcb);
+		break;
+	case EXIT_LIST:
+		queue_push(exit_queue, pcb);
+		break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
 
@@ -239,7 +240,7 @@ void move_to_list(pcb* pcb, int list_name) {
 }
 
 /*
- * FILESYSTEM
+ * CPU-FILESYSTEM
  */
 
 bool validate_file_from_fs(char* path) {
@@ -249,127 +250,314 @@ bool validate_file_from_fs(char* path) {
 
 }
 
-int find_file_pos_in_global_table_by_path(char* path) {
+//GETTERS TABLA GLOBAL
+int get_gfd_by_path(char* path) {
 	int i;
 	for (i = 0; i < list_size(fs_global_table); i++) {
 		t_global_file_table* file = list_get(fs_global_table, i);
 		if (!strcmp(file->path, path))
+			return file->gfd;
+	}
+	return -1; //No existe
+}
+
+char* get_path_by_gfd(int gfd) {
+	int pos = get_pos_in_fs_global_table_by_gfd(gfd);
+	t_global_file_table* n_file = list_get(fs_global_table, pos);
+	return n_file->path;
+}
+
+int get_pos_in_fs_global_table_by_gfd(int gfd) {
+	int i;
+	for (i = 0; i < list_size(fs_global_table); i++) {
+		t_global_file_table* global_files = list_get(fs_global_table, i);
+		if (global_files->gfd == gfd)
+			return i;
+	}
+	return -1; //No existe
+}
+
+t_global_file_table* get_global_file_by_gfd(int gfd) {
+	int i;
+	for (i = 0; i < list_size(fs_global_table); i++) {
+		t_global_file_table* file = list_get(fs_global_table, i);
+		if (file->gfd == gfd)
+			return file;
+	}
+	return NULL;
+}
+
+////GETTERS TABLA DE ARCHIVOS DE PROCESOS
+
+t_process_file_table* get_process_file_by_pid( pid) {
+	int i;
+	for (i = 0; i < list_size(fs_process_table); i++) {
+		t_process_file_table* file = list_get(fs_process_table, i);
+		if (file->pid == pid)
+			return file;
+	}
+	return NULL; //No existe
+}
+
+int get_pos_open_file_by_fd(t_list* open_files, int fd) {
+	int i;
+	for (i = 0; i < list_size(open_files); i++) {
+		t_open_file* file = list_get(open_files, i);
+		if (file->fd == fd)
+			return i;
+	}
+	return -1; //No existe
+}
+
+int get_pos_in_fs_process_table_by_pid(int pid) {
+	int i;
+	for (i = 0; i < list_size(fs_process_table); i++) {
+		t_process_file_table* file = list_get(fs_process_table, i);
+		if (file->pid == pid)
 			return i;
 	}
 	return -1; //No existe File en la table
 }
 
-int add_file_in_process_table(int global_fd, char* flag, int pid) {
-	t_list* files_open_process = list_get(fs_process_table, pid);
-	t_process_file_table* n_file = malloc(sizeof(t_process_file_table));
-	n_file->global_fd = global_fd;
+t_open_file* get_open_file_by_fd_and_pid(int fd, int pid) {
+	t_process_file_table* files_open_process = get_process_file_by_pid(pid);
+	if (files_open_process == NULL)
+		return NULL;
+	int i;
+	for (i = 0; i < list_size(files_open_process->open_files); i++) {
+		t_open_file* file = list_get(files_open_process->open_files, i);
+		if (file->fd == fd)
+			return file;
+	}
+	return NULL;
+}
+
+char* get_path_by_fd_and_pid(int fd, int pid) {
+	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
+	if (process == NULL)
+		return NULL;
+	return get_path_by_gfd(process->gfd);
+}
+
+//ADDS
+
+int open_file_in_process_table(char* path, char* flag, int pid) {
+
+	int pos = get_pos_in_fs_process_table_by_pid(pid);
+	if (pos == -1) {
+		t_process_file_table* n_file = malloc(sizeof(t_process_file_table));
+		n_file->pid = pid;
+		n_file->open_files = add_defaults_fds();
+		pos = list_add(fs_process_table, n_file);
+	}
+
+	int gfd = add_file_in_global_table(path);
+
+	t_open_file* n_file = malloc(sizeof(t_open_file));
+	n_file->gfd = gfd;
 	n_file->flag = flag;
 	n_file->pointer = 0;
 
-	pthread_mutex_lock(&fs_mutex);
-	list_add_in_index(files_open_process, pid, n_file);
-	list_replace(fs_process_table, pid, files_open_process);
-	/*t_global_file_table* n_global = list_get(fs_global_table, global_fd);
-	n_global->open++;
-	list_replace(fs_global_table, global_fd, n_global);*/
-	return list_size(files_open_process);//TODO ver si es +3
-	pthread_mutex_unlock(&fs_mutex);
+	t_process_file_table* files_open_process = get_process_file_by_pid(pid);
+
+	n_file->fd = list_size(files_open_process->open_files);
+	int fd = list_add(files_open_process->open_files, n_file);
+	list_replace(fs_process_table, pos, files_open_process);
+
+	return fd;
 }
 
-void  add_file_in_global_table(char* path) {
+int add_file_in_global_table(char* path) {
 	t_global_file_table* n_file = malloc(sizeof(t_global_file_table));
 
-	pthread_mutex_lock(&fs_mutex);
-	int pos = find_file_pos_in_global_table_by_path(path);
-	if (pos == -1) { //No existe*/
-		n_file->path = string_new();
-		string_append(n_file->path, path);
+	int gfd = get_gfd_by_path(path);
+	if (gfd == -1) { //No existe
+		n_file->path = path;
+		//string_append(n_file->path, path);
 		n_file->open = 1;
+		n_file->gfd = list_size(fs_global_table);
 		list_add(fs_global_table, n_file);
-		//return list_size(fs_global_table);
 	} else {
+		int pos = get_pos_in_fs_global_table_by_gfd(get_gfd_by_path(path));
 		n_file = list_get(fs_global_table, pos);
 		n_file->open++;
 		list_replace(fs_global_table, pos, n_file);
 	}
-	free(n_file);
-	pthread_mutex_unlock(&fs_mutex);
-	//return pos;
+	return n_file->gfd;
 }
 
-void close_file(int fd_close, int pid) {
-	fd_close -= 3;
-	t_process_file_table* process_file_to_close = get_process_file_by_fd(fd_close, pid);
-	int gfd_to_close = process_file_to_close->global_fd;
+int remove_open_file_by_fd_and_pid(int fd, int pid) {
 
-	/*if (process_file_to_close == NULL) {
+	t_process_file_table* files = get_process_file_by_pid(pid);
+	if (files == NULL)
+		return -1; //El proceso no abrio nunca un archivo
+
+	int pos = get_pos_open_file_by_fd(files->open_files, fd);
+	if (pos == -1)
+		return -1; // El proceso no tiene ese fd asignado
+
+	t_open_file* file_to_remove = list_get(files->open_files, pos);
+	list_remove(files->open_files, pos);
+	pos = get_pos_in_fs_process_table_by_pid(pid);
+
+	list_replace(fs_process_table, pos, files);
+
+	if (list_size(files->open_files) == 3)
+		list_remove(fs_process_table, get_pos_in_fs_process_table_by_pid(pid)); //Si no tiene archivos abierto la remuevo de la lista
+
+	return file_to_remove->gfd;
+}
+
+bool close_file(int fd_close, int pid) {
+
+	if (is_default(fd_close))
 		return false;
-	} else {*/
-		list_remove(fs_process_table, fd_close);
 
-		t_global_file_table* global_file_to_decrement = list_get(fs_global_table, gfd_to_close);
-		global_file_to_decrement->open--;
+	int gfd = remove_open_file_by_fd_and_pid(fd_close, pid);
 
-		if (global_file_to_decrement->open == 0) //Si es 0 lo borro de la Global File Table
-			list_remove(fs_global_table, gfd_to_close);
-		else
-			list_replace(fs_global_table, gfd_to_close, global_file_to_decrement);
-	//}
-	//return true;
+	t_global_file_table* global_file_to_decrement = get_global_file_by_gfd(gfd);
+
+	if (global_file_to_decrement == NULL)
+		return false;
+
+	global_file_to_decrement->open--;
+
+	int pos_gfd = get_pos_in_fs_global_table_by_gfd(gfd);
+
+	if (global_file_to_decrement->open == 0) //Si es 0 lo borro de la Global File Table
+		list_remove(fs_global_table, pos_gfd);
+	else
+		list_replace(fs_global_table, pos_gfd, global_file_to_decrement);
+
+	return true;
 }
 
-void delete_file_from_global_table(int gfd) {
-	list_remove(fs_global_table, gfd); // lo borro de la global
-	int i,j;
-	//ahora de la de de procesos
-	for(i=0; i<list_size(fs_process_table);i++){
-		t_list* process_table = list_get(fs_process_table,i);
-		for(j=0; j<list_size(process_table);j++){
-			t_process_file_table* process= list_get(process_table,j);
-			if(process->global_fd == gfd){
-				list_remove(process_table,j);
+bool delete_file_from_global_table(int gfd) {
+	int pos = get_pos_in_fs_global_table_by_gfd(gfd);
+	if (pos == -1)
+		return false; //No existe archivo
+
+	list_remove(fs_global_table, pos); // lo borro de la global
+	int i, j;
+	//ahora de la de de procesos que lo tenian abierto
+
+	for (i = 0; i < list_size(fs_process_table); i++) {
+		t_process_file_table* process_table = list_get(fs_process_table, i);
+		for (j = 0; j < list_size(process_table->open_files); j++) {
+			t_open_file* process = list_get(process_table->open_files, j);
+			if (process->gfd == gfd) {
+				list_remove(process_table->open_files, j);
+				j--;
 			}
 		}
+		if (list_size(process_table->open_files) == 3) {
+			list_remove(fs_process_table, i);
+			i--;
+		}
 	}
+	return true;
 }
 
-bool isAllowed(int pid, int fd, char* flag){
-	t_process_file_table* process = get_process_file_by_fd(fd, pid);
+bool is_allowed(int pid, int fd, char* flag) {
+	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
+	if (process == NULL || is_default(fd))
+		return false;
 	return string_contains(process->flag, flag);
 }
 
-char* get_path_by_gfd(int gfd){
-	t_global_file_table* n_file = list_get(fs_global_table, gfd);
-	return n_file->path;
+void set_process_file_by_fd(int fd, int pid, t_open_file* n_file) {
+	int pos_table = get_pos_in_fs_process_table_by_pid(pid);
+	t_process_file_table* files_open_process = list_get(fs_process_table,
+			pos_table);
+
+	int pos_fd = get_pos_open_file_by_fd(files_open_process->open_files, fd);
+	list_replace(files_open_process->open_files, pos_fd, n_file);
+	list_replace(fs_process_table, pos_table, files_open_process);
 }
 
-int get_gfd_by_path(char* path){
-	int i;
-	for(i=0; i< list_size(fs_process_table); i++){
-		t_global_file_table* n_file = list_get(fs_process_table, i);
-		if(!strcmp(n_file->path,path)) return i;
-	}
-
-	return -1;
-}
-
-t_process_file_table* get_process_file_by_fd(int fd, int pid){
-	t_list* files_open_process = list_get(fs_process_table, pid);
-	t_process_file_table* process = list_get(files_open_process, fd);
-	return process;
-}
-
-void set_process_file_by_fd(int fd, int pid, t_process_file_table* n_file){
-	t_list* files_open_process = list_get(fs_process_table, pid);
-
-	list_replace(files_open_process, fd, n_file);
-	list_replace(fs_process_table, pid, files_open_process);
-}
-
-void set_pointer(int n_pointer, int fd, int pid){
-	t_process_file_table* process = get_process_file_by_fd(fd, pid);
+bool set_pointer(int n_pointer, int fd, int pid) {
+	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
+	if (process == NULL || is_default(fd))
+		return false;
 	process->pointer = n_pointer;
 	set_process_file_by_fd(fd, pid, process);
+	return true;
+}
+
+bool is_default(int fd) {
+	if (fd == 0 || fd == 1 || fd == 2)
+		return true;
+	return false;
+}
+
+t_list* add_defaults_fds() {
+	t_list* defaults = list_create();
+	int i;
+	for (i = 0; i < 3; i++) {
+		t_open_file* file = malloc(sizeof(t_open_file));
+		file->gfd = -1;
+		file->fd = i;
+		list_add(defaults, file);
+	}
+	return defaults;
+}
+
+bool write_file(int fd_write, int pid, char* info, int size) {
+	t_socket_pcb* socket_console = find_socket_by_pid(pid);
+	if (fd_write == 1) {
+		runFunction(socket_console->socket, "kernel_print_message", 2, info,
+				string_itoa(pid));
+		log_debug(logger, "Escribir '%s'",info);
+		return true;
+	}
+
+	t_open_file* process = get_open_file_by_fd_and_pid(fd_write, pid);
+
+	if (is_allowed(pid, fd_write, process->flag)) {
+		char* path = get_path_by_gfd(process->gfd);
+		int offset = process->pointer;
+		runFunction(fs_socket, "kernel_save_data", 4, path, offset, size, info);
+		wait_response(fs_mutex);
+		if (!fs_response) {
+			//TODO overflow al escribir? en FILESYSTEM (esto llega aca cuando save_data = false)
+			return false;
+		}
+	}
+
+	return false; //ESCRIBIR_SIN_PERMISOS
+}
+
+void show_global_file_table() {
+	int i;
+	for (i = 0; i < list_size(fs_global_table); i++) {
+		t_global_file_table* global_file = list_get(fs_global_table, i);
+		printf("> GLOBAL_FD: %d\t> OPEN: %d\t> FILE: %s\n", global_file->gfd,
+				global_file->open, global_file->path);
+	}
+}
+
+void show_all_processes_file_table() {
+	int i;
+	for (i = 0; i < list_size(fs_process_table); i++) {
+		t_process_file_table* file = list_get(fs_process_table, i);
+		printf("> PID %d:\n", file->pid);
+		show_process_file_table(file->pid);
+		puts("");
+	}
+}
+
+void show_process_file_table(int pid) {
+	t_process_file_table* files_process = get_process_file_by_pid(pid);
+	if (files_process == NULL)
+		printf("El Proceso %d no tiene procesos abiertos!\n", pid); //TODO podria poner una validacion para un PID que no existe, sino va a mostrar esto
+	else {
+		int i;
+		for (i = 3; i < list_size(files_process->open_files); i++) {
+			t_open_file* file = list_get(files_process->open_files, i);
+			printf("> FD: %d\t> GLOBAL_FD: %d\t> FLAGS: %s\t>POINTER: %d\n",
+					file->fd, file->gfd, file->flag, file->pointer);
+		}
+	}
 }
 
 void wait_response(pthread_mutex_t mutex) {
@@ -385,10 +573,12 @@ void create_function_dictionary() {
 
 	dictionary_put(fns, "console_load_program", &console_load_program);
 	dictionary_put(fns, "memory_identify", &memory_identify);
-	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
+	dictionary_put(fns, "memory_response_start_program",
+			&memory_response_start_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);
 
-	dictionary_put(fns, "cpu_received_page_stack_size", &cpu_received_page_stack_size);
+	dictionary_put(fns, "cpu_received_page_stack_size",
+			&cpu_received_page_stack_size);
 	dictionary_put(fns, "cpu_task_finished", &cpu_task_finished);
 	dictionary_put(fns, "cpu_error", &cpu_error);
 	dictionary_put(fns, "cpu_get_shared_var", &cpu_get_shared_var);
@@ -403,6 +593,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "cpu_write_file", &cpu_write_file);
 	dictionary_put(fns, "cpu_read_file", &cpu_read_file);
 	dictionary_put(fns, "cpu_seek_file", &cpu_seek_file);
+	dictionary_put(fns, "cpu_validate_file", &cpu_validate_file);
 
 	dictionary_put(fns, "fs_response_file", &fs_response_file);
 	dictionary_put(fns, "fs_response_get_data", &fs_response_get_data);
@@ -449,7 +640,8 @@ void connect_to_server(t_config* config, char* name) {
 		exit(EXIT_FAILURE);
 	}
 
-	if ((*socket = connectServer(ip_server, port, fns, &server_connectionClosed, NULL)) == -1) {
+	if ((*socket = connectServer(ip_server, port, fns, &server_connectionClosed,
+	NULL)) == -1) {
 		log_error(logger, "Error at connecting to %s.", name);
 		error_show(" at connecting to %s.\n", name);
 		exit(EXIT_FAILURE);
@@ -480,7 +672,8 @@ void init_kernel(t_config* config) {
 	char** global_vars_arr = config_get_array_value(config, SHARED_VARS);
 	int i = 0;
 	while (global_vars_arr[i] != NULL) {
-		dictionary_put(shared_vars, string_substring_from(global_vars_arr[i], 1), 0);
+		dictionary_put(shared_vars,
+				string_substring_from(global_vars_arr[i], 1), 0);
 		i++;
 	}
 
@@ -519,7 +712,6 @@ void init_kernel(t_config* config) {
 	cpu_list = list_create();
 
 	fs_process_table = list_create();
-	list_add(fs_process_table, list_create());
 	fs_global_table = list_create();
 
 	open_socket(config, CONSOLE);
@@ -557,57 +749,57 @@ void show_active_process(char option) {
 	char* list_name = string_new();
 	int i, j;
 	switch (option) {
-		case 'A':
-			string_append(&list_name, "PROCESS IN ALL\n");
+	case 'A':
+		string_append(&list_name, "PROCESS IN ALL\n");
 
-			j = queue_size(new_queue);
-			for (i = 0; i < j; i++) {
-				pcb* n_pcb = queue_pop(new_queue);
-				queue_push(new_queue, n_pcb);
-				list_add(list, n_pcb);
-			}
+		j = queue_size(new_queue);
+		for (i = 0; i < j; i++) {
+			pcb* n_pcb = queue_pop(new_queue);
+			queue_push(new_queue, n_pcb);
+			list_add(list, n_pcb);
+		}
 
-			list_add_all(list, ready_list);
-			list_add_all(list, block_list);
-			list_add_all(list, exec_list);
+		list_add_all(list, ready_list);
+		list_add_all(list, block_list);
+		list_add_all(list, exec_list);
 
-			j = queue_size(exit_queue);
-			for (i = 0; i < j; i++) {
-				pcb* n_pcb = queue_pop(exit_queue);
-				queue_push(exit_queue, n_pcb);
-				list_add(list, n_pcb);
-			}
-			break;
-		case 'N':
-			string_append(&list_name, "PROCESS IN NEW\n");
-			int i, j = queue_size(new_queue);
-			for (i = 0; i < j; i++) {
-				pcb* n_pcb = queue_pop(new_queue);
-				queue_push(new_queue, n_pcb);
-				list_add(list, n_pcb);
-			}
-			break;
-		case 'R':
-			string_append(&list_name, "PROCESS IN READY\n");
-			list_add_all(list, ready_list);
-			break;
-		case 'E':
-			string_append(&list_name, "PROCESS IN EXIT\n");
-			j = queue_size(exit_queue);
-			for (i = 0; i < j; i++) {
-				pcb* n_pcb = queue_pop(exit_queue);
-				queue_push(exit_queue, n_pcb);
-				list_add(list, n_pcb);
-			}
-			break;
-		case 'X':
-			string_append(&list_name, "PROCESS IN EXEC\n");
-			list_add_all(list, exec_list);
-			break;
-		case 'B':
-			string_append(&list_name, "PROCESS IN BLOCK\n");
-			list_add_all(list, block_list);
-			break;
+		j = queue_size(exit_queue);
+		for (i = 0; i < j; i++) {
+			pcb* n_pcb = queue_pop(exit_queue);
+			queue_push(exit_queue, n_pcb);
+			list_add(list, n_pcb);
+		}
+		break;
+	case 'N':
+		string_append(&list_name, "PROCESS IN NEW\n");
+		int i, j = queue_size(new_queue);
+		for (i = 0; i < j; i++) {
+			pcb* n_pcb = queue_pop(new_queue);
+			queue_push(new_queue, n_pcb);
+			list_add(list, n_pcb);
+		}
+		break;
+	case 'R':
+		string_append(&list_name, "PROCESS IN READY\n");
+		list_add_all(list, ready_list);
+		break;
+	case 'E':
+		string_append(&list_name, "PROCESS IN EXIT\n");
+		j = queue_size(exit_queue);
+		for (i = 0; i < j; i++) {
+			pcb* n_pcb = queue_pop(exit_queue);
+			queue_push(exit_queue, n_pcb);
+			list_add(list, n_pcb);
+		}
+		break;
+	case 'X':
+		string_append(&list_name, "PROCESS IN EXEC\n");
+		list_add_all(list, exec_list);
+		break;
+	case 'B':
+		string_append(&list_name, "PROCESS IN BLOCK\n");
+		list_add_all(list, block_list);
+		break;
 	}
 
 	clear_screen();
@@ -643,13 +835,15 @@ void show_info(int pid) {
 	pcb* n_pcb = find_pcb_by_pid(pid);
 	char* info = string_new();
 	string_append_with_format(&info, "PID: %d\n", n_pcb->pid);
-	string_append_with_format(&info, "RAFAGAS EJECUTADAS: %d\n", n_pcb->statistics.cycles);
-	string_append_with_format(&info, "OP. PRIVILEGIADAS: %d\n", n_pcb->statistics.op_priviliges);
-	// TODO tabla de archivos abiertos
-	// Cantidad de páginas de Heap
-	// Cantidad de acciones alocar en operaciones y bytes
-	// Cantidad de acciones liberar en operaciones y bytes
-	// Cantidad de syscalls
+	string_append_with_format(&info, "RAFAGAS EJECUTADAS: %d\n",
+			n_pcb->statistics.cycles);
+	string_append_with_format(&info, "OP. PRIVILEGIADAS: %d\n",
+			n_pcb->statistics.op_priviliges);
+// TODO tabla de archivos abiertos
+// Cantidad de páginas de Heap
+// Cantidad de acciones alocar en operaciones y bytes
+// Cantidad de acciones liberar en operaciones y bytes
+// Cantidad de syscalls
 
 	clear_screen();
 	printf("%s\n", info);
@@ -669,7 +863,7 @@ void do_show_info(char* sel) {
 
 void do_show_file_table(char* sel) {
 	if (!strcmp(sel, "F")) {
-		// TODO
+		show_global_file_table();
 	}
 }
 
@@ -700,7 +894,8 @@ void stop_process(int pid) {
 	t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
 	pcb* n_pcb = find_pcb_by_pid(pid);
 	n_pcb->exit_code = ERROR_SIN_DEFINIR;
-	runFunction(n_socket_pcb->socket, "kernel_stop_process", 2, n_socket_pcb->pid, n_pcb->exit_code);
+	runFunction(n_socket_pcb->socket, "kernel_stop_process", 2,
+			n_socket_pcb->pid, n_pcb->exit_code);
 }
 
 void do_stop_process(char* sel) {

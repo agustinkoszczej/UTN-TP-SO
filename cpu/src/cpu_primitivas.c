@@ -368,16 +368,20 @@ t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion,
 	log_debug(logger, "CPU Abrir");
 	char* n_flag = get_flag(flags);
 
-	runFunction(kernel_socket, "cpu_open_file", 3, string_itoa(direccion),
-			n_flag, string_itoa(pcb_actual->pid));
-	wait_response();
-	if (kernel_file_descriptor == NO_EXISTE_ARCHIVO) {
+	runFunction(kernel_socket, "cpu_validate_file", 1, string_itoa(direccion));
+	wait_kernel_response();
+
+	if (!validate_file) {
 		runFunction(kernel_socket, "cpu_error", 1,
-				string_itoa(kernel_file_descriptor));
+				string_itoa(NO_EXISTE_ARCHIVO));
 		cpu_finalizar();
 		return NO_EXISTE_ARCHIVO;
-	} else
-		return kernel_file_descriptor;
+	}
+
+	runFunction(kernel_socket, "cpu_open_file", 3, string_itoa(direccion),
+			n_flag, string_itoa(pcb_actual->pid));
+	wait_kernel_response();
+	return kernel_file_descriptor;
 }
 
 /*
@@ -391,17 +395,13 @@ t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion,
  */
 void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
 	log_debug(logger, "CPU Borrar");
-	/*runFunction(kernel_socket, "kernel_validate_file", 1, path);
-	 wait_response();
-	 if (kernel_file_descriptor == NO_EXISTE_ARCHIVO) {
-	 runFunction(kernel_socket, "cpu_error", 1,
-	 string_itoa(kernel_file_descriptor));
-	 cpu_finalizar();
-	 return;
-	 }*/
 	runFunction(kernel_socket, "cpu_delete_file", 1,
 			string_itoa(descriptor_archivo));
 	wait_response();
+	if (kernel_response_file == NO_EXISTE_ARCHIVO)
+		runFunction(kernel_socket, "cpu_error", 1,
+				string_itoa(NO_EXISTE_ARCHIVO));
+	cpu_finalizar();
 }
 
 /*
@@ -415,23 +415,9 @@ void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
  */
 void kernel_cerrar(t_descriptor_archivo descriptor_archivo) {
 	log_debug(logger, "CPU Cerrar");
-	/*runFunction(kernel_socket, "kernel_validate_file", 1);
-	 wait_response();
-	 if (kernel_file_descriptor == NO_EXISTE_ARCHIVO) {
-	 runFunction(kernel_socket, "cpu_error", 1,
-	 string_itoa(kernel_file_descriptor));
-	 cpu_finalizar();
-	 return;
-	 }*/
-
 	runFunction(kernel_socket, "cpu_close_file", 2,
 			string_itoa(descriptor_archivo), string_itoa(pcb_actual->pid));
-	wait_response();
-	/*if (kernel_file_descriptor == NO_SE_ABRIO_EL_ARCHIVO) {
-	 runFunction(kernel_socket, "cpu_error", 1,
-	 string_itoa(kernel_file_descriptor));
-	 cpu_finalizar();
-	 }*/
+	wait_kernel_response();
 }
 
 /*
@@ -450,7 +436,7 @@ void kernel_moverCursor(t_descriptor_archivo descriptor_archivo,
 	runFunction(kernel_socket, "cpu_seek_file", 3,
 			string_itoa(descriptor_archivo), string_itoa(posicion),
 			string_itoa(pcb_actual->pid));
-	wait_response();
+	wait_kernel_response();
 }
 
 /*
@@ -471,14 +457,24 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 	log_debug(logger, "CPU Escribir");
 	char* buffer = string_new();
 	memcpy(buffer, informacion, tamanio);
+	strtok(buffer, "\n");
 	log_debug(logger, "%s", buffer);
+
 	runFunction(kernel_socket, "cpu_write_file", 4,
-			string_itoa(descriptor_archivo), buffer,
-			string_itoa(tamanio), string_itoa(pcb_actual->pid));
-	wait_response();
+			string_itoa(descriptor_archivo), buffer, string_itoa(tamanio),
+			string_itoa(pcb_actual->pid));
+
+	wait_kernel_response();
+
+	log_debug(logger, "CPU Escribir bien");
 	if (kernel_file_descriptor == ESCRIBIR_SIN_PERMISOS) {
 		runFunction(kernel_socket, "cpu_error", 1,
-				string_itoa(kernel_file_descriptor));
+				string_itoa(ESCRIBIR_SIN_PERMISOS));
+		cpu_finalizar();
+	}
+	if (kernel_file_descriptor == NO_EXISTE_ARCHIVO) {
+		runFunction(kernel_socket, "cpu_error", 1,
+				string_itoa(NO_EXISTE_ARCHIVO));
 		cpu_finalizar();
 	}
 }
@@ -502,7 +498,7 @@ void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 	runFunction(kernel_socket, "cpu_read_file", 4,
 			string_itoa(descriptor_archivo), string_itoa(informacion),
 			string_itoa(tamanio), string_itoa(pcb_actual->pid));
-	wait_response();
+	wait_kernel_response();
 	if (kernel_file_descriptor == LEER_SIN_PERMISOS) {
 		runFunction(kernel_socket, "cpu_error", 1,
 				string_itoa(kernel_file_descriptor));

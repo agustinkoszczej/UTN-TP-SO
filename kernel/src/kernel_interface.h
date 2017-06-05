@@ -52,6 +52,7 @@ void cpu_delete_file(socket_connection* connection, char** args);
 void cpu_write_file(socket_connection* connection, char** args);
 void cpu_read_file(socket_connection* connection, char** args);
 void cpu_seek_file(socket_connection* connection, char** args);
+void cpu_validate_file(socket_connection* connection, char** args);
 
 /*
  * FILESYSTEM

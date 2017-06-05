@@ -69,18 +69,25 @@ char* fs_buffer;
 
 typedef struct {
 	char* flag;
-	int global_fd;
+	int gfd;
 	int pointer;
-	//int process_fd;  no hace falta, lo obtengo de la posicion de la lista + 3
-}t_process_file_table;
-t_list* fs_process_table;
+	int fd;
+}t_open_file;
 
+typedef struct{
+	int pid;
+	t_list* open_files;
+}t_process_file_table;
 
 typedef struct {
 	char* path;
 	int open;
+	int gfd;
 }t_global_file_table;
+
 t_list* fs_global_table;
+t_list* fs_process_table;
+
 
 /*
 typedef struct {
@@ -132,25 +139,31 @@ pcb* find_pcb_by_pid(int pid);
 void remove_pcb_from_socket_pcb_list(pcb* n_pcb);
 void remove_cpu_from_cpu_list(t_cpu* cpu);
 t_cpu* find_cpu_by_socket(int socket);
-t_socket_pcb* find_socket_bpathy_pid(int pid);
+t_socket_pcb* find_socket_by_pid(int pid);
 void add_process_in_memory();
 void substract_process_in_memory();
 void short_planning();
+
+void wait_response(pthread_mutex_t mutex);
+void signal_response(pthread_mutex_t mutex);
 
 /*
  * FILESYSTEM
  */
 bool validate_file_from_fs(char* path);
-int find_file_pos_in_global_table_by_path(char* path);
-void add_file_in_global_table(char* path);
-void wait_response(pthread_mutex_t mutex);
-int add_file_in_process_table(int global_fd, char* flag, int pid);
-void close_file(int fd_close, int pid);
-void delete_file_from_global_table(int gfd);
-bool isAllowed(int pid, int fd, char* flag);
-char* get_path_by_gfd(int gfd);
-t_process_file_table* get_process_file_by_fd(int fd, int pid);
-void set_process_file_by_fd(int fd, int pid, t_process_file_table* n_file);
-void set_pointer(int n_pointer, int fd, int pid);
+
+//CAPA FILE SYSTEM
+int open_file_in_process_table(char* path, char* flag, int pid);
+bool close_file(int fd_close, int pid);
+bool delete_file_from_global_table(int gfd);
+bool write_file(int fd_write, int pid, char* info, int size);
+t_list* add_defaults_fds();
+bool is_default(int fd);
+
+//SHOWS
+void show_global_file_table();
+void show_all_processes_file_table();
+void show_process_file_table(int pid);
+
 
 #endif /* KERNEL_H_ */

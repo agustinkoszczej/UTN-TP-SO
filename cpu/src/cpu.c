@@ -61,6 +61,16 @@ void signal_response() {
 	//log_debug(logger, "signal_response: void");
 }
 
+void wait_kernel_response() {
+	pthread_mutex_lock(&kernel_response_mutex);
+	//log_debug(logger, "wait_response: void");
+}
+
+void signal_kernel_response() {
+	pthread_mutex_unlock(&kernel_response_mutex);
+	//log_debug(logger, "signal_response: void");
+}
+
 char* get_flag(t_banderas flags) {
 	char* n_flag = string_new();
 	if(flags.creacion) string_append(n_flag, CREATE);
@@ -85,6 +95,8 @@ void create_function_dictionary() {
 	dictionary_put(fns, "kernel_response_get_shared_var", &kernel_response_get_shared_var);
 	dictionary_put(fns, "kernel_response_set_shared_var", &kernel_response_set_shared_var);
 	dictionary_put(fns, "kernel_response_file", &kernel_response_file);
+	dictionary_put(fns, "kernel_response_validate_file", &kernel_response_validate_file);
+	dictionary_put(fns, "kernel_response", &kernel_response);
 
 	log_debug(logger, "create_function_dictionary: void");
 }
@@ -124,6 +136,7 @@ void init_cpu(t_config* config) {
 
 	pthread_mutex_init(&mx_main, NULL);
 	pthread_mutex_init(&planning_mutex, NULL);
+	pthread_mutex_init(&kernel_response_mutex, NULL);
 
 	connect_to_server(config, MEMORY);
 	connect_to_server(config, KERNEL);

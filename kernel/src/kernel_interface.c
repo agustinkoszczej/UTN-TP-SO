@@ -187,49 +187,84 @@ void cpu_free(socket_connection* connection, char** args) {
 	//TODO
 }
 
+void cpu_validate_file(socket_connection* connection, char** args) {
+	char* path = args[0];
+	bool validate = validate_file_from_fs(path);
+	runFunction(connection->socket, "kernel_response_validate_file", 1,
+			string_itoa(validate));
+}
+
 void cpu_open_file(socket_connection* connection, char** args) {
 	char* path = args[0];
 	char* flags = args[1];
 	int pid = atoi(args[2]);
 
-	bool validate = validate_file_from_fs(path);
-	int global_fd;
-
 	if (!strcmp(flags, "c")) {
 		runFunction(fs_socket, "kernel_create_file", 1, path);
 		wait_response(fs_mutex);
 		if (fs_response == 0) {
-			//TODO aca llega cuando no hay lugar disponible en FILESYSTEM (create_file = false);
+			//TODO aca llega cuando create_file = false, que no se que significa del lado de FileSystem xd
 			return;
 		}
-	} else if (!validate)
+	}
+
+	int fd_assigned = open_file_in_process_table(path, flags, pid);
+
+	runFunction(connection->socket, "kernel_response_file", 1,
+			string_itoa(fd_assigned));
+}
+
+void cpu_delete_file(socket_connection* connection, char** args) {
+	int gfd_delete = atoi(args[0]);
+
+	bool result = delete_file_from_global_table(gfd_delete);
+	if (!result) {
 		runFunction(connection->socket, "kernel_response_file", 1,
 				string_itoa(NO_EXISTE_ARCHIVO));
+		return;
+	}
 
-	add_file_in_global_table(path);
-	global_fd = get_gfd_by_path(path);
-	int fd_file = add_file_in_process_table(global_fd, flags, pid);
+	char* path = get_path_by_gfd(gfd_delete);
+
+	runFunction(fs_socket, "kernel_delete_file", 1, path);
+	wait_response(fs_mutex);
+	if (fs_response == 0) {
+		//TODO aca llega cuando delete_file = false, que no se que significa del lado de FileSystem xd
+		return;
+	}
+
 	runFunction(connection->socket, "kernel_response_file", 1,
-			string_itoa(fd_file));
+			string_itoa(gfd_delete));
 }
 
 void cpu_close_file(socket_connection* connection, char** args) {
 	int fd_close = atoi(args[0]);
 	int pid = atoi(args[1]);
 
-	close_file(fd_close, pid);
+	bool result = close_file(fd_close, pid);
+	if (result) {
+		runFunction(connection->socket, "kernel_response_file", 1,
+				string_itoa(fd_close));
+		return;
+	}
+
 	runFunction(connection->socket, "kernel_response_file", 1,
-			string_itoa(fd_close));
+			string_itoa(ERROR_SIN_DEFINIR)); //TODO ARCHIVO_SIN_ABRIR_PREVIAMENTE deberia ser pero no se me actualiza la libreria comun :c
 
 }
 
-void cpu_delete_file(socket_connection* connection, char** args) {
-	int fd_delete = atoi(args[0]);
-	t_global_file_table* global_file = list_get(fs_global_table, fd_delete);
-	delete_file_from_global_table(fd_delete);
-	runFunction(fs_socket, "kernel_delete_file", 1, global_file->path);
-	runFunction(connection->socket, "kernel_response_file", 1,
-			string_itoa(fd_delete));
+void cpu_seek_file(socket_connection* connection, char** args) {
+	int fd = atoi(args[0]);
+	int pos = atoi(args[1]);
+	int pid = atoi(args[2]);
+
+	bool result = set_pointer(pos, fd, pid);
+	if (result)
+		runFunction(connection->socket, "kernel_response_file", 1, fd);
+	else
+		runFunction(connection->socket, "kernel_response_file", 1,
+				string_itoa(ERROR_SIN_DEFINIR)); //TODO ARCHIVO_SIN_ABRIR_PREVIAMENTE deberia ser pero no se me actualiza la libreria comun :c
+
 }
 
 void cpu_write_file(socket_connection* connection, char** args) {
@@ -238,40 +273,22 @@ void cpu_write_file(socket_connection* connection, char** args) {
 	int size = atoi(args[2]);
 	int pid = atoi(args[3]);
 
-	t_process_file_table* process;
+	bool result = write_file(fd, pid, info, size);
 
-	char* path;
-	char* flags;
-	int offset;
-
-	log_debug(logger, "Kernel Escribir");
-
-	t_socket_pcb* socket_console = find_socket_by_pid(pid);
-	if (fd == 1)
-		runFunction(socket_console->socket, "kernel_print_message", 2, info,
-				string_itoa(pid));
-	else {
-		t_process_file_table* process = get_process_file_by_fd(fd, pid);
-
-		path = get_path_by_gfd(process->global_fd);
-		flags = process->flag;
-		offset = process->pointer;
-
-		if (isAllowed(pid, fd, flags)) {
-			runFunction(fs_socket, "kernel_save_data", 4, path, offset, size,
-					info);
-			wait_response(fs_mutex);
-			if (!fs_response) {
-				//TODO overflow al escribir? en FILESYSTEM (esto llega aca cuando save_data = false)
-
-			}
-		}
-		else
-			fd = ESCRIBIR_SIN_PERMISOS;
+	char* path = get_path_by_fd_and_pid(fd, pid);
+	if (path == NULL && !result) {
+		runFunction(connection->socket, "kernel_response_file", 1,
+				string_itoa(ERROR_SIN_DEFINIR));
+		return; //TODO ARCHIVO_SIN_ABRIR_PREVIAMENTE deberia ser pero no se me actualiza la libreria comun :c
 	}
 
-	bool r = runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
-	log_debug(logger, "Kernel Response Escribir Socket '%d' bool '%d'", connection->socket, r);
+	if (!result)
+		fd = ESCRIBIR_SIN_PERMISOS;
+
+	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
+	runFunction(connection->socket, "kernel_response", 1, string_itoa(fd));
+
+	log_debug(logger, "Resultado Kernel Escribir '%d'", result);
 }
 
 void cpu_read_file(socket_connection* connection, char** args) {
@@ -281,24 +298,15 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	int size = atoi(args[2]);
 	int pid = atoi(args[3]) - 1;
 
-	t_process_file_table* process = get_process_file_by_fd(fd, pid);
-	char* path = get_path_by_gfd(process->global_fd);
+	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
+	char* path = get_path_by_gfd(process->gfd);
 	char* flags = process->flag;
 
-	if (isAllowed(pid, fd, flags)) {
+	if (is_allowed(pid, fd, flags)) {
 		runFunction(fs_socket, "kernel_get_data", 3, path, offset, size);
 		wait_response(fs_mutex);
 	} else
 		fd = LEER_SIN_PERMISOS;
-	runFunction(connection->socket, "kernel_response_file", 1, fd);
-}
-
-void cpu_seek_file(socket_connection* connection, char** args) {
-	int fd = atoi(args[0]);
-	int pos = atoi(args[1]);
-	int pid = atoi(args[2]);
-
-	set_pointer(pos, fd, pid);
 	runFunction(connection->socket, "kernel_response_file", 1, fd);
 }
 
