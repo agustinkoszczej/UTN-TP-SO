@@ -839,7 +839,9 @@ void show_info(int pid) {
 			n_pcb->statistics.cycles);
 	string_append_with_format(&info, "OP. PRIVILEGIADAS: %d\n",
 			n_pcb->statistics.op_priviliges);
-// TODO tabla de archivos abiertos
+
+	show_process_file_table(pid);
+// TODO
 // Cantidad de páginas de Heap
 // Cantidad de acciones alocar en operaciones y bytes
 // Cantidad de acciones liberar en operaciones y bytes
