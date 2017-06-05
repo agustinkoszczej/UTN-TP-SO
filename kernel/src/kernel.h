@@ -64,7 +64,7 @@ t_list* block_list;
 t_queue* exit_queue;
 
 int fs_response;
-char* fs_buffer;
+char* fs_read_buffer;
 
 
 typedef struct {
@@ -159,6 +159,10 @@ bool delete_file_from_global_table(int gfd);
 bool write_file(int fd_write, int pid, char* info, int size);
 t_list* add_defaults_fds();
 bool is_default(int fd);
+
+t_open_file* get_open_file_by_fd_and_pid(int fd, int pid);
+char* get_path_by_gfd(int gfd);
+int add_file_in_global_table(char* path);
 
 //SHOWS
 void show_global_file_table();

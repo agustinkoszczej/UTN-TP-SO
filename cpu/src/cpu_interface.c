@@ -105,4 +105,10 @@ void kernel_response_validate_file(socket_connection* connection, char** args) {
 	validate_file = atoi(args[0]);
 	signal_kernel_response();
 }
+void kernel_response_read_file(socket_connection* connection, char** args) {
+
+	read_info = args[0];
+	kernel_file_descriptor = atoi(args[1]);
+	signal_kernel_response();
+}
 

@@ -260,7 +260,7 @@ void cpu_seek_file(socket_connection* connection, char** args) {
 
 	bool result = set_pointer(pos, fd, pid);
 	if (result)
-		runFunction(connection->socket, "kernel_response_file", 1, fd);
+		runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
 	else
 		runFunction(connection->socket, "kernel_response_file", 1,
 				string_itoa(ERROR_SIN_DEFINIR)); //TODO ARCHIVO_SIN_ABRIR_PREVIAMENTE deberia ser pero no se me actualiza la libreria comun :c
@@ -285,7 +285,6 @@ void cpu_write_file(socket_connection* connection, char** args) {
 	if (!result)
 		fd = ESCRIBIR_SIN_PERMISOS;
 
-	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
 	runFunction(connection->socket, "kernel_response", 1, string_itoa(fd));
 
 	log_debug(logger, "Resultado Kernel Escribir '%d'", result);
@@ -296,7 +295,7 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	int fd = atoi(args[0]);
 	int offset = atoi(args[1]);
 	int size = atoi(args[2]);
-	int pid = atoi(args[3]) - 1;
+	int pid = atoi(args[3]);
 
 	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
 	char* path = get_path_by_gfd(process->gfd);
@@ -305,9 +304,11 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	if (is_allowed(pid, fd, flags)) {
 		runFunction(fs_socket, "kernel_get_data", 3, path, offset, size);
 		wait_response(fs_mutex);
+		runFunction(connection->socket, "kernel_response_read_file", 2, fs_read_buffer, string_itoa(fd));
+
 	} else
 		fd = LEER_SIN_PERMISOS;
-	runFunction(connection->socket, "kernel_response_file", 1, fd);
+	runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
 }
 
 /*
@@ -349,7 +350,7 @@ void fs_response_file(socket_connection* connection, char** args) {
 }
 
 void fs_response_get_data(socket_connection* connection, char** args) {
-	fs_buffer = args[0];
+	fs_read_buffer = args[0];
 	signal_response(fs_mutex);
 }
 

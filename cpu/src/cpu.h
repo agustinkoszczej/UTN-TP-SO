@@ -44,6 +44,7 @@ int stack_size;
 int kernel_shared_var;
 int kernel_file_descriptor;
 bool validate_file;
+char* read_info;
 
 pcb* pcb_actual;
 

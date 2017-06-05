@@ -261,12 +261,6 @@ int get_gfd_by_path(char* path) {
 	return -1; //No existe
 }
 
-char* get_path_by_gfd(int gfd) {
-	int pos = get_pos_in_fs_global_table_by_gfd(gfd);
-	t_global_file_table* n_file = list_get(fs_global_table, pos);
-	return n_file->path;
-}
-
 int get_pos_in_fs_global_table_by_gfd(int gfd) {
 	int i;
 	for (i = 0; i < list_size(fs_global_table); i++) {
@@ -276,6 +270,13 @@ int get_pos_in_fs_global_table_by_gfd(int gfd) {
 	}
 	return -1; //No existe
 }
+
+char* get_path_by_gfd(int gfd) {
+	int pos = get_pos_in_fs_global_table_by_gfd(gfd);
+	t_global_file_table* n_file = list_get(fs_global_table, pos);
+	return n_file->path;
+}
+
 
 t_global_file_table* get_global_file_by_gfd(int gfd) {
 	int i;

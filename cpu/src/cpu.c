@@ -97,6 +97,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "kernel_response_file", &kernel_response_file);
 	dictionary_put(fns, "kernel_response_validate_file", &kernel_response_validate_file);
 	dictionary_put(fns, "kernel_response", &kernel_response);
+	dictionary_put(fns, "kernel_response_read_file", &kernel_response_read_file);
 
 	log_debug(logger, "create_function_dictionary: void");
 }

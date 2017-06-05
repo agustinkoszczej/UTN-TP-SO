@@ -495,10 +495,12 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 		t_valor_variable tamanio) {
 	log_debug(logger, "CPU Leer");
+
 	runFunction(kernel_socket, "cpu_read_file", 4,
 			string_itoa(descriptor_archivo), string_itoa(informacion),
 			string_itoa(tamanio), string_itoa(pcb_actual->pid));
 	wait_kernel_response();
+
 	if (kernel_file_descriptor == LEER_SIN_PERMISOS) {
 		runFunction(kernel_socket, "cpu_error", 1,
 				string_itoa(kernel_file_descriptor));
