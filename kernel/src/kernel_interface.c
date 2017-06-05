@@ -172,11 +172,39 @@ void cpu_error(socket_connection* connection, char** args) {
 }
 
 void cpu_wait_sem(socket_connection* connection, char** args) {
-	//TODO
+	char* id_sem = args[0];
+	pcb *process = find_pcb_by_socket(connection->socket);
+	int process_pid = process->pid;
+	sem_status *sem_curr = dictionary_get(sem_ids,id_sem);
+
+	sem_curr->value--;
+
+	if(sem_curr->value<0){
+
+		queue_push(sem_curr->blocked_pids, process_pid);
+		move_to_list(process,BLOCK_LIST);
+		short_planning();
+	}
+
+	dictionary_remove_and_destroy(sem_ids,id_sem,free);
+	dictionary_put(sem_ids,id_sem,sem_curr); 	//Seria mejor modificarlo pero las commons no dejan
+
 }
 
 void cpu_signal_sem(socket_connection* connection, char** args) {
-	//TODO
+	char* id_sem = args[0];
+		sem_status *sem_curr = dictionary_get(sem_ids,id_sem);
+
+		sem_curr->value++;
+
+		if(sem_curr->value<=0){
+
+			pcb *process = queue_pop(sem_curr->blocked_pids);
+			move_to_list(process,READY_LIST);
+		}
+
+		dictionary_remove_and_destroy(sem_ids,id_sem,free);
+		dictionary_put(sem_ids,id_sem,sem_curr);
 }
 
 void cpu_malloc(socket_connection* connection, char** args) {

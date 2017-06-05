@@ -683,9 +683,11 @@ void init_kernel(t_config* config) {
 	char** sem_vals_arr = config_get_array_value(config, SEM_INIT);
 	i = 0;
 	while (sem_ids_arr[i] != NULL) {
-		int* val = malloc(sizeof(int));
-		*val = atoi(sem_vals_arr[i]);
-		dictionary_put(sem_ids, sem_ids_arr[i], val);
+
+		sem_status *sems = malloc(sizeof(sem_status));
+		sems->value = atoi(sem_vals_arr[i]);
+		sems->blocked_pids = queue_create();
+		dictionary_put(sem_ids, sem_ids_arr[i], sems);
 		i++;
 	}
 
