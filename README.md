@@ -15,6 +15,7 @@ inventado y diseñado por la cátedra para fines didácticos.
 
 * Koszczej, Agustín
 * Manchione, Bruno
+* Ortiz, Marcos
 * Plawner, Sebastián
 * Villalba, Matías
 
