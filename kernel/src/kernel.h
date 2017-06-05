@@ -159,6 +159,8 @@ bool delete_file_from_global_table(int gfd);
 bool write_file(int fd_write, int pid, char* info, int size);
 t_list* add_defaults_fds();
 bool is_default(int fd);
+bool is_allowed(int pid, int fd, char* flag);
+bool set_pointer(int n_pointer, int fd, int pid);
 
 t_open_file* get_open_file_by_fd_and_pid(int fd, int pid);
 char* get_path_by_gfd(int gfd);
