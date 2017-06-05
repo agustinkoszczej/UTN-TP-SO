@@ -398,13 +398,13 @@ int remove_open_file_by_fd_and_pid(int fd, int pid) {
 		return -1; // El proceso no tiene ese fd asignado
 
 	t_open_file* file_to_remove = list_get(files->open_files, pos);
-	list_remove(files->open_files, pos);
+	list_remove_and_destroy_element(files->open_files, pos, &free);
 	pos = get_pos_in_fs_process_table_by_pid(pid);
 
 	list_replace(fs_process_table, pos, files);
 
 	if (list_size(files->open_files) == 3)
-		list_remove(fs_process_table, get_pos_in_fs_process_table_by_pid(pid)); //Si no tiene archivos abierto la remuevo de la lista
+		list_remove_and_destroy_element(fs_process_table, get_pos_in_fs_process_table_by_pid(pid), &free); //Si no tiene archivos abierto la remuevo de la lista
 
 	return file_to_remove->gfd;
 }
@@ -426,7 +426,7 @@ bool close_file(int fd_close, int pid) {
 	int pos_gfd = get_pos_in_fs_global_table_by_gfd(gfd);
 
 	if (global_file_to_decrement->open == 0) //Si es 0 lo borro de la Global File Table
-		list_remove(fs_global_table, pos_gfd);
+		list_remove_and_destroy_element(fs_global_table, pos_gfd, &free);
 	else
 		list_replace(fs_global_table, pos_gfd, global_file_to_decrement);
 
@@ -438,7 +438,7 @@ bool delete_file_from_global_table(int gfd) {
 	if (pos == -1)
 		return false; //No existe archivo
 
-	list_remove(fs_global_table, pos); // lo borro de la global
+	list_remove_and_destroy_element(fs_global_table, pos, &free); // lo borro de la global
 	int i, j;
 	//ahora de la de de procesos que lo tenian abierto
 
@@ -447,12 +447,12 @@ bool delete_file_from_global_table(int gfd) {
 		for (j = 0; j < list_size(process_table->open_files); j++) {
 			t_open_file* process = list_get(process_table->open_files, j);
 			if (process->gfd == gfd) {
-				list_remove(process_table->open_files, j);
+				list_remove_and_destroy_element(process_table->open_files, j, &free);
 				j--;
 			}
 		}
 		if (list_size(process_table->open_files) == 3) {
-			list_remove(fs_process_table, i);
+			list_remove_and_destroy_element(fs_process_table, i, &free);
 			i--;
 		}
 	}
