@@ -36,8 +36,8 @@ inventado y diseñado por la cátedra para fines didácticos.
 * ~~Checkpoint 3~~
   * ~~Fecha: 20/05/2017~~
   
-* Checkpoint 4 - Obligatorio (En Laboratorio)
-  * Fecha: 03/06/2017
+* ~~Checkpoint 4 - Obligatorio (En Laboratorio)~~
+  * ~~Fecha: 03/06/2017~~
   
 * Checkpoint 5
   * Fecha: 10/06/2017
