@@ -68,7 +68,7 @@ char* fs_read_buffer;
 
 typedef struct {
 	int value;
-	t_queue blocked_pids;
+	t_queue *blocked_pids;
 } sem_status;
 
 typedef struct {
