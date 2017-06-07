@@ -343,7 +343,7 @@ void dump(int pid) {
 	pthread_mutex_lock(&frames_mutex);
 	char* dump_mem_struct = string_new();
 	char* dump_act_process = string_new();
-	char* dump_mem_content;
+	char* dump_mem_content = string_new();
 
 	if (pid == -1) {
 		string_append(&dump_mem_content, frames);
@@ -366,12 +366,14 @@ void dump(int pid) {
 	}
 
 	char* dump_total = string_new();
-	string_append_with_format(&dump_total, "CACHE:\n%s\n", dump_cache);
-	string_append_with_format(&dump_total, "TABLA DE PAGINAS:\n%s\n", dump_act_process);
-	string_append_with_format(&dump_total, "LISTADO DE PROCESOS ACTIVOS:%s\n", dump_mem_struct);
-	string_append_with_format(&dump_total, "CONTENIDO MEMORIA:%s\n\n", dump_mem_content);
+	string_append_with_format(&dump_total, "CACHE:\n\t%s\n", dump_cache);
+	string_append_with_format(&dump_total, "TABLA DE PAGINAS:\n\t%s\n", dump_act_process);
+	string_append_with_format(&dump_total, "LISTADO DE PROCESOS ACTIVOS:\t%s\n", dump_mem_struct);
+	string_append_with_format(&dump_total, "CONTENIDO MEMORIA:\t%s\n\n", dump_mem_content);
 
 	pthread_mutex_unlock(&frames_mutex);
+
+	log_debug(logger, "Content dumped:\n\n", dump_total);
 	clear_screen();
 	printf("%s", dump_total);
 
