@@ -43,13 +43,12 @@ void console_load_program(socket_connection* connection, char** args) {
 		char** labels = string_split(metadata->etiquetas, "\0");
 		for (i = 0; i < metadata->etiquetas_size; i++) {
 			char* label = labels[i];
-			if(!string_is_empty(label)){
+			//TODO aca rompe con Program3
 			t_puntero_instruccion* instruction = malloc(
 					sizeof(t_puntero_instruccion));
 			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas,
 					metadata->etiquetas_size);
 			dictionary_put(new_pcb->i_label, label, instruction);
-			}
 		}
 	}
 
