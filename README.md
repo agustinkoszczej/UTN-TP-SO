@@ -41,7 +41,7 @@ inventado y diseñado por la cátedra para fines didácticos.
   * ~~Fecha: 03/06/2017~~
   
 * Checkpoint 5
-  * Fecha: 10/06/2017
+  * Fecha: 24/06/2017
   
 * Entrega Final
   * Fecha: 08/07/2017
