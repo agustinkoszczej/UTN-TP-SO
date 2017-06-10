@@ -7,6 +7,7 @@ void i_start_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
 	char* buffer = args[1];
 
+
 	int size_buffer = string_length(buffer);
 	int n_frames = ceil((float) size_buffer / frame_size);
 
@@ -56,9 +57,15 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 		runFunction(m_sockets.k_socket, "memory_response_add_pages_to_program", 1, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS));
 }
 void i_finish_program(socket_connection* connection, char** args) {
-	int pid = string_length(args[0]);
-
+	int pid = atoi(args[0]);
 	finish_program(pid);
+}
+
+void i_free_page(socket_connection* connection, char** args) {
+	int pid = atoi(args[0]);
+	int page = atoi(args[0]);
+
+	free_page(pid, page);
 }
 
 void kernel_stack_size(socket_connection* connection, char** args) {

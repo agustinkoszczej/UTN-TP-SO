@@ -43,11 +43,13 @@ void console_load_program(socket_connection* connection, char** args) {
 		char** labels = string_split(metadata->etiquetas, "\0");
 		for (i = 0; i < metadata->etiquetas_size; i++) {
 			char* label = labels[i];
+			if(!string_is_empty(label)){
 			t_puntero_instruccion* instruction = malloc(
 					sizeof(t_puntero_instruccion));
 			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas,
 					metadata->etiquetas_size);
 			dictionary_put(new_pcb->i_label, label, instruction);
+			}
 		}
 	}
 
@@ -210,10 +212,15 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 
 void cpu_malloc(socket_connection* connection, char** args) {
 	//TODO
+	int space = atoi(args[0]);
+	int pid = atoi(args[1]);
+
 }
 
 void cpu_free(socket_connection* connection, char** args) {
 	//TODO
+	int pointer = atoi(args[0]);
+	int pid = atoi(args[1]);
 }
 
 void cpu_validate_file(socket_connection* connection, char** args) {

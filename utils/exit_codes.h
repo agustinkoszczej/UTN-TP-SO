@@ -1,10 +1,3 @@
-/*
- * exit_codes.h
- *
- *  Created on: 1/6/2017
- *      Author: utnso
- */
-
 #ifndef EXIT_CODES_H_
 #define EXIT_CODES_H_
 

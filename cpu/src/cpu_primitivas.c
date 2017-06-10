@@ -333,7 +333,7 @@ void kernel_signal(t_nombre_semaforo identificador_semaforo) {
  * @return	puntero a donde esta reservada la memoria
  */
 t_puntero kernel_reservar(t_valor_variable espacio) {
-	runFunction(kernel_socket, "cpu_malloc", 1, string_itoa(espacio)); //TODO Agregar a interface de Kernel
+	runFunction(kernel_socket, "cpu_malloc", 2, string_itoa(espacio), string_itoa(pcb_actual->pid)); //TODO Agregar a interface de Kernel
 	wait_response();
 	return malloc_pointer;
 }
@@ -349,7 +349,7 @@ t_puntero kernel_reservar(t_valor_variable espacio) {
  * @return	void
  */
 void kernel_liberar(t_puntero puntero) {
-	runFunction(kernel_socket, "cpu_free", 1, string_itoa(puntero)); //TODO Agregar a interface de Kernel
+	runFunction(kernel_socket, "cpu_free", 2, string_itoa(puntero), string_itoa(pcb_actual->pid)); //TODO Agregar a interface de Kernel
 	wait_response();
 }
 

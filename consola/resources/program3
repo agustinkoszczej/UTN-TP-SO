@@ -1,0 +1,14 @@
+#!/usr/bin/ansisop
+function doble
+variables f
+    f = $0 + $0
+    return f
+end
+
+begin
+	variables b, g
+	b = 2
+	g <- doble b
+	print g
+end
+

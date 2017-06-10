@@ -30,6 +30,7 @@ void i_read_bytes_from_page(socket_connection* connection, char** args);
 void i_store_bytes_in_page(socket_connection* connection, char** args);
 void i_add_pages_to_program(socket_connection* connection, char** args);
 void i_finish_program(socket_connection* connection, char** args);
+void i_free_page(socket_connection* connection, char** args);
 /*
  * CLIENT
  */
