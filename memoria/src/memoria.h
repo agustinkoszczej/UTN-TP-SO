@@ -22,7 +22,7 @@
 #define RETARDO_MEMORIA "RETARDO_MEMORIA"
 #define CONFIG_FIELDS_N 6
 
-#define PID_ADM_STRUCT 9999 //si le pongo un numero < 0 es alta paja cambiar todos los ifs que preguntan por pid < 0 en vez si es igual a -1
+#define PID_ADM_STRUCT 0 //si le pongo un numero < 0 es alta paja cambiar todos los ifs que preguntan por pid < 0 en vez si es igual a -1
 
 typedef struct {
 	int frame;
