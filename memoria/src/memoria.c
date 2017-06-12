@@ -276,6 +276,7 @@ void store_bytes(int pid, int page, int offset, int size, char* buffer) {
 		adm_table = list_find(adm_list, find);
 		sleep(mem_delay / 1000);
 	}
+
 	int start = frame_size * adm_table->frame + offset;
 	int end = start + size;
 
@@ -470,7 +471,6 @@ void dump(int pid) {
 	char* dump_act_process = string_new();
 	char* dump_mem_content = string_new();
 
-	char* frame_block = string_new();
 	if (pid == -1) {
 		string_append(&dump_mem_content, frames);
 	} else {
@@ -545,7 +545,7 @@ void do_flush(char* sel) {
 		for (i = 0; i < list_size(cache_list); i++) {
 			t_cache* cache = list_get(cache_list, i);
 			save_victim(cache->adm_table);
-			cache->adm_table->pid = -1; //TODO No deberia ser cache->lru = -1 ?
+			cache->adm_table->pid = -1;
 		}
 	}
 }

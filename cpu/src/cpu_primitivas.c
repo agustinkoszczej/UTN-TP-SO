@@ -239,14 +239,14 @@ void cpu_llamarSinRetorno(t_nombre_etiqueta etiqueta) {
  */
 void cpu_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
 	t_stack* stack_aux = stack_create();
-	t_retvar* retvar_aux;
+	t_retvar* retvar_aux = malloc(sizeof(t_retvar));
 
 	retvar_aux->pag = donde_retornar / frame_size + pcb_actual->page_c;
 	retvar_aux->off = donde_retornar % frame_size;
 	retvar_aux->size = 4;
 
 	stack_aux->retvar = retvar_aux;
-	stack_aux->retpos = pcb_actual->pc;
+	stack_aux->retpos = &(pcb_actual->pc);
 
 	list_add(pcb_actual->i_stack, stack_aux);
 
