@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 
 #include "cJSON.h"
 #include <commons/collections/list.h>
@@ -46,11 +45,6 @@ typedef struct {
 	t_statistics statistics;
 	int exit_code;
 } pcb;
-
-typedef struct {
-	uint32_t size;
-	bool isFree;
-} HeapMetadata;
 
 char* pcb_to_string(pcb* _pcb);
 pcb* string_to_pcb(char* str);

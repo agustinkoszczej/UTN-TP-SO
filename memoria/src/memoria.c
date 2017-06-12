@@ -84,8 +84,7 @@ void finish_program(int pid) { //TODO En que momento se actualiza la tabla adm_l
 	for (i = 0; i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid != -1 && adm_table->pid != PID_ADM_STRUCT)
-			log_debug(logger,
-					"adm_table->pid = %d, adm_table->frame = %d, adm_table->pag = %d\n",
+			log_debug(logger,"adm_table->pid = %d, adm_table->frame = %d, adm_table->pag = %d",
 					adm_table->pid, adm_table->frame, adm_table->pag);
 	}
 

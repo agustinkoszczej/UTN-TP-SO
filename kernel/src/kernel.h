@@ -18,6 +18,7 @@
 #include "kernel_interface.h"
 
 #include<exit_codes.h>
+#include <stdint.h>
 
 #define NEW_LIST 1
 #define READY_LIST 2
@@ -65,6 +66,8 @@ t_queue* exit_queue;
 
 int fs_response;
 char* fs_read_buffer;
+int memory_response;
+char* mem_read_buffer;
 
 typedef struct {
 	int value;
@@ -95,15 +98,17 @@ t_list* fs_process_table;
 
 typedef struct {
 	int pid;
-	t_list* heap_pages;
+	int heap_c;
 }t_heap_manage;
 
-typedef struct {
-	int page_n;
-	int free_size;
-}t_heap_page;
-
 t_list* process_heap_pages;
+
+typedef struct {
+	uint32_t size;
+	bool isFree;
+} HeapMetadata;
+
+int heap_metadata_size;
 
 
 /*
@@ -139,6 +144,8 @@ pthread_mutex_t planning_mutex;
 pthread_mutex_t cpu_mutex;
 pthread_mutex_t process_in_memory_mutex;
 pthread_mutex_t shared_vars_mutex;
+
+pthread_mutex_t mem_response;
 
 pthread_mutex_t fs_mutex;
 

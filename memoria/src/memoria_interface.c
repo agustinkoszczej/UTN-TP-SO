@@ -32,6 +32,7 @@ void i_read_bytes_from_page(socket_connection* connection, char** args) {
 
 	char* buffer = read_bytes(pid, page, offset, size);
 
+	log_debug(logger, "memory_response_read_bytes_from_page: '%s'", buffer);
 	runFunction(connection->socket, "memory_response_read_bytes_from_page", 1, buffer);
 }
 void i_store_bytes_in_page(socket_connection* connection, char** args) {
@@ -52,9 +53,9 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 	if (has_available_frames(n_frames)) {
 		add_pages(pid, n_frames);
 
-		runFunction(m_sockets.k_socket, "memory_response_add_pages_to_program", 1, string_itoa(NO_ERRORES));
+		runFunction(connection->socket, "memory_response_heap", 1, string_itoa(NO_ERRORES));
 	} else
-		runFunction(m_sockets.k_socket, "memory_response_add_pages_to_program", 1, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS));
+		runFunction(connection->socket, "memory_response_heap", 1, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS));
 }
 void i_finish_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);

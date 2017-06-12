@@ -1,0 +1,5 @@
+#!/usr/bin/ansisop
+begin
+	abrir LC archivoPruebas.bin
+	escribir 3 "bam" 4
+end

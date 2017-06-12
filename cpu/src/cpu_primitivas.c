@@ -333,7 +333,8 @@ void kernel_signal(t_nombre_semaforo identificador_semaforo) {
  * @return	puntero a donde esta reservada la memoria
  */
 t_puntero kernel_reservar(t_valor_variable espacio) {
-	runFunction(kernel_socket, "cpu_malloc", 2, string_itoa(espacio), string_itoa(pcb_actual->pid)); //TODO Agregar a interface de Kernel
+	runFunction(kernel_socket, "cpu_malloc", 2, string_itoa(espacio),
+			string_itoa(pcb_actual->pid)); //TODO Agregar a interface de Kernel
 	wait_response();
 	return malloc_pointer;
 }
@@ -349,7 +350,8 @@ t_puntero kernel_reservar(t_valor_variable espacio) {
  * @return	void
  */
 void kernel_liberar(t_puntero puntero) {
-	runFunction(kernel_socket, "cpu_free", 2, string_itoa(puntero), string_itoa(pcb_actual->pid)); //TODO Agregar a interface de Kernel
+	runFunction(kernel_socket, "cpu_free", 2, string_itoa(puntero),
+			string_itoa(pcb_actual->pid)); //TODO Agregar a interface de Kernel
 	wait_response();
 }
 
@@ -398,10 +400,11 @@ void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
 	runFunction(kernel_socket, "cpu_delete_file", 1,
 			string_itoa(descriptor_archivo));
 	wait_response();
-	if (kernel_response_file == NO_EXISTE_ARCHIVO)
+	if (kernel_file_descriptor == NO_EXISTE_ARCHIVO) {
 		runFunction(kernel_socket, "cpu_error", 1,
 				string_itoa(NO_EXISTE_ARCHIVO));
-	cpu_finalizar();
+		cpu_finalizar();
+	}
 }
 
 /*
@@ -418,6 +421,11 @@ void kernel_cerrar(t_descriptor_archivo descriptor_archivo) {
 	runFunction(kernel_socket, "cpu_close_file", 2,
 			string_itoa(descriptor_archivo), string_itoa(pcb_actual->pid));
 	wait_kernel_response();
+	if (kernel_file_descriptor == ARCHIVO_SIN_ABRIR_PREVIAMENTE){
+		runFunction(kernel_socket, "cpu_error", 1,
+				string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+	cpu_finalizar();
+	}
 }
 
 /*
@@ -465,8 +473,8 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 			string_itoa(pcb_actual->pid));
 
 	wait_kernel_response();
+	log_debug(logger, "CPU Escribir kernel_response ok");
 
-	log_debug(logger, "CPU Escribir bien");
 	if (kernel_file_descriptor == ESCRIBIR_SIN_PERMISOS) {
 		runFunction(kernel_socket, "cpu_error", 1,
 				string_itoa(ESCRIBIR_SIN_PERMISOS));

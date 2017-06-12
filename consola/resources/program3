@@ -11,4 +11,3 @@ begin
 	g <- doble b
 	print g
 end
-

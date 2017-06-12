@@ -47,15 +47,6 @@ void console_load_program(socket_connection* connection, char** args) {
 					sizeof(t_puntero_instruccion));
 			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas,
 					metadata->etiquetas_size); //TODO aca rompe con Program3
-			/*Lo que rompe es el codigo:
-			 * function doble
-			 variables f
-			 f = $0 + $0
-			 return f
-			 end
-			 * En program3,
-			 * en la segunda iteracion del for
-			 * */
 			dictionary_put(new_pcb->i_label, label, instruction);
 		}
 	}
@@ -87,7 +78,6 @@ void console_load_program(socket_connection* connection, char** args) {
 	process_struct.socket = connection->socket;
 	process_struct.pid = new_pcb->pid;
 	process_struct.state = new_pcb->state;
-
 	runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid),
 			program);
 }
@@ -292,7 +282,7 @@ void cpu_close_file(socket_connection* connection, char** args) {
 	}
 
 	runFunction(connection->socket, "kernel_response_file", 1,
-			string_itoa(ERROR_SIN_DEFINIR)); //TODO ARCHIVO_SIN_ABRIR_PREVIAMENTE deberia ser pero no se me actualiza la libreria comun :c
+			string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 
 }
 
@@ -322,8 +312,8 @@ void cpu_write_file(socket_connection* connection, char** args) {
 	char* path = get_path_by_fd_and_pid(fd, pid);
 	if (path == NULL && !result) {
 		runFunction(connection->socket, "kernel_response_file", 1,
-				string_itoa(ERROR_SIN_DEFINIR));
-		return; //TODO ARCHIVO_SIN_ABRIR_PREVIAMENTE deberia ser pero no se me actualiza la libreria comun :c
+				string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+		return;
 	}
 
 	if (!result)
@@ -331,7 +321,9 @@ void cpu_write_file(socket_connection* connection, char** args) {
 
 	runFunction(connection->socket, "kernel_response", 1, string_itoa(fd));
 
-	log_debug(logger, "Resultado Kernel Escribir '%d'", result);
+	log_debug(logger,
+			"runFunction a socket: '%d', Resultado Kernel Escribir '%d'",
+			connection->socket, result);
 }
 
 void cpu_read_file(socket_connection* connection, char** args) {
@@ -369,6 +361,10 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 	n_pcb->exit_code = response;
 
 	if (response == NO_ERRORES) {
+		t_heap_manage* heap = malloc(sizeof(t_heap_manage));
+		heap->heap_c = 0;
+		heap->pid = n_pcb->pid;
+		list_add(process_heap_pages, heap); //TODO Despues habrai que quitarlo de la lista cuando termina
 		move_to_list(n_pcb, READY_LIST);
 		add_process_in_memory();
 		short_planning();
@@ -384,6 +380,25 @@ void memory_page_size(socket_connection* connection, char** args) {
 
 	mem_page_size = page_size;
 	runFunction(mem_socket, "kernel_stack_size", 1, string_itoa(stack_size));
+}
+
+void memory_response_heap(socket_connection* connection, char** args) {
+	memory_response = atoi(args[0]);
+	signal_response(mem_response);
+}
+
+void memory_response_store_bytes_in_page(socket_connection* connection,
+		char** args) {
+	memory_response = atoi(args[0]);
+	signal_response(mem_response);
+}
+
+void memory_response_read_bytes_from_page(socket_connection* connection, char** args) {
+	log_debug(logger, "memory_response_read_bytes_from_page: buffer=%s", args[0]);
+
+	mem_read_buffer = string_new();
+	string_append(&mem_read_buffer, args[0]);
+	signal_response(mem_response);
 }
 
 /*
