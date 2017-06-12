@@ -20,10 +20,14 @@ void create_function_dictionary() {
 }
 
 void mem_allocate_fullspace() {
+	int mem_size = frames_count * frame_size;
+
 	pthread_mutex_lock(&frames_mutex);
 
-	frames = malloc(frames_count * frame_size);
+	frames = malloc(mem_size);
 	frames_cache = malloc(cache_size * frame_size);
+
+	memset(frames, '#', mem_size);
 
 	pthread_mutex_unlock(&frames_mutex);
 }
@@ -76,9 +80,9 @@ void finish_program(int pid) { //TODO En que momento se actualiza la tabla adm_l
 		return adm_table->pid == pid;
 	}
 
-	int k;
-	for (k = 0; k < list_size(adm_list); k++) {
-		t_adm_table* adm_table = list_get(adm_list, k);
+	int i;
+	for (i = 0; i < list_size(adm_list); i++) {
+		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid != -1 && adm_table->pid != PID_ADM_STRUCT)
 			log_debug(logger,
 					"adm_table->pid = %d, adm_table->frame = %d, adm_table->pag = %d\n",
@@ -86,7 +90,7 @@ void finish_program(int pid) { //TODO En que momento se actualiza la tabla adm_l
 	}
 
 	t_list* adm_tables = list_filter(adm_list, find);
-	int i;
+
 	for (i = 0; i < list_size(adm_tables); i++) {
 		t_adm_table* adm_table = list_get(adm_tables, i);
 		adm_table->pid = -1;
@@ -265,14 +269,13 @@ void store_bytes(int pid, int page, int offset, int size, char* buffer) {
 
 	t_adm_table* adm_table;
 	bool is_cache = exists_in_cache(pid, page);
-	//if (pid == PID_ADM_STRUCT || pid < 0) is_cache = false; TODO
+
 	if (is_cache) {
 		adm_table = get_from_cache(pid, page);
 	} else {
 		adm_table = list_find(adm_list, find);
 		sleep(mem_delay / 1000);
 	}
-
 	int start = frame_size * adm_table->frame + offset;
 	int end = start + size;
 
@@ -292,13 +295,14 @@ void store_bytes(int pid, int page, int offset, int size, char* buffer) {
 void store_administrative_structures() {
 	int adm_structs_c_pages = 0;
 	int size_reg_adm_list = (sizeof(int) + sizeof(int) + sizeof(int));
-	int bytes_adm_list = size_reg_adm_list * frames_count;
 	//(sizeof(nroFrame) + sizeof(nroDePID) + sizeof(nroDePagina)) * cant_frames
-	adm_structs_c_pages += bytes_adm_list;
+	adm_structs_c_pages += size_reg_adm_list * frames_count;
 	//(sizeof(nroFrame) + sizeof(nroDePID) + sizeof(nroDePagina)) + sizeof(lru) * cache_size	TODO ver si es cache size o cache_x_proc
 	int size_reg_cache_list = (sizeof(int) + sizeof(int) + sizeof(int)
 			+ sizeof(int));
 	adm_structs_c_pages += size_reg_cache_list * cache_size;
+
+	log_debug(logger, "cont_bytes '%d'", adm_structs_c_pages);
 
 	adm_structs_c_pages = ceil((float) adm_structs_c_pages / frame_size);
 
@@ -309,45 +313,66 @@ void store_administrative_structures() {
 
 	for (i = 0; i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
-		if (adm_table->pid < 0 && page_c>0) {
-					adm_table->pid = PID_ADM_STRUCT;
-					adm_table->frame = i;
-					adm_table->pag = adm_structs_c_pages - page_c;
-					page_c--;
-		}
-		else{
+		if (adm_table->pid < 0 && page_c > 0) {
+			adm_table->pid = PID_ADM_STRUCT;
+			adm_table->frame = i;
+			adm_table->pag = adm_structs_c_pages - page_c;
+			page_c--;
+		} else {
 			adm_table->pag = i - adm_structs_c_pages;
 		}
 	}
 
-	int pag = 0;
+	//ESTRUCTURA TABLA DE PAGINAS
+	int j;
 	for (i = 0; i < list_size(adm_list); i++) {
-
 		t_adm_table* adm_table = list_get(adm_list, i);
-		log_debug(logger, "adm_table-> frame = %d\nadm_table->pid = %d\nadm_table->pag = %d\n\n", adm_table->frame, adm_table->pid, adm_table->pag);
+
 		buffer = string_itoa(adm_table->frame);
-		if (offset >= frame_size){
-			offset -= frame_size;
-			pag++;
-		}
-		store_bytes(adm_table->pid, pag, offset,
-				string_length(buffer), buffer);
+		for (j = 0; j < string_length(buffer); j++)
+			frames[offset + j] = buffer[j];
+
 		offset += sizeof(int);
-		if (offset >= frame_size){
-			offset -= frame_size;
-			pag++;
-		}
+
 		buffer = string_itoa(adm_table->pid);
-		store_bytes(adm_table->pid, pag, offset,
-				string_length(buffer), buffer);
+		for (j = 0; j < string_length(buffer); j++)
+			frames[offset + j] = buffer[j];
+
 		offset += sizeof(int);
-		if (offset >= frame_size){
-			offset -= frame_size;
-			pag++;
-		}
+
 		buffer = string_itoa(adm_table->pag);
-		store_bytes(adm_table->pid, pag, offset,
-				string_length(buffer), buffer);
+		for (j = 0; j < string_length(buffer); j++)
+			frames[offset + j] = buffer[j];
+
+		offset += sizeof(int);
+	}
+
+	//ESTRUCTURA CACHE
+	for (i = 0; i < list_size(cache_list); i++) {
+		t_cache* cache_table = list_get(cache_list, i);
+
+		buffer = string_itoa(cache_table->adm_table->frame);
+		for (j = 0; j < string_length(buffer); j++)
+			frames[offset + j] = buffer[j];
+
+		offset += sizeof(int);
+
+		buffer = string_itoa(cache_table->adm_table->pid);
+		for (j = 0; j < string_length(buffer); j++)
+			frames[offset + j] = buffer[j];
+
+		offset += sizeof(int);
+
+		buffer = string_itoa(cache_table->adm_table->pag);
+		for (j = 0; j < string_length(buffer); j++)
+			frames[offset + j] = buffer[j];
+
+		offset += sizeof(int);
+
+		buffer = string_itoa(cache_table->lru);
+		for (j = 0; j < string_length(buffer); j++)
+			frames[offset + j] = buffer[j];
+
 		offset += sizeof(int);
 	}
 }
@@ -394,7 +419,7 @@ void init_memory(t_config *config) {
 	}
 
 	//TODO work in progress xd
-	//store_administrative_structures();
+	store_administrative_structures();
 
 	if ((m_sockets.k_socket = createListen(port, &newClient, fns,
 			&connectionClosed, NULL) == -1)) {
@@ -445,6 +470,7 @@ void dump(int pid) {
 	char* dump_act_process = string_new();
 	char* dump_mem_content = string_new();
 
+	char* frame_block = string_new();
 	if (pid == -1) {
 		string_append(&dump_mem_content, frames);
 	} else {
@@ -519,7 +545,7 @@ void do_flush(char* sel) {
 		for (i = 0; i < list_size(cache_list); i++) {
 			t_cache* cache = list_get(cache_list, i);
 			save_victim(cache->adm_table);
-			cache->adm_table->pid = -1;
+			cache->adm_table->pid = -1; //TODO No deberia ser cache->lru = -1 ?
 		}
 	}
 }
