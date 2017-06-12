@@ -263,7 +263,7 @@ void store_bytes(int pid, int page, int offset, int size, char* buffer) {
 		return adm_table->pag == page && adm_table->pid == pid;
 	}
 
-	t_adm_table* adm_table;
+	t_adm_table* adm_table = malloc(sizeof(t_adm_table));
 	bool is_cache = exists_in_cache(pid, page);
 	//if (pid == PID_ADM_STRUCT || pid < 0) is_cache = false; TODO
 	if (is_cache) {
@@ -272,21 +272,22 @@ void store_bytes(int pid, int page, int offset, int size, char* buffer) {
 		adm_table = list_find(adm_list, find);
 		sleep(mem_delay / 1000);
 	}
+	if (adm_table != NULL) {
+		int start = frame_size * adm_table->frame + offset;
+		int end = start + size;
 
-	int start = frame_size * adm_table->frame + offset;
-	int end = start + size;
-
-	int i, b = 0;
-	for (i = start; i < end; i++) {
-		if (is_cache)
-			frames_cache[i] = buffer[b];
-		else
-			frames[i] = buffer[b];
-		b++;
+		int i, b = 0;
+		for (i = start; i < end; i++) {
+			if (is_cache)
+				frames_cache[i] = buffer[b];
+			else
+				frames[i] = buffer[b];
+			b++;
+		}
+		pthread_mutex_unlock(&frames_mutex);
+		if (!is_cache)
+			store_in_cache(adm_table);
 	}
-	pthread_mutex_unlock(&frames_mutex);
-	if (!is_cache)
-		store_in_cache(adm_table);
 }
 
 void store_administrative_structures() {
@@ -309,13 +310,12 @@ void store_administrative_structures() {
 
 	for (i = 0; i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
-		if (adm_table->pid < 0 && page_c>0) {
-					adm_table->pid = PID_ADM_STRUCT;
-					adm_table->frame = i;
-					adm_table->pag = adm_structs_c_pages - page_c;
-					page_c--;
-		}
-		else{
+		if (adm_table->pid < 0 && page_c > 0) {
+			adm_table->pid = PID_ADM_STRUCT;
+			adm_table->frame = i;
+			adm_table->pag = adm_structs_c_pages - page_c;
+			page_c--;
+		} else {
 			adm_table->pag = i - adm_structs_c_pages;
 		}
 	}
@@ -324,30 +324,29 @@ void store_administrative_structures() {
 	for (i = 0; i < list_size(adm_list); i++) {
 
 		t_adm_table* adm_table = list_get(adm_list, i);
-		log_debug(logger, "adm_table-> frame = %d\nadm_table->pid = %d\nadm_table->pag = %d\n\n", adm_table->frame, adm_table->pid, adm_table->pag);
+		log_debug(logger,
+				"adm_table-> frame = %d\nadm_table->pid = %d\nadm_table->pag = %d\n\n",
+				adm_table->frame, adm_table->pid, adm_table->pag);
 		buffer = string_itoa(adm_table->frame);
-		if (offset >= frame_size){
+		if (offset >= frame_size) {
 			offset -= frame_size;
 			pag++;
 		}
-		store_bytes(adm_table->pid, pag, offset,
-				string_length(buffer), buffer);
+		store_bytes(adm_table->pid, pag, offset, string_length(buffer), buffer);
 		offset += sizeof(int);
-		if (offset >= frame_size){
+		if (offset >= frame_size) {
 			offset -= frame_size;
 			pag++;
 		}
 		buffer = string_itoa(adm_table->pid);
-		store_bytes(adm_table->pid, pag, offset,
-				string_length(buffer), buffer);
+		store_bytes(adm_table->pid, pag, offset, string_length(buffer), buffer);
 		offset += sizeof(int);
-		if (offset >= frame_size){
+		if (offset >= frame_size) {
 			offset -= frame_size;
 			pag++;
 		}
 		buffer = string_itoa(adm_table->pag);
-		store_bytes(adm_table->pid, pag, offset,
-				string_length(buffer), buffer);
+		store_bytes(adm_table->pid, pag, offset, string_length(buffer), buffer);
 		offset += sizeof(int);
 	}
 }

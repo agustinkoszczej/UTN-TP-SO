@@ -39,15 +39,23 @@ void console_load_program(socket_connection* connection, char** args) {
 	new_pcb->pc = metadata->instruccion_inicio;
 	int i;
 
-	if (metadata->etiquetas_size > 0) {
+	if (metadata->cantidad_de_etiquetas > 0) {
 		char** labels = string_split(metadata->etiquetas, "\0");
-		for (i = 0; i < metadata->etiquetas_size; i++) {
+		for (i = 0; i < metadata->cantidad_de_etiquetas; i++) {
 			char* label = labels[i];
-			//TODO aca rompe con Program3
 			t_puntero_instruccion* instruction = malloc(
 					sizeof(t_puntero_instruccion));
 			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas,
-					metadata->etiquetas_size);
+					metadata->etiquetas_size); //TODO aca rompe con Program3
+			/*Lo que rompe es el codigo:
+			 * function doble
+			 variables f
+			 f = $0 + $0
+			 return f
+			 end
+			 * En program3,
+			 * en la segunda iteracion del for
+			 * */
 			dictionary_put(new_pcb->i_label, label, instruction);
 		}
 	}
@@ -177,36 +185,36 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 	pcb *process = find_pcb_by_socket(connection->socket);
 	int *process_pid = malloc(sizeof(int));
 	*process_pid = process->pid;
-	sem_status *sem_curr = dictionary_get(sem_ids,id_sem);
+	sem_status *sem_curr = dictionary_get(sem_ids, id_sem);
 
 	sem_curr->value--;
 
-	if(sem_curr->value<0){
+	if (sem_curr->value < 0) {
 
 		queue_push(sem_curr->blocked_pids, process_pid);
-		move_to_list(process,BLOCK_LIST);
+		move_to_list(process, BLOCK_LIST);
 		short_planning();
 	}
 
-	dictionary_remove_and_destroy(sem_ids,id_sem,free);
-	dictionary_put(sem_ids,id_sem,sem_curr); 	//Seria mejor modificarlo pero las commons no dejan
+	dictionary_remove_and_destroy(sem_ids, id_sem, free);
+	dictionary_put(sem_ids, id_sem, sem_curr); //Seria mejor modificarlo pero las commons no dejan
 
 }
 
 void cpu_signal_sem(socket_connection* connection, char** args) {
 	char* id_sem = args[0];
-		sem_status *sem_curr = dictionary_get(sem_ids,id_sem);
+	sem_status *sem_curr = dictionary_get(sem_ids, id_sem);
 
-		sem_curr->value++;
+	sem_curr->value++;
 
-		if(sem_curr->value<=0){
+	if (sem_curr->value <= 0) {
 
-			pcb *process = queue_pop(sem_curr->blocked_pids);
-			move_to_list(process,READY_LIST);
-		}
+		pcb *process = queue_pop(sem_curr->blocked_pids);
+		move_to_list(process, READY_LIST);
+	}
 
-		dictionary_remove_and_destroy(sem_ids,id_sem,free);
-		dictionary_put(sem_ids,id_sem,sem_curr);
+	dictionary_remove_and_destroy(sem_ids, id_sem, free);
+	dictionary_put(sem_ids, id_sem, sem_curr);
 }
 
 void cpu_malloc(socket_connection* connection, char** args) {
@@ -295,7 +303,8 @@ void cpu_seek_file(socket_connection* connection, char** args) {
 
 	bool result = set_pointer(pos, fd, pid);
 	if (result)
-		runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
+		runFunction(connection->socket, "kernel_response_file", 1,
+				string_itoa(fd));
 	else
 		runFunction(connection->socket, "kernel_response_file", 1,
 				string_itoa(ERROR_SIN_DEFINIR)); //TODO ARCHIVO_SIN_ABRIR_PREVIAMENTE deberia ser pero no se me actualiza la libreria comun :c
@@ -339,7 +348,8 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	if (is_allowed(pid, fd, flags)) {
 		runFunction(fs_socket, "kernel_get_data", 3, path, offset, size);
 		wait_response(fs_mutex);
-		runFunction(connection->socket, "kernel_response_read_file", 2, fs_read_buffer, string_itoa(fd));
+		runFunction(connection->socket, "kernel_response_read_file", 2,
+				fs_read_buffer, string_itoa(fd));
 
 	} else
 		fd = LEER_SIN_PERMISOS;
