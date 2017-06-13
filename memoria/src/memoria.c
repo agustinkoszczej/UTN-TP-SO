@@ -275,21 +275,23 @@ void store_bytes(int pid, int page, int offset, int size, char* buffer) {
 		adm_table = list_find(adm_list, find);
 		sleep(mem_delay / 1000);
 	}
+	if (adm_table != NULL) {
+		//TODO: CUANDO list_find DEVUELVE NULL, ROMPE
+		int start = frame_size * adm_table->frame + offset;
+		int end = start + size;
 
-	int start = frame_size * adm_table->frame + offset;
-	int end = start + size;
-
-	int i, b = 0;
-	for (i = start; i < end; i++) {
-		if (is_cache)
-			frames_cache[i] = buffer[b];
-		else
-			frames[i] = buffer[b];
-		b++;
+		int i, b = 0;
+		for (i = start; i < end; i++) {
+			if (is_cache)
+				frames_cache[i] = buffer[b];
+			else
+				frames[i] = buffer[b];
+			b++;
+		}
+		pthread_mutex_unlock(&frames_mutex);
+		if (!is_cache)
+			store_in_cache(adm_table);
 	}
-	pthread_mutex_unlock(&frames_mutex);
-	if (!is_cache)
-		store_in_cache(adm_table);
 }
 
 void store_administrative_structures() {
