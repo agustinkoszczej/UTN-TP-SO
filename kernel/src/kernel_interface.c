@@ -46,7 +46,7 @@ void console_load_program(socket_connection* connection, char** args) {
 			t_puntero_instruccion* instruction = malloc(
 					sizeof(t_puntero_instruccion));
 			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas,
-					metadata->etiquetas_size); //TODO aca rompe con Program3
+					metadata->etiquetas_size); //aca rompia con Program3, por el cantidad_de_etiquetas
 			dictionary_put(new_pcb->i_label, label, instruction);
 		}
 	}
@@ -393,8 +393,10 @@ void memory_response_store_bytes_in_page(socket_connection* connection,
 	signal_response(mem_response);
 }
 
-void memory_response_read_bytes_from_page(socket_connection* connection, char** args) {
-	log_debug(logger, "memory_response_read_bytes_from_page: buffer=%s", args[0]);
+void memory_response_read_bytes_from_page(socket_connection* connection,
+		char** args) {
+	log_debug(logger, "memory_response_read_bytes_from_page: buffer=%s",
+			args[0]);
 
 	mem_read_buffer = string_new();
 	string_append(&mem_read_buffer, args[0]);
