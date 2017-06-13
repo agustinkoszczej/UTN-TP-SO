@@ -653,8 +653,8 @@ int it_fits_malloc(char* full_page, int space_occupied) {
 	}
 	return -1;
 }
-//Esta funcion libera una posicion de pagina y hace la parte de fragmentacion si hay dos bloques continuos libres
-void free_heap(char* full_page, int pos){
+//Esta funcion libera una posicion de pagina y hace la parte de fragmentacion si hay dos bloques continuos libres y retorna true si se libero toda la pagina
+bool free_heap(char* full_page, int pos){
 	HeapMetadata* heap = read_HeapMetadata(full_page, pos);
 	heap->isFree = true;
 	write_HeapMetadata(heap,pos,full_page);
@@ -679,6 +679,9 @@ void free_heap(char* full_page, int pos){
 		}
 		offset += heap->size+heap_metadata_size;
 	}
+	heap = read_HeapMetadata(full_page, 0);
+		if(heap->isFree && (mem_page_size - heap->size - heap_metadata_size) == 0) return true;
+		else return false;
 }
 
 void malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
