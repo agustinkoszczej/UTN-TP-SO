@@ -98,8 +98,13 @@ t_list* fs_process_table;
 
 typedef struct {
 	int pid;
-	int heap_c;
+	t_list* heap_pages;
 }t_heap_manage;
+
+typedef struct {
+	int page_n;
+	int free_size;
+}t_heap_page;
 
 t_list* process_heap_pages;
 

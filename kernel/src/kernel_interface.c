@@ -362,9 +362,9 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 
 	if (response == NO_ERRORES) {
 		t_heap_manage* heap = malloc(sizeof(t_heap_manage));
-		heap->heap_c = 0;
+		heap->heap_pages = list_create();
 		heap->pid = n_pcb->pid;
-		list_add(process_heap_pages, heap); //TODO Despues habrai que quitarlo de la lista cuando termina
+		list_add(process_heap_pages, heap); //TODO Despues habria que quitarlo de la lista cuando termina
 		move_to_list(n_pcb, READY_LIST);
 		add_process_in_memory();
 		short_planning();

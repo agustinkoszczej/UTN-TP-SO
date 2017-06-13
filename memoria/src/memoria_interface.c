@@ -44,6 +44,7 @@ void i_store_bytes_in_page(socket_connection* connection, char** args) {
 
 	store_bytes(pid, page, offset, size, buffer);
 
+	//TODO hacer que esta funcion me retorne el offset absoluto en memoria
 	runFunction(connection->socket, "memory_response_store_bytes_in_page", 1, string_itoa(NO_ERRORES));
 }
 void i_add_pages_to_program(socket_connection* connection, char** args) {

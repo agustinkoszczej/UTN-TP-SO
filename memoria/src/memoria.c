@@ -545,6 +545,7 @@ void do_flush(char* sel) {
 			t_cache* cache = list_get(cache_list, i);
 			save_victim(cache->adm_table);
 			cache->adm_table->pid = -1;
+			cache->lru = -1;
 		}
 	}
 }

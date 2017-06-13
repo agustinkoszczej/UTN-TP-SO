@@ -1,0 +1,16 @@
+#!/usr/bin/ansisop
+begin
+    variables a, b
+    alocar a 50
+        #a va a tener el valor de la posicion de memoria en el heap
+    *a = 5
+        # pondría al principio de ese cachito de stack el numero 5 en los primeros 4 bytes
+    print n *a
+        #deberia imprimir 20
+    b = 3 + *a
+    *b = 10
+        #pondria el 10 en los siguientes 3 bytes. Esto pisaria algunos bits del primer 5
+    print n *a
+        #deberia imprimir cosas horribles!
+    liberar a
+end
