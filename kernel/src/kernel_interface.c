@@ -172,9 +172,12 @@ void cpu_error(socket_connection* connection, char** args) {
 
 void cpu_wait_sem(socket_connection* connection, char** args) {
 	char* id_sem = args[0];
-	pcb *process = find_pcb_by_socket(connection->socket);
-	int *process_pid = malloc(sizeof(int));
-	*process_pid = process->pid;
+	string_trim(&id_sem);
+	t_cpu* _cpu = find_cpu_by_socket(connection->socket);
+	int* process_pid = malloc(sizeof(int));
+	*process_pid = _cpu->xpid;
+	//int process_pid = _cpu->xpid;
+	pcb *process = find_pcb_by_pid(*process_pid);
 	sem_status *sem_curr = dictionary_get(sem_ids, id_sem);
 
 	sem_curr->value--;

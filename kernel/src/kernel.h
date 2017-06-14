@@ -129,6 +129,7 @@ typedef struct {
 typedef struct {
 	bool busy;
 	int socket;
+	int xpid; //PID del proceso actualmente ejecutandose
 } t_cpu;
 t_list* cpu_list;
 

@@ -37,6 +37,7 @@ void short_planning() {
 
 		move_to_list(_pcb, EXEC_LIST);
 		free_cpu->busy = true;
+		free_cpu->xpid = _pcb->pid;
 
 		char* pcb_string = pcb_to_string(_pcb);
 
@@ -128,35 +129,37 @@ pcb* find_pcb_by_socket(int socket) {
 		return n_pcb->socket == socket;
 	}
 
-	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find);
+	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find);//TODO: CUANDO list_find DEVUELVE NULL ROMPE
+	if (socket_pcb != NULL) {
+		pthread_mutex_lock(&pcb_list_mutex);
+		int pos;
+		pcb* n_pcb = malloc(sizeof(pcb));
+		switch (socket_pcb->state) {
+		case NEW_LIST:
+			n_pcb = queue_peek(new_queue);
+			break;
+		case READY_LIST:
+			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
+			n_pcb = list_get(ready_list, pos);
+			break;
+		case EXEC_LIST:
+			pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
+			n_pcb = list_get(exec_list, pos);
+			break;
+		case BLOCK_LIST:
+			pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
+			n_pcb = list_get(block_list, pos);
+			break;
+		case EXIT_LIST:
+			n_pcb = queue_peek(exit_queue);
+			break;
+		}
+		pthread_mutex_unlock(&pcb_list_mutex);
+		pthread_mutex_unlock(&socket_pcb_mutex);
 
-	pthread_mutex_lock(&pcb_list_mutex);
-	int pos;
-	pcb* n_pcb = malloc(sizeof(pcb));
-	switch (socket_pcb->state) {
-	case NEW_LIST:
-		n_pcb = queue_peek(new_queue);
-		break;
-	case READY_LIST:
-		pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
-		n_pcb = list_get(ready_list, pos);
-		break;
-	case EXEC_LIST:
-		pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
-		n_pcb = list_get(exec_list, pos);
-		break;
-	case BLOCK_LIST:
-		pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
-		n_pcb = list_get(block_list, pos);
-		break;
-	case EXIT_LIST:
-		n_pcb = queue_peek(exit_queue);
-		break;
+		return n_pcb;
 	}
-	pthread_mutex_unlock(&pcb_list_mutex);
-	pthread_mutex_unlock(&socket_pcb_mutex);
-
-	return n_pcb;
+	return NULL;
 }
 
 void substract_process_in_memory() {
@@ -581,15 +584,17 @@ int get_suitable_page(int space, int pid) {
 	}
 	t_heap_manage* heap = list_find(process_heap_pages, &find);
 	int i;
-	for(i = 0; i < list_size(heap->heap_pages); i++){
+	for (i = 0; i < list_size(heap->heap_pages); i++) {
 		t_heap_page* page = list_get(heap->heap_pages, i);
-		if(page->free_size <= space) return i;
+		if (page->free_size <= space)
+			return i;
 	}
 	return -1;
 }
 
 HeapMetadata* read_HeapMetadata(char* page, int offset) {
-	if(offset == mem_page_size) return NULL;
+	if (offset == mem_page_size)
+		return NULL;
 	HeapMetadata* heap_metadata = malloc(sizeof(HeapMetadata));
 	int i, j = 0;
 	char* aux = string_new();
@@ -654,34 +659,38 @@ int it_fits_malloc(char* full_page, int space_occupied) {
 	return -1;
 }
 //Esta funcion libera una posicion de pagina y hace la parte de fragmentacion si hay dos bloques continuos libres y retorna true si se libero toda la pagina
-bool free_heap(char* full_page, int pos){
+bool free_heap(char* full_page, int pos) {
 	HeapMetadata* heap = read_HeapMetadata(full_page, pos);
 	heap->isFree = true;
-	write_HeapMetadata(heap,pos,full_page);
+	write_HeapMetadata(heap, pos, full_page);
 
 	int offset;
 	HeapMetadata* next_heap;
 	for (offset = 0; offset < mem_page_size;) {
 		heap = read_HeapMetadata(full_page, offset);
-		next_heap = read_HeapMetadata(full_page, heap->size+heap_metadata_size+offset);
-		if(next_heap == NULL) break;
-		if (heap->isFree && next_heap->isFree){
+		next_heap = read_HeapMetadata(full_page,
+				heap->size + heap_metadata_size + offset);
+		if (next_heap == NULL)
+			break;
+		if (heap->isFree && next_heap->isFree) {
 			int i, start, end;
-			start = offset+heap->size+heap_metadata_size;
-			end = start+heap_metadata_size;
+			start = offset + heap->size + heap_metadata_size;
+			end = start + heap_metadata_size;
 
 			heap->size += next_heap->size + heap_metadata_size;
-			write_HeapMetadata(heap, offset,full_page);
+			write_HeapMetadata(heap, offset, full_page);
 
-			for (i = start; i < end; i++){
+			for (i = start; i < end; i++) {
 				full_page[i] = '#';
 			}
 		}
-		offset += heap->size+heap_metadata_size;
+		offset += heap->size + heap_metadata_size;
 	}
 	heap = read_HeapMetadata(full_page, 0);
-		if(heap->isFree && (mem_page_size - heap->size - heap_metadata_size) == 0) return true;
-		else return false;
+	if (heap->isFree && (mem_page_size - heap->size - heap_metadata_size) == 0)
+		return true;
+	else
+		return false;
 }
 
 void malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
@@ -690,7 +699,7 @@ void malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 
 	int page = pcb_malloc->page_c + stack_size; //TODO arranca en pagina 0? page +1?
 
-	if (list_is_empty(heap_manage->heap_pages)){
+	if (list_is_empty(heap_manage->heap_pages)) {
 		runFunction(mem_socket, "i_add_pages_to_program", 2, pid, 1);
 		wait_response(mem_response);
 		if (memory_response == NO_SE_PUEDEN_RESERVAR_RECURSOS) {
@@ -702,7 +711,7 @@ void malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 
 		list_add(heap_manage->heap_pages, n_heap_page);
 		runFunction(mem_socket, "i_read_bytes_from_page", 4, pid, page, 0,
-						mem_page_size);
+				mem_page_size);
 		wait_response(mem_response);
 		HeapMetadata* heap = malloc(sizeof(HeapMetadata));
 		heap->isFree = true;
@@ -712,28 +721,28 @@ void malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 
 	/*int heap_conter = heap_manage->heap_c;
 
-	do {
+	 do {
 
-		runFunction(mem_socket, "i_read_bytes_from_page", 4, pid, page, 0,
-				mem_page_size);
-		wait_response(mem_response);
+	 runFunction(mem_socket, "i_read_bytes_from_page", 4, pid, page, 0,
+	 mem_page_size);
+	 wait_response(mem_response);
 
-		page++;
-		heap_conter--;
+	 page++;
+	 heap_conter--;
 
-		if (heap_conter == 0) {
-			runFunction(mem_socket, "i_add_pages_to_program", 2, pid, 1);
-			wait_response(mem_response);
-			if (memory_response == NO_SE_PUEDEN_RESERVAR_RECURSOS) {
+	 if (heap_conter == 0) {
+	 runFunction(mem_socket, "i_add_pages_to_program", 2, pid, 1);
+	 wait_response(mem_response);
+	 if (memory_response == NO_SE_PUEDEN_RESERVAR_RECURSOS) {
 
-				return;
-			}
-			heap_manage->heap_c++;
-			break;
-		}
+	 return;
+	 }
+	 heap_manage->heap_c++;
+	 break;
+	 }
 
-		/*runFunction(mem_socket, "i_store_bytes_in_page", 2, pid, page, offset, size);
-		 wait_response(mem_response);*/
+	 /*runFunction(mem_socket, "i_store_bytes_in_page", 2, pid, page, offset, size);
+	 wait_response(mem_response);*/
 	//} while (!it_fits_malloc(mem_read_buffer, size));*/
 }
 

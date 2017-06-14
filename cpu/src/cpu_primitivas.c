@@ -304,6 +304,7 @@ void cpu_retornar(t_valor_variable retorno) {
  * @return	void
  */
 void kernel_wait(t_nombre_semaforo identificador_semaforo) {
+	log_debug(logger, "Wait: Semaforo \"%s\"", identificador_semaforo);
 	runFunction(kernel_socket, "cpu_wait_sem", 1, identificador_semaforo); //TODO Agregar a interface de Kernel
 	wait_response();
 }
@@ -318,6 +319,7 @@ void kernel_wait(t_nombre_semaforo identificador_semaforo) {
  * @return	void
  */
 void kernel_signal(t_nombre_semaforo identificador_semaforo) {
+	log_debug(logger, "Signal: Semaforo \"%s\"", identificador_semaforo);
 	runFunction(kernel_socket, "cpu_signal_sem", 1, identificador_semaforo); //TODO Agregar a interface de Kernel
 	wait_response();
 }
