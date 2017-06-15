@@ -54,6 +54,7 @@ int p_counter;
 int multiprog;
 int quantum;
 int stack_size;
+int quantum_sleep;
 int planning_alg;
 t_dictionary* shared_vars;
 t_dictionary* sem_ids;

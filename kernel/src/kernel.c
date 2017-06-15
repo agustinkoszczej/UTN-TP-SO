@@ -857,6 +857,7 @@ void init_kernel(t_config* config) {
 	port_cpu = config_get_int_value(config, PUERTO_CPU);
 	multiprog = config_get_int_value(config, GRADO_MULTIPROG);
 	stack_size = config_get_int_value(config, STACK_SIZE);
+	quantum_sleep = config_get_int_value(config, QUANTUM_SLEEP);
 
 	shared_vars = dictionary_create();
 	char** global_vars_arr = config_get_array_value(config, SHARED_VARS);

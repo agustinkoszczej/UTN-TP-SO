@@ -91,7 +91,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
 
 	dictionary_put(fns, "kernel_receive_pcb", &kernel_receive_pcb);
-	dictionary_put(fns, "kernel_page_stack_size", &kernel_page_stack_size);
+	dictionary_put(fns, "kernel_quantum_page_stack_size", &kernel_quantum_page_stack_size);
 	dictionary_put(fns, "kernel_response_get_shared_var", &kernel_response_get_shared_var);
 	dictionary_put(fns, "kernel_response_set_shared_var", &kernel_response_set_shared_var);
 	dictionary_put(fns, "kernel_response_file", &kernel_response_file);

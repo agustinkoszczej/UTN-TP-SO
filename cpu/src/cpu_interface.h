@@ -31,7 +31,7 @@ void memory_response_store_bytes_in_page(socket_connection* connection, char** a
  * KERNEL
  */
 void kernel_receive_pcb(socket_connection* connection, char** args);
-void kernel_page_stack_size(socket_connection* connection, char** args);
+void kernel_quantum_page_stack_size(socket_connection* connection, char** args);
 void kernel_response_get_shared_var(socket_connection* connection, char** args);
 void kernel_response_set_shared_var(socket_connection* connection, char** args);
 void kernel_response_file(socket_connection* connection, char** args);

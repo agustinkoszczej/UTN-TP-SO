@@ -42,14 +42,16 @@ void kernel_response_get_shared_var(socket_connection* connection, char** args) 
 	kernel_shared_var = atoi(args[0]);
 	signal_response();
 }
-void kernel_page_stack_size(socket_connection* connection, char** args) {
+void kernel_quantum_page_stack_size(socket_connection* connection, char** args) {
 	int mem_page_size = atoi(args[0]);
 	int stack_s = atoi(args[1]);
+	int quantum_s = atoi(args[2]);
 
-	log_debug(logger, "kernel_page_stack_size: mem_page_size=%d, stack_size=%d", mem_page_size, stack_s);
+	log_debug(logger, "kernel_quantum_page_stack_size: quantum_sleep=%d, mem_page_size=%d, stack_size=%d", quantum_s, mem_page_size, stack_s);
 
 	frame_size = mem_page_size;
 	stack_size = stack_s;
+	quantum_sleep = quantum_s;
 	runFunction(connection->socket, "cpu_received_page_stack_size", 0);
 }
 void kernel_receive_pcb(socket_connection* connection, char** args) {
@@ -59,7 +61,13 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	finished = false;
 	log_debug(logger, "kernel_receive_pcb: planning_alg=%d, quantum=%d, pcb*", planning_alg, quantum);
 
+	float percent_per_instruction = 100 / (list_size(pcb_actual->i_code) - pcb_actual->pc);
+	float acum_percent = 0;
+
+	printf("> EXECUTING_PID: %d\n", pcb_actual->pid);
 	while ((planning_alg == FIFO || quantum-- >= 0) && !finished) {
+		printf("[%.3f %]\n", acum_percent); //TODO hacerlo mas cheto :C
+		//printf("\r%c[2K", 27);
 		t_intructions* i_code = list_get(pcb_actual->i_code, pcb_actual->pc);
 		int start = i_code->start;
 		int offset = i_code->offset;
@@ -74,7 +82,10 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 
 		analizadorLinea(mem_buffer, &functions, &kernel_functions);
 		pcb_actual->pc++;
+		acum_percent += percent_per_instruction;
+		sleep(quantum_sleep / 1000);
 	}
+	printf("[%.3f %]\n\n", acum_percent);
 	log_debug(logger, "cpu_task_finished");
 	runFunction(kernel_socket, "cpu_task_finished", 2, pcb_to_string(pcb_actual), string_itoa(finished));
 }
@@ -109,4 +120,3 @@ void kernel_response_read_file(socket_connection* connection, char** args) {
 	kernel_file_descriptor = atoi(args[1]);
 	signal_kernel_response();
 }
-

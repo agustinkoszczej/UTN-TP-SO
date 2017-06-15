@@ -232,7 +232,7 @@ void abort_program(t_process* process, int exit_code) {
 
 	process->pid = -1;
 	process->socket = -1;
-	list_clean(messages_list);
+	//list_clean(messages_list);
 	//log_debug(logger, dictionary_get(message_map, string_itoa(exit_code)));
 	//runFunction(process->socket, "console_abort_program", 2, CONSOLE, string_itoa(process->pid));
 	close(process->socket);
