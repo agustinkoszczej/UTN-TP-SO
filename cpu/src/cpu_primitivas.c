@@ -487,6 +487,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 				string_itoa(NO_EXISTE_ARCHIVO));
 		cpu_finalizar();
 	}
+	signal_kernel_response();
 }
 
 /*
