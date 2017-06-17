@@ -42,10 +42,9 @@ void i_store_bytes_in_page(socket_connection* connection, char** args) {
 	int size = atoi(args[3]);
 	char* buffer = args[4];
 
-	store_bytes(pid, page, offset, size, buffer);
-
-	//TODO hacer que esta funcion me retorne el offset absoluto en memoria
-	runFunction(connection->socket, "memory_response_store_bytes_in_page", 1, string_itoa(NO_ERRORES));
+	int offset_abs = store_bytes(pid, page, offset, size, buffer);
+	log_debug(logger, "i_store_bytes_in_page: '%d'", offset_abs);
+	runFunction(connection->socket, "memory_response_store_bytes_in_page", 2, string_itoa(NO_ERRORES), string_itoa(offset_abs));
 }
 void i_add_pages_to_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -68,12 +67,20 @@ void i_free_page(socket_connection* connection, char** args) {
 	int page = atoi(args[0]);
 
 	free_page(pid, page);
+	runFunction(connection->socket, "memory_response_heap", 1, string_itoa(NO_ERRORES));
 }
 
 void kernel_stack_size(socket_connection* connection, char** args) {
 	int stack_s = atoi(args[0]);
 
 	stack_size = stack_s;
+}
+
+void i_get_page_from_pointer(socket_connection* connection, char** args) {
+	int pointer = args[0];
+
+	int page = get_page_from_pointer(pointer);
+	runFunction(connection->socket, "memory_response_get_page_from_pointer", 1, string_itoa(page));
 }
 
 /*

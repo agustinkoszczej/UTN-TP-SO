@@ -57,7 +57,7 @@ int stack_size;
 
 void start_program();
 char* read_bytes(int pid, int page, int offset, int size);
-void store_bytes(int pid, int page, int offset, int size, char* buffer);
+int store_bytes(int pid, int page, int offset, int size, char* buffer);
 void add_pages(int pid, int n_frames);
 void finish_program(int pid);
 void free_page(int pid, int page);

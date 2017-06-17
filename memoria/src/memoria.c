@@ -15,6 +15,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "i_add_pages_to_program", &i_add_pages_to_program);
 	dictionary_put(fns, "i_finish_program", &i_finish_program);
 	dictionary_put(fns, "i_free_page", &i_free_page);
+	dictionary_put(fns, "i_get_page_from_pointer", &i_get_page_from_pointer);
 
 	dictionary_put(fns, "kernel_stack_size", &kernel_stack_size);
 }
@@ -113,7 +114,7 @@ void add_pages(int pid, int n_frames) {
 	}
 	int i;
 
-	int known_pages = list_size(list_filter(adm_list, find));
+	int known_pages = list_size(list_filter(adm_list, find)); //TODO ver que pasa si se libera una pag
 
 	for (i = 0; i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
@@ -259,7 +260,7 @@ char* read_bytes(int pid, int page, int offset, int size) {
 	return buffer;
 }
 
-void store_bytes(int pid, int page, int offset, int size, char* buffer) {
+int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 	pthread_mutex_lock(&frames_mutex);
 	bool find(void* element) {
 		t_adm_table* adm_table = element;
@@ -275,10 +276,11 @@ void store_bytes(int pid, int page, int offset, int size, char* buffer) {
 		adm_table = list_find(adm_list, find);
 		sleep(mem_delay / 1000);
 	}
+	int start, end;
 	if (adm_table != NULL) {
 		//TODO: CUANDO list_find DEVUELVE NULL, ROMPE
-		int start = frame_size * adm_table->frame + offset;
-		int end = start + size;
+		start = frame_size * adm_table->frame + offset;
+		end = start + size;
 
 		int i, b = 0;
 		for (i = start; i < end; i++) {
@@ -292,6 +294,11 @@ void store_bytes(int pid, int page, int offset, int size, char* buffer) {
 		if (!is_cache)
 			store_in_cache(adm_table);
 	}
+	return start;
+}
+
+void update_administrative_structures(){
+//TODO
 }
 
 void store_administrative_structures() {
@@ -321,7 +328,7 @@ void store_administrative_structures() {
 			adm_table->pag = adm_structs_c_pages - page_c;
 			page_c--;
 		} else {
-			adm_table->pag = i - adm_structs_c_pages;
+			adm_table->pag = 0;
 		}
 	}
 
@@ -420,7 +427,6 @@ void init_memory(t_config *config) {
 		list_add(cache_list, cache);
 	}
 
-	//TODO work in progress xd
 	store_administrative_structures();
 
 	if ((m_sockets.k_socket = createListen(port, &newClient, fns,
@@ -442,7 +448,8 @@ void free_page(int pid, int page) {
 	t_list* adm_tables = list_filter(adm_list, find);
 
 	t_adm_table* adm_table = list_get(adm_tables, page);
-	adm_table->pid = -1; //TODO falta actualizar la tabla adm_list o se hace algo turbio y anda asi?
+	adm_table->pid = -1;
+	adm_table->pag = 0; //TODO falta actualizar la tabla adm_list o se hace algo turbio y anda asi?
 
 	pthread_mutex_unlock(&frames_mutex);
 }
@@ -604,6 +611,16 @@ void ask_option(char *sel) {
 	fgets(sel, 255, stdin);
 	strtok(sel, "\n");
 	string_to_upper(sel);
+}
+
+int get_page_from_pointer(int pointer){
+	int frame = pointer / frame_size;
+	int i;
+	for(i=0; i< list_size(adm_list); i++){
+		t_adm_table* adm_table = list_get(adm_list, i);
+		if(adm_table->frame == frame) return adm_table->pag;
+	}
+	return -1;
 }
 
 int main(int argc, char *argv[]) {

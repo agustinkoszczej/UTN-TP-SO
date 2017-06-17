@@ -195,7 +195,7 @@ void cpu_irAlLabel(t_nombre_etiqueta t_nombre_etiqueta) {
 	if (dictionary_has_key(pcb_actual->i_label, t_nombre_etiqueta))
 		pcb_actual->pc = dictionary_get(pcb_actual->i_label, t_nombre_etiqueta);
 	else
-		pcb_actual->pc = -1; //TODO Ver que hacer cuando no existe la funcion
+		//pcb_actual->pc = -1; //TODO Ver que hacer cuando no existe la funcion
 
 	log_debug(logger, "Ir a Label '%d'", pcb_actual->pc);
 }
@@ -214,7 +214,7 @@ void cpu_irAlLabel(t_nombre_etiqueta t_nombre_etiqueta) {
  * @return	void
  */
 void cpu_llamarSinRetorno(t_nombre_etiqueta etiqueta) {
-	log_debug(logger, "Llamada sin retorno");
+	log_debug(logger, "Llamar sin retorno"); //TODO no deberia caer nunca aca, ya que siempre nos van a dar ansisop que anden
 	t_stack* stack_aux = stack_create();
 	stack_aux->retpos = pcb_actual->pc;
 	list_add(pcb_actual->i_stack, stack_aux);
@@ -238,6 +238,7 @@ void cpu_llamarSinRetorno(t_nombre_etiqueta etiqueta) {
  * @return	void
  */
 void cpu_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
+	log_debug(logger, "Llamar con retorno '%s', '%d'", etiqueta, donde_retornar);
 	t_stack* stack_aux = stack_create();
 	t_retvar* retvar_aux = malloc(sizeof(t_retvar));
 
@@ -284,6 +285,7 @@ void cpu_finalizar(void) {
  * @return	void,
  */
 void cpu_retornar(t_valor_variable retorno) {
+	log_debug(logger, "Retornar '%d'", retorno);
 	t_stack* stack_aux = list_get(pcb_actual->i_stack,
 			pcb_actual->i_stack->elements_count - 1);
 
@@ -335,10 +337,12 @@ void kernel_signal(t_nombre_semaforo identificador_semaforo) {
  * @return	puntero a donde esta reservada la memoria
  */
 t_puntero kernel_reservar(t_valor_variable espacio) {
+
 	runFunction(kernel_socket, "cpu_malloc", 2, string_itoa(espacio),
-			string_itoa(pcb_actual->pid)); //TODO Agregar a interface de Kernel
+			string_itoa(pcb_actual->pid));
 	wait_response();
-	return malloc_pointer;
+	log_debug(logger, "CPU Reservar '%d' bytes en '%d'", espacio, malloc_pointer);
+	return (t_puntero) malloc_pointer;
 }
 
 /*
@@ -355,6 +359,7 @@ void kernel_liberar(t_puntero puntero) {
 	runFunction(kernel_socket, "cpu_free", 2, string_itoa(puntero),
 			string_itoa(pcb_actual->pid)); //TODO Agregar a interface de Kernel
 	wait_response();
+	log_debug(logger, "CPU Libero '%d'", puntero);
 }
 
 /*
@@ -369,7 +374,6 @@ void kernel_liberar(t_puntero puntero) {
  */
 t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion,
 		t_banderas flags) {
-	log_debug(logger, "CPU Abrir");
 	char* n_flag = get_flag(flags);
 
 	runFunction(kernel_socket, "cpu_validate_file", 1, string_itoa(direccion));
@@ -385,6 +389,7 @@ t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion,
 	runFunction(kernel_socket, "cpu_open_file", 3, string_itoa(direccion),
 			n_flag, string_itoa(pcb_actual->pid));
 	wait_kernel_response();
+	log_debug(logger, "CPU Abrir en FD '%d'", kernel_file_descriptor);
 	return kernel_file_descriptor;
 }
 
@@ -464,11 +469,11 @@ void kernel_moverCursor(t_descriptor_archivo descriptor_archivo,
  */
 void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 		t_valor_variable tamanio) {
-	log_debug(logger, "CPU Escribir");
+
 	char* buffer = string_new();
 	memcpy(buffer, informacion, tamanio);
 	strtok(buffer, "\n");
-	log_debug(logger, "%s", buffer);
+	log_debug(logger, "CPU Escribir FD: '%d', Info: '%s', Tamanio: '%d'", descriptor_archivo, buffer, tamanio);
 
 	runFunction(kernel_socket, "cpu_write_file", 4,
 			string_itoa(descriptor_archivo), buffer, string_itoa(tamanio),
@@ -505,7 +510,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
  */
 void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 		t_valor_variable tamanio) {
-	log_debug(logger, "CPU Leer");
+	log_debug(logger, "CPU Leer FD: '%d', Info: '%d', Tamanio: '%d'", descriptor_archivo, informacion, tamanio);
 
 	runFunction(kernel_socket, "cpu_read_file", 4,
 			string_itoa(descriptor_archivo), string_itoa(informacion),

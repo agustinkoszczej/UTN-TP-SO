@@ -68,7 +68,9 @@ t_queue* exit_queue;
 int fs_response;
 char* fs_read_buffer;
 int memory_response;
+int mem_offset_abs;
 char* mem_read_buffer;
+int page_from_pointer;
 
 typedef struct {
 	int value;
@@ -105,6 +107,7 @@ typedef struct {
 typedef struct {
 	int page_n;
 	int free_size;
+	bool wasFreed;
 }t_heap_page;
 
 t_list* process_heap_pages;
@@ -201,6 +204,9 @@ int add_file_in_global_table(char* path);
 void show_global_file_table();
 void show_all_processes_file_table();
 void show_process_file_table(int pid);
+
+//HEAP
+int find_heap_pages_pos_in_list(t_list* list, int pid);
 
 
 #endif /* KERNEL_H_ */

@@ -127,6 +127,8 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	n_cpu->busy = false;
 
 	if (finished) {
+		int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
+		list_remove_and_destroy_element(process_heap_pages, pos, &free);
 		move_to_list(n_pcb, EXIT_LIST);
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
@@ -211,16 +213,18 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 }
 
 void cpu_malloc(socket_connection* connection, char** args) {
-	//TODO
 	int space = atoi(args[0]);
 	int pid = atoi(args[1]);
 
+	int pos = malloc_memory(pid, space);
+	runFunction(connection->socket, "kernel_response_malloc_pointer", 1, string_itoa(pos));
 }
 
 void cpu_free(socket_connection* connection, char** args) {
-	//TODO
 	int pointer = atoi(args[0]);
 	int pid = atoi(args[1]);
+	free_memory(pid, pointer);
+	runFunction(connection->socket, "kernel_response", 0);
 }
 
 void cpu_validate_file(socket_connection* connection, char** args) {
@@ -300,7 +304,7 @@ void cpu_seek_file(socket_connection* connection, char** args) {
 				string_itoa(fd));
 	else
 		runFunction(connection->socket, "kernel_response_file", 1,
-				string_itoa(ERROR_SIN_DEFINIR)); //TODO ARCHIVO_SIN_ABRIR_PREVIAMENTE deberia ser pero no se me actualiza la libreria comun :c
+				string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 
 }
 
@@ -393,6 +397,7 @@ void memory_response_heap(socket_connection* connection, char** args) {
 void memory_response_store_bytes_in_page(socket_connection* connection,
 		char** args) {
 	memory_response = atoi(args[0]);
+	mem_offset_abs = atoi(args[1]);
 	signal_response(mem_response);
 }
 
@@ -403,6 +408,15 @@ void memory_response_read_bytes_from_page(socket_connection* connection,
 
 	mem_read_buffer = string_new();
 	string_append(&mem_read_buffer, args[0]);
+	signal_response(mem_response);
+}
+
+void memory_response_get_page_from_pointer(socket_connection* connection,
+		char** args) {
+	log_debug(logger, "memory_response_get_page_from_pointer: page_from_pointer=%s",
+			args[0]);
+
+	page_from_pointer = atoi(args[0]);
 	signal_response(mem_response);
 }
 

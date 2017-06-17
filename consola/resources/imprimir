@@ -1,7 +1,10 @@
 #!/usr/bin/ansisop
 begin
-	variables a
+	variables a, b
 	a = 3
 	prints n a
 	prints l Holitas
+	prints l Chausito
+	b = 5
+	prints n b
 end

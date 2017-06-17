@@ -35,6 +35,7 @@ void memory_page_size(socket_connection* connection, char** args);
 void memory_response_heap(socket_connection* connection, char** args);
 void memory_response_store_bytes_in_page(socket_connection* connection, char** args);
 void memory_response_read_bytes_from_page(socket_connection* connection, char** args);
+void memory_response_get_page_from_pointer(socket_connection* connection, char** args);
 
 /*
  * CPU
