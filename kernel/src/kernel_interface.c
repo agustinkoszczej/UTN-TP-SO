@@ -216,8 +216,11 @@ void cpu_malloc(socket_connection* connection, char** args) {
 	int space = atoi(args[0]);
 	int pid = atoi(args[1]);
 
+	log_debug(logger, "cpu_malloc");
 	int pos = malloc_memory(pid, space);
+	log_debug(logger, "cpu_malloc: pos '%d'", pos);
 	runFunction(connection->socket, "kernel_response_malloc_pointer", 1, string_itoa(pos));
+	log_debug(logger, "kernel_response_malloc_pointer: send");
 }
 
 void cpu_free(socket_connection* connection, char** args) {
@@ -241,7 +244,7 @@ void cpu_open_file(socket_connection* connection, char** args) {
 
 	if (!strcmp(flags, "c")) {
 		runFunction(fs_socket, "kernel_create_file", 1, path);
-		wait_response(fs_mutex);
+		wait_response(&fs_mutex);
 		if (fs_response == 0) {
 			//TODO aca llega cuando create_file = false, que no se que significa del lado de FileSystem xd
 			return;
@@ -267,7 +270,7 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 	char* path = get_path_by_gfd(gfd_delete);
 
 	runFunction(fs_socket, "kernel_delete_file", 1, path);
-	wait_response(fs_mutex);
+	wait_response(&fs_mutex);
 	if (fs_response == 0) {
 		//TODO aca llega cuando delete_file = false, que no se que significa del lado de FileSystem xd
 		return;
@@ -346,7 +349,7 @@ void cpu_read_file(socket_connection* connection, char** args) {
 
 	if (is_allowed(pid, fd, flags)) {
 		runFunction(fs_socket, "kernel_get_data", 3, path, offset, size);
-		wait_response(fs_mutex);
+		wait_response(&fs_mutex);
 		runFunction(connection->socket, "kernel_response_read_file", 2,
 				fs_read_buffer, string_itoa(fd));
 
@@ -391,14 +394,15 @@ void memory_page_size(socket_connection* connection, char** args) {
 
 void memory_response_heap(socket_connection* connection, char** args) {
 	memory_response = atoi(args[0]);
-	signal_response(mem_response);
+	signal_response(&mem_response);
 }
 
 void memory_response_store_bytes_in_page(socket_connection* connection,
 		char** args) {
 	memory_response = atoi(args[0]);
 	mem_offset_abs = atoi(args[1]);
-	signal_response(mem_response);
+	log_debug(logger,"memory_response_store_bytes_in_page: mem_offset_abs=%d", mem_offset_abs);
+	signal_response(&mem_response);
 }
 
 void memory_response_read_bytes_from_page(socket_connection* connection,
@@ -408,7 +412,7 @@ void memory_response_read_bytes_from_page(socket_connection* connection,
 
 	mem_read_buffer = string_new();
 	string_append(&mem_read_buffer, args[0]);
-	signal_response(mem_response);
+	signal_response(&mem_response);
 }
 
 void memory_response_get_page_from_pointer(socket_connection* connection,
@@ -417,7 +421,7 @@ void memory_response_get_page_from_pointer(socket_connection* connection,
 			args[0]);
 
 	page_from_pointer = atoi(args[0]);
-	signal_response(mem_response);
+	signal_response(&mem_response);
 }
 
 /*
@@ -425,12 +429,12 @@ void memory_response_get_page_from_pointer(socket_connection* connection,
  */
 void fs_response_file(socket_connection* connection, char** args) {
 	fs_response = atoi(args[0]);
-	signal_response(fs_mutex);
+	signal_response(&fs_mutex);
 }
 
 void fs_response_get_data(socket_connection* connection, char** args) {
 	fs_read_buffer = args[0];
-	signal_response(fs_mutex);
+	signal_response(&fs_mutex);
 }
 
 /*

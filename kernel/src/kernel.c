@@ -248,7 +248,7 @@ void move_to_list(pcb* pcb, int list_name) {
 
 bool validate_file_from_fs(char* path) {
 	runFunction(fs_socket, "kernel_validate_file", 1, path);
-	wait_response(fs_mutex);
+	wait_response(&fs_mutex);
 	return fs_response;
 
 }
@@ -522,7 +522,7 @@ bool write_file(int fd_write, int pid, char* info, int size) {
 		char* path = get_path_by_gfd(process->gfd);
 		int offset = process->pointer;
 		runFunction(fs_socket, "kernel_save_data", 4, path, offset, size, info);
-		wait_response(fs_mutex);
+		wait_response(&fs_mutex);
 		if (!fs_response) {
 			//TODO overflow al escribir? en FILESYSTEM (esto llega aca cuando save_data = false)
 			return false;
@@ -590,7 +590,7 @@ int get_suitable_page(int space, t_list* heap_pages, int start) {
 	int i;
 	for (i = start; i < list_size(heap_pages); i++) {
 		t_heap_page* heap = list_get(heap_pages, i);
-		if (heap->free_size <= space)
+		if (heap->free_size <= space && !heap->wasFreed)
 			return heap->page_n;
 	}
 	return -1;
@@ -599,11 +599,12 @@ int get_suitable_page(int space, t_list* heap_pages, int start) {
 HeapMetadata* read_HeapMetadata(char* page, int offset) {
 	if (offset == mem_page_size)
 		return NULL;
+
 	HeapMetadata* heap_metadata = malloc(sizeof(HeapMetadata));
 	int i, j = 0;
 	char* aux = string_new();
 	heap_metadata->isFree = page[offset] - '0'; //char to int
-	for (i = offset + 1; page[i] != '#'; i++) {
+	for (i = offset + 1; (page[i] != '#' && j < 4); i++) {
 		aux[j] = page[i];
 		j++;
 	}
@@ -625,7 +626,7 @@ int write_HeapMetadata(HeapMetadata* n_heap, int offset, char* page) {
 		page[i] = aux[j];
 		j++;
 	}
-	free(n_heap);
+	//free(n_heap);
 	return offset + heap_metadata_size;
 }
 //Esta funcion ocupa un espacio en una pagina, caso contrario retorna -1
@@ -635,10 +636,10 @@ int it_fits_malloc(char* full_page, int space_occupied) {
 
 	/*if (space_occupied > mem_page_size - (heap_metadata_size * 2))
 	 return false; //Tamanio maximo alloc*/
-
 	for (offset = 0; offset < mem_page_size;) {
 
 		actual_heap = read_HeapMetadata(full_page, offset);
+
 		//If magico, creanme que anda para todos los casos xd
 		if (actual_heap->isFree
 				&& (actual_heap->size >= (space_occupied + heap_metadata_size)
@@ -654,7 +655,7 @@ int it_fits_malloc(char* full_page, int space_occupied) {
 				write_HeapMetadata(n_heap,
 						offset + heap_metadata_size + space_occupied,
 						full_page);
-				free(n_heap);
+				//free(n_heap);
 			}
 			actual_heap->size = space_occupied;
 			return write_HeapMetadata(actual_heap, offset, full_page);
@@ -662,7 +663,7 @@ int it_fits_malloc(char* full_page, int space_occupied) {
 			offset += actual_heap->size + heap_metadata_size;
 		}
 	}
-	free(actual_heap);
+	//free(actual_heap);
 	return -1;
 }
 //Esta funcion libera una posicion de pagina y hace la parte de fragmentacion si hay dos bloques continuos libres y retorna la cantidad de espacio liberado o -1 si se libero toda la pagina
@@ -707,10 +708,10 @@ int free_heap(char* full_page, int pos) {
 
 int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	runFunction(mem_socket, "i_add_pages_to_program", 2, string_itoa(pid), string_itoa(1));
-	wait_response(mem_response);
+	wait_response(&mem_response);
 	if (memory_response == NO_SE_PUEDEN_RESERVAR_RECURSOS) {
 		//TODO decirle a CPU y finalizarla
-		return -1;
+		return NO_SE_PUEDEN_RESERVAR_RECURSOS;
 	}
 	t_heap_page* n_heap_page = malloc(sizeof(t_heap_manage));
 	n_heap_page->free_size = mem_page_size - (heap_metadata_size * 2) - space;
@@ -718,20 +719,23 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	n_heap_page->wasFreed = false;
 
 	list_add(heap_manage->heap_pages, n_heap_page);
-	list_replace(process_heap_pages,
-			find_heap_pages_pos_in_list(process_heap_pages, pid), heap_manage);
+	int pos_to_replace = find_heap_pages_pos_in_list(process_heap_pages, pid);
+	list_replace(process_heap_pages, pos_to_replace, heap_manage);
 	runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page), string_itoa(0),
 			string_itoa(mem_page_size));
-	wait_response(mem_response);
+	wait_response(&mem_response);
+
 	HeapMetadata* heap = malloc(sizeof(HeapMetadata));
 	heap->isFree = true;
 	heap->size = mem_page_size - heap_metadata_size;
 	write_HeapMetadata(heap, 0, mem_read_buffer);
-	free(heap);
+	//free(heap);
 	it_fits_malloc(mem_read_buffer, space);
 	runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid), string_itoa(page), string_itoa(0),
 			string_itoa(mem_page_size), mem_read_buffer);
-	wait_response(mem_response);
+	wait_response(&mem_response);
+	wait_response(&mem_response); //TODO Con dos locks anda no se porque ¯\_(ツ)_/¯
+	log_debug(logger, "add_heap_page: mem_offset_abs '%d'", mem_offset_abs);
 	return (mem_offset_abs + heap_metadata_size);
 }
 
@@ -749,7 +753,7 @@ void occupy_space(int pid, int page, int space, bool freed) {
 
 int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 	if (size > mem_page_size - (heap_metadata_size * 2))
-		return -1; //TODO directamente lo rechazo porque excede el tamanio maximo del alloc
+		return NO_SE_PUEDEN_RESERVAR_RECURSOS; //directamente lo rechazo porque excede el tamanio maximo del alloc
 
 	pcb* pcb_malloc = find_pcb_by_pid(pid);
 	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
@@ -765,12 +769,12 @@ int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 			if (page != -1) {
 				runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page),
 						string_itoa(0), string_itoa(mem_page_size));
-				wait_response(mem_response);
+				wait_response(&mem_response);
 				int it_fits = it_fits_malloc(mem_read_buffer, size);
 				if (it_fits != -1) {
 					runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid),
 							string_itoa(page), string_itoa(0), string_itoa(mem_page_size), mem_read_buffer);
-					wait_response(mem_response);
+					wait_response(&mem_response);
 					occupy_space(pid, page, size + heap_metadata_size, false);
 					return (mem_offset_abs + it_fits);
 				}
@@ -784,27 +788,27 @@ int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 
 void free_memory(int pid, int pointer) {
 	runFunction(mem_socket, "i_get_page_from_pointer", 1, string_itoa(pointer));
-	wait_response(mem_response);
+	wait_response(&mem_response);
 	runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page_from_pointer), string_itoa(0),
 			string_itoa(mem_page_size));
-	wait_response(mem_response);
+	wait_response(&mem_response);
 
 	int freed_space = free_heap(mem_read_buffer, pointer - heap_metadata_size);
 
 	if (freed_space == -1) {
 		runFunction(mem_socket, "i_free_page", 2, string_itoa(pid), string_itoa(page_from_pointer));
-		wait_response(mem_response);
+		wait_response(&mem_response);
 		occupy_space(pid, page_from_pointer, -freed_space, true);
 	} else
 		occupy_space(pid, page_from_pointer, -freed_space, false);
 }
 
-void wait_response(pthread_mutex_t mutex) {
-	pthread_mutex_lock(&mutex);
+void wait_response(pthread_mutex_t* mutex) {
+	pthread_mutex_lock(mutex);
 }
 
-void signal_response(pthread_mutex_t mutex) {
-	pthread_mutex_unlock(&mutex);
+void signal_response(pthread_mutex_t* mutex) {
+	pthread_mutex_unlock(mutex);
 }
 
 void create_function_dictionary() {
@@ -818,6 +822,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "memory_response_heap", &memory_response_heap);
 	dictionary_put(fns, "memory_response_read_bytes_from_page",
 			&memory_response_read_bytes_from_page);
+	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
 	dictionary_put(fns, "memory_response_get_page_from_pointer", &memory_response_get_page_from_pointer);
 
 	dictionary_put(fns, "cpu_received_page_stack_size",

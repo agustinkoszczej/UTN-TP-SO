@@ -178,8 +178,8 @@ void add_process_in_memory();
 void substract_process_in_memory();
 void short_planning();
 
-void wait_response(pthread_mutex_t mutex);
-void signal_response(pthread_mutex_t mutex);
+void wait_response(pthread_mutex_t* mutex);
+void signal_response(pthread_mutex_t* mutex);
 
 /*
  * FILESYSTEM

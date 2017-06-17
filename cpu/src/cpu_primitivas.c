@@ -342,6 +342,11 @@ t_puntero kernel_reservar(t_valor_variable espacio) {
 			string_itoa(pcb_actual->pid));
 	wait_response();
 	log_debug(logger, "CPU Reservar '%d' bytes en '%d'", espacio, malloc_pointer);
+	if(malloc_pointer < 0){
+		runFunction(kernel_socket, "cpu_error", 1,
+						string_itoa(malloc_pointer));
+		cpu_finalizar();
+	}
 	return (t_puntero) malloc_pointer;
 }
 
@@ -357,7 +362,7 @@ t_puntero kernel_reservar(t_valor_variable espacio) {
  */
 void kernel_liberar(t_puntero puntero) {
 	runFunction(kernel_socket, "cpu_free", 2, string_itoa(puntero),
-			string_itoa(pcb_actual->pid)); //TODO Agregar a interface de Kernel
+			string_itoa(pcb_actual->pid));
 	wait_response();
 	log_debug(logger, "CPU Libero '%d'", puntero);
 }
