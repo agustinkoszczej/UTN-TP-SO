@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include<exit_codes.h>
+#include <exit_codes.h>
 
 bool finished;
 

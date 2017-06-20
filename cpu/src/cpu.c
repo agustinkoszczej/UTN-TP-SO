@@ -52,30 +52,24 @@ int vars_in_stack() {
 }
 
 void wait_response() {
-	pthread_mutex_lock(&planning_mutex);
-	//log_debug(logger, "wait_response: void");
+	struct timespec abs_time;
+	clock_gettime(CLOCK_REALTIME, &abs_time);
+	abs_time.tv_sec += .5f;
+	pthread_mutex_timedlock(&planning_mutex, &abs_time);
 }
 
 void signal_response() {
 	pthread_mutex_unlock(&planning_mutex);
-	//log_debug(logger, "signal_response: void");
-}
-
-void wait_kernel_response() {
-	pthread_mutex_lock(&kernel_response_mutex);
-	//log_debug(logger, "wait_response: void");
-}
-
-void signal_kernel_response() {
-	pthread_mutex_unlock(&kernel_response_mutex);
-	//log_debug(logger, "signal_response: void");
 }
 
 char* get_flag(t_banderas flags) {
 	char* n_flag = string_new();
-	if(flags.creacion) string_append(n_flag, CREATE);
-	if(flags.lectura) string_append(n_flag, READ);
-	if(flags.escritura) string_append(n_flag, WRITE);
+	if (flags.creacion)
+		string_append(n_flag, CREATE);
+	if (flags.lectura)
+		string_append(n_flag, READ);
+	if (flags.escritura)
+		string_append(n_flag, WRITE);
 
 	log_debug(logger, "get_flag: t_banderas");
 	return n_flag;
@@ -136,8 +130,6 @@ void init_cpu(t_config* config) {
 	log_debug(logger, "init_cpu: void");
 
 	pthread_mutex_init(&mx_main, NULL);
-	pthread_mutex_init(&planning_mutex, NULL);
-	pthread_mutex_init(&kernel_response_mutex, NULL);
 
 	connect_to_server(config, MEMORY);
 	connect_to_server(config, KERNEL);
@@ -167,7 +159,6 @@ void init_cpu(t_config* config) {
 	kernel_functions.AnSISOP_escribir = kernel_escribir;
 	kernel_functions.AnSISOP_leer = kernel_leer;
 
-	pthread_mutex_lock(&planning_mutex);
 	pthread_mutex_lock(&mx_main);
 	pthread_mutex_lock(&mx_main);
 

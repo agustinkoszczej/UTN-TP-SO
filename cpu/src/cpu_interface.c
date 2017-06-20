@@ -61,12 +61,15 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	finished = false;
 	log_debug(logger, "kernel_receive_pcb: planning_alg=%d, quantum=%d, pcb*", planning_alg, quantum);
 
-	float percent_per_instruction = 100 / (list_size(pcb_actual->i_code) - pcb_actual->pc);
-	float acum_percent = 0;
+	double percent_per_instruction = 100.0f / (double) (list_size(pcb_actual->i_code) - pcb_actual->pc);
+	double acum_percent = 0;
+
+	pthread_mutex_init(&planning_mutex, NULL);
+	pthread_mutex_lock(&planning_mutex);
 
 	printf("> EXECUTING_PID: %d\n", pcb_actual->pid);
 	while ((planning_alg == FIFO || quantum-- >= 0) && !finished) {
-		printf("[%.3f %]\n", acum_percent); //TODO hacerlo mas cheto :C
+		printf("[ %%%.2f ]\n", acum_percent); //TODO hacerlo mas cheto :C
 		//printf("\r%c[2K", 27);
 		t_intructions* i_code = list_get(pcb_actual->i_code, pcb_actual->pc);
 		int start = i_code->start;
@@ -85,7 +88,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		acum_percent += percent_per_instruction;
 		sleep(quantum_sleep / 1000);
 	}
-	printf("[%.3f %]\n\n", acum_percent);
+	printf("[ %%%.2f ]\n\n", acum_percent);
 	log_debug(logger, "cpu_task_finished");
 	runFunction(kernel_socket, "cpu_task_finished", 2, pcb_to_string(pcb_actual), string_itoa(finished));
 }
@@ -105,18 +108,17 @@ void kernel_response_file(socket_connection* connection, char** args) {
 }
 
 void kernel_response(socket_connection* connection, char** args) {
-	signal_kernel_response();
+	signal_response();
 }
 
 void kernel_response_validate_file(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_file: kernel_file_descriptor=%s", args[0]);
 
 	validate_file = atoi(args[0]);
-	signal_kernel_response();
+	signal_response();
 }
 void kernel_response_read_file(socket_connection* connection, char** args) {
-
 	read_info = args[0];
 	kernel_file_descriptor = atoi(args[1]);
-	signal_kernel_response();
+	signal_response();
 }
