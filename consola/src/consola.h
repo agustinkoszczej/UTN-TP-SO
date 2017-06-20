@@ -17,13 +17,8 @@
 #include <config.h>
 #include <console.h>
 #include <pcb.h>
+#include <exit_codes.h>
 #include "consola_interface.h"
-
-#define NO_ERRORES 0
-#define NO_SE_PUEDEN_RESERVAR_RECURSOS -1
-#define ERROR_SIN_DEFINIR -20
-#define DESCONEXION_CONSOLA -6
-#define ABORTO_POR_CONSOLA -7
 
 #define IP_KERNEL "IP_KERNEL"
 #define PUERTO_KERNEL "PUERTO_KERNEL"

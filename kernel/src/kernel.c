@@ -41,8 +41,7 @@ void short_planning() {
 
 		char* pcb_string = pcb_to_string(_pcb);
 
-		runFunction(free_cpu->socket, "kernel_receive_pcb", 3,
-				string_itoa(planning_alg), string_itoa(quantum), pcb_string);
+		runFunction(free_cpu->socket, "kernel_receive_pcb", 3, string_itoa(planning_alg), string_itoa(quantum), pcb_string);
 	}
 	pthread_mutex_unlock(&planning_mutex);
 }
@@ -97,24 +96,24 @@ pcb* find_pcb_by_pid(int pid) {
 	int pos;
 	pcb* n_pcb = malloc(sizeof(pcb));
 	switch (socket_pcb->state) {
-	case NEW_LIST:
-		n_pcb = queue_peek(new_queue);
-		break;
-	case READY_LIST:
-		pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
-		n_pcb = list_get(ready_list, pos);
-		break;
-	case EXEC_LIST:
-		pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
-		n_pcb = list_get(exec_list, pos);
-		break;
-	case BLOCK_LIST:
-		pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
-		n_pcb = list_get(block_list, pos);
-		break;
-	case EXIT_LIST:
-		n_pcb = queue_peek(exit_queue);
-		break;
+		case NEW_LIST:
+			n_pcb = queue_peek(new_queue);
+			break;
+		case READY_LIST:
+			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
+			n_pcb = list_get(ready_list, pos);
+			break;
+		case EXEC_LIST:
+			pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
+			n_pcb = list_get(exec_list, pos);
+			break;
+		case BLOCK_LIST:
+			pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
+			n_pcb = list_get(block_list, pos);
+			break;
+		case EXIT_LIST:
+			n_pcb = queue_peek(exit_queue);
+			break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
 	pthread_mutex_unlock(&socket_pcb_mutex);
@@ -135,24 +134,24 @@ pcb* find_pcb_by_socket(int socket) {
 		int pos;
 		pcb* n_pcb = malloc(sizeof(pcb));
 		switch (socket_pcb->state) {
-		case NEW_LIST:
-			n_pcb = queue_peek(new_queue);
-			break;
-		case READY_LIST:
-			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
-			n_pcb = list_get(ready_list, pos);
-			break;
-		case EXEC_LIST:
-			pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
-			n_pcb = list_get(exec_list, pos);
-			break;
-		case BLOCK_LIST:
-			pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
-			n_pcb = list_get(block_list, pos);
-			break;
-		case EXIT_LIST:
-			n_pcb = queue_peek(exit_queue);
-			break;
+			case NEW_LIST:
+				n_pcb = queue_peek(new_queue);
+				break;
+			case READY_LIST:
+				pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
+				n_pcb = list_get(ready_list, pos);
+				break;
+			case EXEC_LIST:
+				pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
+				n_pcb = list_get(exec_list, pos);
+				break;
+			case BLOCK_LIST:
+				pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
+				n_pcb = list_get(block_list, pos);
+				break;
+			case EXIT_LIST:
+				n_pcb = queue_peek(exit_queue);
+				break;
 		}
 		pthread_mutex_unlock(&pcb_list_mutex);
 		pthread_mutex_unlock(&socket_pcb_mutex);
@@ -190,43 +189,43 @@ void move_to_list(pcb* pcb, int list_name) {
 
 	pthread_mutex_lock(&pcb_list_mutex);
 	switch (pcb->state) {
-	case NEW_LIST:
-		queue_pop(new_queue);
-		break;
-	case READY_LIST:
-		pos = find_pcb_pos_in_list(ready_list, pcb->pid);
-		list_remove(ready_list, pos);
-		break;
-	case EXEC_LIST:
-		pos = find_pcb_pos_in_list(exec_list, pcb->pid);
-		list_remove(exec_list, pos);
-		break;
-	case BLOCK_LIST:
-		pos = find_pcb_pos_in_list(block_list, pcb->pid);
-		list_remove(block_list, pos);
-		break;
-	case EXIT_LIST:
-		queue_pop(exit_queue);
-		break;
+		case NEW_LIST:
+			queue_pop(new_queue);
+			break;
+		case READY_LIST:
+			pos = find_pcb_pos_in_list(ready_list, pcb->pid);
+			list_remove(ready_list, pos);
+			break;
+		case EXEC_LIST:
+			pos = find_pcb_pos_in_list(exec_list, pcb->pid);
+			list_remove(exec_list, pos);
+			break;
+		case BLOCK_LIST:
+			pos = find_pcb_pos_in_list(block_list, pcb->pid);
+			list_remove(block_list, pos);
+			break;
+		case EXIT_LIST:
+			queue_pop(exit_queue);
+			break;
 	}
 
 	pcb->state = list_name;
 	switch (list_name) {
-	case NEW_LIST:
-		queue_push(new_queue, pcb);
-		break;
-	case READY_LIST:
-		list_add(ready_list, pcb);
-		break;
-	case EXEC_LIST:
-		list_add(exec_list, pcb);
-		break;
-	case BLOCK_LIST:
-		list_add(block_list, pcb);
-		break;
-	case EXIT_LIST:
-		queue_push(exit_queue, pcb);
-		break;
+		case NEW_LIST:
+			queue_push(new_queue, pcb);
+			break;
+		case READY_LIST:
+			list_add(ready_list, pcb);
+			break;
+		case EXEC_LIST:
+			list_add(exec_list, pcb);
+			break;
+		case BLOCK_LIST:
+			list_add(block_list, pcb);
+			break;
+		case EXIT_LIST:
+			queue_push(exit_queue, pcb);
+			break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
 
@@ -250,7 +249,11 @@ bool validate_file_from_fs(char* path) {
 	runFunction(fs_socket, "kernel_validate_file", 1, path);
 	wait_response(&fs_mutex);
 	return fs_response;
+}
 
+void create_file_from_fs(char* path) {
+	runFunction(fs_socket, "kernel_create_file", 1, path);
+	wait_response(&fs_mutex);
 }
 
 //GETTERS TABLA GLOBAL
@@ -406,8 +409,7 @@ int remove_open_file_by_fd_and_pid(int fd, int pid) {
 	list_replace(fs_process_table, pos, files);
 
 	if (list_size(files->open_files) == 3)
-		list_remove_and_destroy_element(fs_process_table,
-				get_pos_in_fs_process_table_by_pid(pid), &free); //Si no tiene archivos abierto la remuevo de la lista
+		list_remove_and_destroy_element(fs_process_table, get_pos_in_fs_process_table_by_pid(pid), &free); //Si no tiene archivos abierto la remuevo de la lista
 
 	return file_to_remove->gfd;
 }
@@ -450,8 +452,7 @@ bool delete_file_from_global_table(int gfd) {
 		for (j = 0; j < list_size(process_table->open_files); j++) {
 			t_open_file* process = list_get(process_table->open_files, j);
 			if (process->gfd == gfd) {
-				list_remove_and_destroy_element(process_table->open_files, j,
-						&free);
+				list_remove_and_destroy_element(process_table->open_files, j, &free);
 				j--;
 			}
 		}
@@ -472,8 +473,7 @@ bool is_allowed(int pid, int fd, char* flag) {
 
 void set_process_file_by_fd(int fd, int pid, t_open_file* n_file) {
 	int pos_table = get_pos_in_fs_process_table_by_pid(pid);
-	t_process_file_table* files_open_process = list_get(fs_process_table,
-			pos_table);
+	t_process_file_table* files_open_process = list_get(fs_process_table, pos_table);
 
 	int pos_fd = get_pos_open_file_by_fd(files_open_process->open_files, fd);
 	list_replace(files_open_process->open_files, pos_fd, n_file);
@@ -510,8 +510,7 @@ t_list* add_defaults_fds() {
 bool write_file(int fd_write, int pid, char* info, int size) {
 	t_socket_pcb* socket_console = find_socket_by_pid(pid);
 	if (fd_write == 1) {
-		runFunction(socket_console->socket, "kernel_print_message", 2, info,
-				string_itoa(pid));
+		runFunction(socket_console->socket, "kernel_print_message", 2, info, string_itoa(pid));
 		log_debug(logger, "Escribir en Consola '%s'", info);
 		return true;
 	}
@@ -536,8 +535,7 @@ void show_global_file_table() {
 	int i;
 	for (i = 0; i < list_size(fs_global_table); i++) {
 		t_global_file_table* global_file = list_get(fs_global_table, i);
-		printf("> GLOBAL_FD: %d\t> OPEN: %d\t> FILE: %s\n", global_file->gfd,
-				global_file->open, global_file->path);
+		printf("> GLOBAL_FD: %d\t> OPEN: %d\t> FILE: %s\n", global_file->gfd, global_file->open, global_file->path);
 	}
 }
 
@@ -554,13 +552,13 @@ void show_all_processes_file_table() {
 void show_process_file_table(int pid) {
 	t_process_file_table* files_process = get_process_file_by_pid(pid);
 	if (files_process == NULL)
-		printf("El Proceso %d no tiene procesos abiertos!\n", pid); //TODO podria poner una validacion para un PID que no existe, sino va a mostrar esto
+		printf("El Proceso %d no tiene procesos abiertos!\n", pid);
+	//TODO podria poner una validacion para un PID que no existe, sino va a mostrar esto
 	else {
 		int i;
 		for (i = 3; i < list_size(files_process->open_files); i++) {
 			t_open_file* file = list_get(files_process->open_files, i);
-			printf("> FD: %d\t> GLOBAL_FD: %d\t> FLAGS: %s\t>POINTER: %d\n",
-					file->fd, file->gfd, file->flag, file->pointer);
+			printf("> FD: %d\t> GLOBAL_FD: %d\t> FLAGS: %s\t>POINTER: %d\n", file->fd, file->gfd, file->flag, file->pointer);
 		}
 	}
 }
@@ -641,20 +639,13 @@ int it_fits_malloc(char* full_page, int space_occupied) {
 		actual_heap = read_HeapMetadata(full_page, offset);
 
 		//If magico, creanme que anda para todos los casos xd
-		if (actual_heap->isFree
-				&& (actual_heap->size >= (space_occupied + heap_metadata_size)
-						|| ((actual_heap->size == space_occupied)
-								&& (offset + heap_metadata_size + space_occupied
-										!= mem_page_size)))) {
+		if (actual_heap->isFree && (actual_heap->size >= (space_occupied + heap_metadata_size) || ((actual_heap->size == space_occupied) && (offset + heap_metadata_size + space_occupied != mem_page_size)))) {
 			actual_heap->isFree = false;
 			if (space_occupied < actual_heap->size) {
 				HeapMetadata* n_heap = malloc(sizeof(HeapMetadata));
 				n_heap->isFree = true;
-				n_heap->size = actual_heap->size - space_occupied
-						- heap_metadata_size;
-				write_HeapMetadata(n_heap,
-						offset + heap_metadata_size + space_occupied,
-						full_page);
+				n_heap->size = actual_heap->size - space_occupied - heap_metadata_size;
+				write_HeapMetadata(n_heap, offset + heap_metadata_size + space_occupied, full_page);
 				//free(n_heap);
 			}
 			actual_heap->size = space_occupied;
@@ -681,8 +672,7 @@ int free_heap(char* full_page, int pos) {
 	HeapMetadata* next_heap;
 	for (offset = 0; offset < mem_page_size;) {
 		heap = read_HeapMetadata(full_page, offset);
-		next_heap = read_HeapMetadata(full_page,
-				heap->size + heap_metadata_size + offset);
+		next_heap = read_HeapMetadata(full_page, heap->size + heap_metadata_size + offset);
 		if (next_heap == NULL)
 			break;
 		if (heap->isFree && next_heap->isFree) {
@@ -710,10 +700,9 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	runFunction(mem_socket, "i_add_pages_to_program", 2, string_itoa(pid), string_itoa(1));
 	wait_response(&mem_response);
 	if (memory_response == NO_SE_PUEDEN_RESERVAR_RECURSOS) {
-		//TODO decirle a CPU y finalizarla
 		return NO_SE_PUEDEN_RESERVAR_RECURSOS;
 	}
-	t_heap_page* n_heap_page = malloc(sizeof(t_heap_manage));
+	t_heap_page* n_heap_page = malloc(sizeof(t_heap_page));
 	n_heap_page->free_size = mem_page_size - (heap_metadata_size * 2) - space;
 	n_heap_page->page_n = page;
 	n_heap_page->wasFreed = false;
@@ -721,8 +710,7 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	list_add(heap_manage->heap_pages, n_heap_page);
 	int pos_to_replace = find_heap_pages_pos_in_list(process_heap_pages, pid);
 	list_replace(process_heap_pages, pos_to_replace, heap_manage);
-	runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page), string_itoa(0),
-			string_itoa(mem_page_size));
+	runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page), string_itoa(0), string_itoa(mem_page_size));
 	wait_response(&mem_response);
 
 	HeapMetadata* heap = malloc(sizeof(HeapMetadata));
@@ -731,8 +719,7 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	write_HeapMetadata(heap, 0, mem_read_buffer);
 	//free(heap);
 	it_fits_malloc(mem_read_buffer, space);
-	runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid), string_itoa(page), string_itoa(0),
-			string_itoa(mem_page_size), mem_read_buffer);
+	runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid), string_itoa(page), string_itoa(0), string_itoa(mem_page_size), mem_read_buffer);
 	wait_response(&mem_response);
 	wait_response(&mem_response); //TODO Con dos locks anda no se porque ¯\_(ツ)_/¯
 	log_debug(logger, "add_heap_page: mem_offset_abs '%d'", mem_offset_abs);
@@ -758,6 +745,9 @@ int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 	pcb* pcb_malloc = find_pcb_by_pid(pid);
 	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
 
+	heap_manage->heap_stats.malloc_c++;
+	heap_manage->heap_stats.malloc_b += size;
+
 	int page = pcb_malloc->page_c + stack_size;
 
 	if (list_is_empty(heap_manage->heap_pages)) {
@@ -767,21 +757,18 @@ int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 		for (i = 0; i < list_size(heap_manage->heap_pages); i++) {
 			page = get_suitable_page(size, heap_manage->heap_pages, i);
 			if (page != -1) {
-				runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page),
-						string_itoa(0), string_itoa(mem_page_size));
+				runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page), string_itoa(0), string_itoa(mem_page_size));
 				wait_response(&mem_response);
 				int it_fits = it_fits_malloc(mem_read_buffer, size);
 				if (it_fits != -1) {
-					runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid),
-							string_itoa(page), string_itoa(0), string_itoa(mem_page_size), mem_read_buffer);
+					runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid), string_itoa(page), string_itoa(0), string_itoa(mem_page_size), mem_read_buffer);
 					wait_response(&mem_response);
 					occupy_space(pid, page, size + heap_metadata_size, false);
 					return (mem_offset_abs + it_fits);
 				}
 			}
 		}
-		t_heap_page* last_page = list_get(heap_manage->heap_pages,
-				list_size(heap_manage->heap_pages));
+		t_heap_page* last_page = list_get(heap_manage->heap_pages, list_size(heap_manage->heap_pages));
 		return add_heap_page(pid, heap_manage, (last_page->page_n) + 1, size);
 	}
 }
@@ -789,11 +776,14 @@ int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 void free_memory(int pid, int pointer) {
 	runFunction(mem_socket, "i_get_page_from_pointer", 1, string_itoa(pointer));
 	wait_response(&mem_response);
-	runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page_from_pointer), string_itoa(0),
-			string_itoa(mem_page_size));
+	runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page_from_pointer), string_itoa(0), string_itoa(mem_page_size));
 	wait_response(&mem_response);
 
 	int freed_space = free_heap(mem_read_buffer, pointer - heap_metadata_size);
+
+	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
+	heap_manage->heap_stats.free_c++;
+	heap_manage->heap_stats.free_b += freed_space;
 
 	if (freed_space == -1) {
 		runFunction(mem_socket, "i_free_page", 2, string_itoa(pid), string_itoa(page_from_pointer));
@@ -816,19 +806,15 @@ void create_function_dictionary() {
 
 	dictionary_put(fns, "console_load_program", &console_load_program);
 	dictionary_put(fns, "memory_identify", &memory_identify);
-	dictionary_put(fns, "memory_response_start_program",
-			&memory_response_start_program);
+	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);
 	dictionary_put(fns, "memory_response_heap", &memory_response_heap);
-	dictionary_put(fns, "memory_response_read_bytes_from_page",
-			&memory_response_read_bytes_from_page);
+	dictionary_put(fns, "memory_response_read_bytes_from_page", &memory_response_read_bytes_from_page);
 	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
 	dictionary_put(fns, "memory_response_get_page_from_pointer", &memory_response_get_page_from_pointer);
 
-	dictionary_put(fns, "cpu_received_page_stack_size",
-			&cpu_received_page_stack_size);
+	dictionary_put(fns, "cpu_received_page_stack_size", &cpu_received_page_stack_size);
 	dictionary_put(fns, "cpu_task_finished", &cpu_task_finished);
-	dictionary_put(fns, "cpu_error", &cpu_error);
 	dictionary_put(fns, "cpu_get_shared_var", &cpu_get_shared_var);
 	dictionary_put(fns, "cpu_set_shared_var", &cpu_set_shared_var);
 	dictionary_put(fns, "cpu_wait_sem", &cpu_wait_sem);
@@ -922,8 +908,7 @@ void init_kernel(t_config* config) {
 	char** global_vars_arr = config_get_array_value(config, SHARED_VARS);
 	int i = 0;
 	while (global_vars_arr[i] != NULL) {
-		dictionary_put(shared_vars,
-				string_substring_from(global_vars_arr[i], 1), 0);
+		dictionary_put(shared_vars, string_substring_from(global_vars_arr[i], 1), 0);
 		i++;
 	}
 
@@ -1006,57 +991,57 @@ void show_active_process(char option) {
 	char* list_name = string_new();
 	int i, j;
 	switch (option) {
-	case 'A':
-		string_append(&list_name, "PROCESS IN ALL\n");
+		case 'A':
+			string_append(&list_name, "PROCESS IN ALL\n");
 
-		j = queue_size(new_queue);
-		for (i = 0; i < j; i++) {
-			pcb* n_pcb = queue_pop(new_queue);
-			queue_push(new_queue, n_pcb);
-			list_add(list, n_pcb);
-		}
+			j = queue_size(new_queue);
+			for (i = 0; i < j; i++) {
+				pcb* n_pcb = queue_pop(new_queue);
+				queue_push(new_queue, n_pcb);
+				list_add(list, n_pcb);
+			}
 
-		list_add_all(list, ready_list);
-		list_add_all(list, block_list);
-		list_add_all(list, exec_list);
+			list_add_all(list, ready_list);
+			list_add_all(list, block_list);
+			list_add_all(list, exec_list);
 
-		j = queue_size(exit_queue);
-		for (i = 0; i < j; i++) {
-			pcb* n_pcb = queue_pop(exit_queue);
-			queue_push(exit_queue, n_pcb);
-			list_add(list, n_pcb);
-		}
-		break;
-	case 'N':
-		string_append(&list_name, "PROCESS IN NEW\n");
-		int i, j = queue_size(new_queue);
-		for (i = 0; i < j; i++) {
-			pcb* n_pcb = queue_pop(new_queue);
-			queue_push(new_queue, n_pcb);
-			list_add(list, n_pcb);
-		}
-		break;
-	case 'R':
-		string_append(&list_name, "PROCESS IN READY\n");
-		list_add_all(list, ready_list);
-		break;
-	case 'E':
-		string_append(&list_name, "PROCESS IN EXIT\n");
-		j = queue_size(exit_queue);
-		for (i = 0; i < j; i++) {
-			pcb* n_pcb = queue_pop(exit_queue);
-			queue_push(exit_queue, n_pcb);
-			list_add(list, n_pcb);
-		}
-		break;
-	case 'X':
-		string_append(&list_name, "PROCESS IN EXEC\n");
-		list_add_all(list, exec_list);
-		break;
-	case 'B':
-		string_append(&list_name, "PROCESS IN BLOCK\n");
-		list_add_all(list, block_list);
-		break;
+			j = queue_size(exit_queue);
+			for (i = 0; i < j; i++) {
+				pcb* n_pcb = queue_pop(exit_queue);
+				queue_push(exit_queue, n_pcb);
+				list_add(list, n_pcb);
+			}
+			break;
+		case 'N':
+			string_append(&list_name, "PROCESS IN NEW\n");
+			int i, j = queue_size(new_queue);
+			for (i = 0; i < j; i++) {
+				pcb* n_pcb = queue_pop(new_queue);
+				queue_push(new_queue, n_pcb);
+				list_add(list, n_pcb);
+			}
+			break;
+		case 'R':
+			string_append(&list_name, "PROCESS IN READY\n");
+			list_add_all(list, ready_list);
+			break;
+		case 'E':
+			string_append(&list_name, "PROCESS IN EXIT\n");
+			j = queue_size(exit_queue);
+			for (i = 0; i < j; i++) {
+				pcb* n_pcb = queue_pop(exit_queue);
+				queue_push(exit_queue, n_pcb);
+				list_add(list, n_pcb);
+			}
+			break;
+		case 'X':
+			string_append(&list_name, "PROCESS IN EXEC\n");
+			list_add_all(list, exec_list);
+			break;
+		case 'B':
+			string_append(&list_name, "PROCESS IN BLOCK\n");
+			list_add_all(list, block_list);
+			break;
 	}
 
 	clear_screen();
@@ -1088,24 +1073,50 @@ void do_show_active_process(char* sel) {
 	}
 }
 
+// Cantidad de páginas de Heap
+void show_heap_pages(int pid) {
+	printf("HEAP PAGES: %d\n", list_size(find_heap_manage_by_pid(pid)->heap_pages));
+}
+
+// Cantidad de acciones alocar en operaciones y bytes
+void show_allocates(int pid) {
+	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
+
+	printf("HEAP MALLOC NUM: %d\n", heap_manage->heap_stats.malloc_c);
+	printf("HEAP MALLOC BYTES: %d\n", heap_manage->heap_stats.malloc_b);
+}
+
+// Cantidad de acciones liberar en operaciones y bytes
+void show_free(int pid) {
+	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
+
+	printf("HEAP FREE NUM: %d\n", heap_manage->heap_stats.free_c);
+	printf("HEAP FREE BYTES: %d\n", heap_manage->heap_stats.free_b);
+}
+
+// Cantidad de syscalls
+void show_syscalls(int pid) {
+	pcb* n_pcb = find_pcb_by_pid(pid);
+
+	printf("SYSCALLS NUM: %d\n", n_pcb->statistics.op_priviliges);
+}
+
 void show_info(int pid) {
 	pcb* n_pcb = find_pcb_by_pid(pid);
 	char* info = string_new();
 	string_append_with_format(&info, "PID: %d\n", n_pcb->pid);
-	string_append_with_format(&info, "RAFAGAS EJECUTADAS: %d\n",
-			n_pcb->statistics.cycles);
-	string_append_with_format(&info, "OP. PRIVILEGIADAS: %d\n",
-			n_pcb->statistics.op_priviliges);
-
-	show_process_file_table(pid);
-// TODO
-// Cantidad de páginas de Heap
-// Cantidad de acciones alocar en operaciones y bytes
-// Cantidad de acciones liberar en operaciones y bytes
-// Cantidad de syscalls
+	string_append_with_format(&info, "RAFAGAS EJECUTADAS: %d\n", n_pcb->statistics.cycles);
+	string_append_with_format(&info, "OP. PRIVILEGIADAS: %d\n", n_pcb->statistics.op_priviliges);
 
 	clear_screen();
 	printf("%s\n", info);
+
+	show_process_file_table(pid);
+	show_heap_pages(pid);
+	show_allocates(pid);
+	show_free(pid);
+	show_syscalls(pid);
+
 	wait_any_key();
 }
 
@@ -1153,8 +1164,7 @@ void stop_process(int pid) {
 	t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
 	pcb* n_pcb = find_pcb_by_pid(pid);
 	n_pcb->exit_code = ERROR_SIN_DEFINIR;
-	runFunction(n_socket_pcb->socket, "kernel_stop_process", 2,
-			n_socket_pcb->pid, n_pcb->exit_code);
+	runFunction(n_socket_pcb->socket, "kernel_stop_process", 2, n_socket_pcb->pid, n_pcb->exit_code);
 }
 
 void do_stop_process(char* sel) {

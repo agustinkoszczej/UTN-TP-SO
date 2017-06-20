@@ -82,33 +82,40 @@ typedef struct {
 	int gfd;
 	int pointer;
 	int fd;
-}t_open_file;
+} t_open_file;
 
-typedef struct{
+typedef struct {
 	int pid;
 	t_list* open_files;
-}t_process_file_table;
+} t_process_file_table;
 
 typedef struct {
 	char* path;
 	int open;
 	int gfd;
-}t_global_file_table;
+} t_global_file_table;
 
 t_list* fs_global_table;
 t_list* fs_process_table;
 
+typedef struct {
+	int malloc_c;
+	int malloc_b;
+	int free_c;
+	int free_b;
+} t_stats;
 
 typedef struct {
 	int pid;
 	t_list* heap_pages;
-}t_heap_manage;
+	t_stats heap_stats;
+} t_heap_manage;
 
 typedef struct {
 	int page_n;
 	int free_size;
 	bool wasFreed;
-}t_heap_page;
+} t_heap_page;
 
 t_list* process_heap_pages;
 
@@ -119,17 +126,15 @@ typedef struct {
 
 int heap_metadata_size;
 
-
 /*
-typedef struct {
-	int socket;
-//	char* program;
-//	pthread_t thread_info;
-	pcb* pcb;
-} t_program;
-*/
+ typedef struct {
+ int socket;
+ //	char* program;
+ //	pthread_t thread_info;
+ pcb* pcb;
+ } t_program;
+ */
 //int last_socket;
-
 typedef struct {
 	bool busy;
 	int socket;
@@ -181,6 +186,10 @@ void short_planning();
 void wait_response(pthread_mutex_t* mutex);
 void signal_response(pthread_mutex_t* mutex);
 
+char* get_path_by_fd_and_pid(int fd, int pid);
+int malloc_memory(int pid, int size);
+void free_memory(int pid, int pointer);
+
 /*
  * FILESYSTEM
  */
@@ -207,6 +216,5 @@ void show_process_file_table(int pid);
 
 //HEAP
 int find_heap_pages_pos_in_list(t_list* list, int pid);
-
 
 #endif /* KERNEL_H_ */

@@ -69,8 +69,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 
 	printf("> EXECUTING_PID: %d\n", pcb_actual->pid);
 	while ((planning_alg == FIFO || quantum-- >= 0) && !finished) {
-		printf("[ %%%.2f ]\n", acum_percent); //TODO hacerlo mas cheto :C
-		//printf("\r%c[2K", 27);
+		printf("[ %%%.2f ]\n", acum_percent);
 		t_intructions* i_code = list_get(pcb_actual->i_code, pcb_actual->pc);
 		int start = i_code->start;
 		int offset = i_code->offset;
@@ -88,8 +87,12 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		acum_percent += percent_per_instruction;
 		sleep(quantum_sleep / 1000);
 	}
-	printf("[ %%%.2f ]\n\n", acum_percent);
+
+	if (acum_percent == 100)
+		printf("[ %%%.2f ]\n\n", acum_percent);
+
 	log_debug(logger, "cpu_task_finished");
+
 	runFunction(kernel_socket, "cpu_task_finished", 2, pcb_to_string(pcb_actual), string_itoa(finished));
 }
 

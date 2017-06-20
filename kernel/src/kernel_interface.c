@@ -122,8 +122,13 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	n_cpu->busy = false;
 
 	if (finished) {
+		void free_heap(void* element) {
+			t_heap_manage* heap = element;
+			free(heap);
+		}
+
 		int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
-		list_remove_and_destroy_element(process_heap_pages, pos, &free);
+		list_remove_and_destroy_element(process_heap_pages, pos, &free_heap);
 		move_to_list(n_pcb, EXIT_LIST);
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
@@ -136,50 +141,25 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	short_planning();
 }
 
-void cpu_error(socket_connection* connection, char** args) {
-
-	switch (atoi(args[0])) {
-		//TODO Falta settear el exit code para cada proceso y liberar la CPU
-		case NO_EXISTE_ARCHIVO:
-			log_debug(logger, "Error: No existe archivo. CPU socket: %d, IP = %s, Port = %d.\n", connection->socket, connection->ip, connection->port);
-			break;
-
-		case LEER_SIN_PERMISOS:
-			log_debug(logger, "Error: Leer sin permisos. CPU socket: %d, IP = %s, Port = %d.\n", connection->socket, connection->ip, connection->port);
-			break;
-
-		case ESCRIBIR_SIN_PERMISOS:
-			log_debug(logger, "Error: Escribir sin permisos. CPU socket: %d, IP = %s, Port = %d.\n", connection->socket, connection->ip, connection->port);
-			break;
-
-		case STACK_OVERFLOW:
-			log_debug(logger, "Error: Stack Overflow. CPU socket: %d, IP = %s, Port = %d.\n", connection->socket, connection->ip, connection->port);
-			break;
-	}
-}
-
 void cpu_wait_sem(socket_connection* connection, char** args) {
 	char* id_sem = args[0];
 	string_trim(&id_sem);
 	t_cpu* _cpu = find_cpu_by_socket(connection->socket);
 	int* process_pid = malloc(sizeof(int));
 	*process_pid = _cpu->xpid;
-	//int process_pid = _cpu->xpid;
 	pcb *process = find_pcb_by_pid(*process_pid);
 	sem_status *sem_curr = dictionary_get(sem_ids, id_sem);
 
 	sem_curr->value--;
 
 	if (sem_curr->value < 0) {
-
 		queue_push(sem_curr->blocked_pids, process_pid);
 		move_to_list(process, BLOCK_LIST);
 		short_planning();
 	}
 
 	dictionary_remove_and_destroy(sem_ids, id_sem, free);
-	dictionary_put(sem_ids, id_sem, sem_curr); //Seria mejor modificarlo pero las commons no dejan
-
+	dictionary_put(sem_ids, id_sem, sem_curr);
 }
 
 void cpu_signal_sem(socket_connection* connection, char** args) {
@@ -189,7 +169,6 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 	sem_curr->value++;
 
 	if (sem_curr->value <= 0) {
-
 		pcb *process = queue_pop(sem_curr->blocked_pids);
 		move_to_list(process, READY_LIST);
 	}
@@ -218,7 +197,14 @@ void cpu_free(socket_connection* connection, char** args) {
 
 void cpu_validate_file(socket_connection* connection, char** args) {
 	char* path = args[0];
+	bool create = atoi(args[1]);
 	bool validate = validate_file_from_fs(path);
+
+	if (!validate && create) {
+		validate = true;
+		create_file_from_fs(path);
+	}
+
 	runFunction(connection->socket, "kernel_response_validate_file", 1, string_itoa(validate));
 }
 
@@ -297,7 +283,7 @@ void cpu_write_file(socket_connection* connection, char** args) {
 
 	bool result = write_file(fd, pid, info, size);
 
-	char* path = get_path_by_fd_and_pid(fd, pid);
+	char* path = string_from_format("%s", get_path_by_fd_and_pid(fd, pid));
 	if (path == NULL && !result) {
 		runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 		return;
@@ -312,7 +298,6 @@ void cpu_write_file(socket_connection* connection, char** args) {
 }
 
 void cpu_read_file(socket_connection* connection, char** args) {
-
 	int fd = atoi(args[0]);
 	int offset = atoi(args[1]);
 	int size = atoi(args[2]);
@@ -326,9 +311,9 @@ void cpu_read_file(socket_connection* connection, char** args) {
 		runFunction(fs_socket, "kernel_get_data", 3, path, offset, size);
 		wait_response(&fs_mutex);
 		runFunction(connection->socket, "kernel_response_read_file", 2, fs_read_buffer, string_itoa(fd));
-
 	} else
 		fd = LEER_SIN_PERMISOS;
+
 	runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
 }
 
@@ -348,7 +333,11 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 		t_heap_manage* heap = malloc(sizeof(t_heap_manage));
 		heap->heap_pages = list_create();
 		heap->pid = n_pcb->pid;
-		list_add(process_heap_pages, heap); //TODO Despues habria que quitarlo de la lista cuando termina
+		heap->heap_stats.malloc_c = 0;
+		heap->heap_stats.malloc_b = 0;
+		heap->heap_stats.free_c = 0;
+		heap->heap_stats.free_b = 0;
+		list_add(process_heap_pages, heap);
 		move_to_list(n_pcb, READY_LIST);
 		add_process_in_memory();
 		short_planning();

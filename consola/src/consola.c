@@ -3,7 +3,7 @@
 const char* CONFIG_FIELDS[] = { IP_KERNEL, PUERTO_KERNEL };
 
 t_process* find_process_by_socket(int socket) {
-	log_debug(logger,"find_process_by_socket: socket=%d", socket);
+	log_debug(logger, "find_process_by_socket: socket=%d", socket);
 
 	pthread_mutex_lock(&process_list_mutex);
 	bool find(void* element) {
@@ -185,7 +185,7 @@ void do_disconnect_console(char* sel) {
 			pthread_mutex_lock(&process_list_mutex);
 			t_process* process = list_get(process_list, i);
 			pthread_mutex_unlock(&process_list_mutex);
-			abort_program(process, ABORTO_POR_CONSOLA);
+			abort_program(process, FINALIZADO_CONSOLA);
 		}
 		pthread_mutex_lock(&process_list_mutex);
 		list_clean(process_list);
@@ -262,7 +262,7 @@ void do_abort_program(char* sel) {
 			pthread_mutex_unlock(&process_list_mutex);
 
 			if (!strcmp(string_itoa(process->pid), pid)) {
-				abort_program(process, ABORTO_POR_CONSOLA);
+				abort_program(process, FINALIZADO_CONSOLA);
 				break;
 			}
 			pthread_mutex_lock(&process_list_mutex);
@@ -313,8 +313,16 @@ void init_console() {
 	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), "Can not reserve resources.");
 	dictionary_put(message_map, string_itoa(ERROR_SIN_DEFINIR), "Unknown error.");
 	dictionary_put(message_map, string_itoa(DESCONEXION_CONSOLA), "Console disconnected.");
-	dictionary_put(message_map, string_itoa(ABORTO_POR_CONSOLA), "Aborted.");
+	dictionary_put(message_map, string_itoa(FINALIZADO_CONSOLA), "Aborted.");
 
+	dictionary_put(message_map, string_itoa(NO_EXISTE_ARCHIVO), "File does not exist.");
+	dictionary_put(message_map, string_itoa(LEER_SIN_PERMISOS), "File read denied.");
+	dictionary_put(message_map, string_itoa(ESCRIBIR_SIN_PERMISOS), "File write denied.");
+	dictionary_put(message_map, string_itoa(EXCEPCION_MEMORIA), "Memory exception.");
+	dictionary_put(message_map, string_itoa(RESERVAR_MAS_MEMORIA_TAMANIO_PAGINA), "Malloc overflow.");
+	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS), "Pages overflow.");
+	dictionary_put(message_map, string_itoa(STACK_OVERFLOW), "Stack overflow.");
+	dictionary_put(message_map, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE), "File not opened.");
 	log_debug(logger, "init_console: void");
 }
 
