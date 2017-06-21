@@ -524,6 +524,7 @@ bool write_file(int fd_write, int pid, char* info, int size) {
 		wait_response(&fs_mutex);
 		if (!fs_response) {
 			//TODO overflow al escribir? en FILESYSTEM (esto llega aca cuando save_data = false)
+			log_debug(logger, "Error de write_file que nunca deberias pasar");
 			return false;
 		}
 	}

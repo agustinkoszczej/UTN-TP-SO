@@ -7,6 +7,7 @@ void newClient(socket_connection * connection) {
 	log_debug(logger, "newClient: socket = %d, ip = %s, port = %d.\n", connection->socket, connection->ip, connection->port);
 	k_socket = connection->socket;
 }
+
 void connectionClosed(socket_connection * connection) {
 	log_debug(logger, "connectionClosed: socket = %d, ip = %s, port = %d.\n", connection->socket, connection->ip, connection->port);
 }
@@ -22,6 +23,7 @@ void kernel_validate_file(socket_connection* connection, char** args) {
 
 	pthread_mutex_unlock(&request_mutex);
 }
+
 void kernel_create_file(socket_connection* connection, char** args) {
 	char* path = args[0];
 	log_debug(logger, "kernel_create_file=path: %s", path);
@@ -33,6 +35,7 @@ void kernel_create_file(socket_connection* connection, char** args) {
 
 	pthread_mutex_unlock(&request_mutex);
 }
+
 void kernel_delete_file(socket_connection* connection, char** args) {
 	char* path = args[0];
 	log_debug(logger, "kernel_delete_file=path: %s", path);
@@ -44,6 +47,7 @@ void kernel_delete_file(socket_connection* connection, char** args) {
 
 	pthread_mutex_unlock(&request_mutex);
 }
+
 void kernel_get_data(socket_connection* connection, char** args) {
 	char* path = args[0];
 	int offset = atoi(args[1]);
@@ -57,6 +61,7 @@ void kernel_get_data(socket_connection* connection, char** args) {
 
 	pthread_mutex_unlock(&request_mutex);
 }
+
 void kernel_save_data(socket_connection* connection, char** args) {
 	char* path = args[0];
 	int offset = atoi(args[1]);

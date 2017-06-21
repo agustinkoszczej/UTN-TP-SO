@@ -197,13 +197,7 @@ void cpu_free(socket_connection* connection, char** args) {
 
 void cpu_validate_file(socket_connection* connection, char** args) {
 	char* path = args[0];
-	bool create = atoi(args[1]);
 	bool validate = validate_file_from_fs(path);
-
-	if (!validate && create) {
-		validate = true;
-		create_file_from_fs(path);
-	}
 
 	runFunction(connection->socket, "kernel_response_validate_file", 1, string_itoa(validate));
 }
@@ -218,6 +212,7 @@ void cpu_open_file(socket_connection* connection, char** args) {
 		wait_response(&fs_mutex);
 		if (fs_response == 0) {
 			//TODO aca llega cuando create_file = false, que no se que significa del lado de FileSystem xd
+			log_debug(logger, "Error de cpu_open_file que nunca deberia llegar");
 			return;
 		}
 	}
@@ -242,6 +237,7 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 	wait_response(&fs_mutex);
 	if (fs_response == 0) {
 		//TODO aca llega cuando delete_file = false, que no se que significa del lado de FileSystem xd
+		log_debug(logger, "Error de cpu_delete_file que nunca deberia llegar");
 		return;
 	}
 

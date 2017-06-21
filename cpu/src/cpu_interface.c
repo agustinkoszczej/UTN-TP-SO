@@ -95,25 +95,21 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 
 	runFunction(kernel_socket, "cpu_task_finished", 2, pcb_to_string(pcb_actual), string_itoa(finished));
 }
-
 void kernel_response_malloc_pointer(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_malloc_pointer: malloc_pointer=%s", args[0]);
 
-	malloc_pointer = atoi(args[0]);
+	*malloc_pointer = atoi(args[0]);
 	signal_response();
 }
-
 void kernel_response_file(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_file: kernel_file_descriptor=%s", args[0]);
 
 	kernel_file_descriptor = atoi(args[0]);
 	signal_response();
 }
-
 void kernel_response(socket_connection* connection, char** args) {
 	signal_response();
 }
-
 void kernel_response_validate_file(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_file: kernel_file_descriptor=%s", args[0]);
 

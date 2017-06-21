@@ -74,7 +74,7 @@ void start_program(int pid, int n_frames) {
 	add_pages(pid, stack_size);
 }
 
-void finish_program(int pid) { //TODO En que momento se actualiza la tabla adm_list (que turbio xd)?
+void finish_program(int pid) {
 	pthread_mutex_lock(&frames_mutex);
 	bool find(void* element) {
 		t_adm_table* adm_table = element;
@@ -88,7 +88,7 @@ void finish_program(int pid) { //TODO En que momento se actualiza la tabla adm_l
 			log_debug(logger, "adm_table->pid = %d, adm_table->frame = %d, adm_table->pag = %d", adm_table->pid, adm_table->frame, adm_table->pag);
 	}
 
-	t_list* adm_tables = list_filter(adm_list, find);
+	t_list* adm_tables = list_filter(adm_list, &find);
 
 	for (i = 0; i < list_size(adm_tables); i++) {
 		t_adm_table* adm_table = list_get(adm_tables, i);
@@ -113,7 +113,7 @@ void add_pages(int pid, int n_frames) {
 	}
 	int i;
 
-	int known_pages = list_size(list_filter(adm_list, find)); //TODO ver que pasa si se libera una pag
+	int known_pages = list_size(list_filter(adm_list, &find));
 
 	for (i = 0; i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
@@ -276,7 +276,6 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 	}
 	int start, end;
 	if (adm_table != NULL) {
-		//TODO: CUANDO list_find DEVUELVE NULL, ROMPE
 		start = frame_size * adm_table->frame + offset;
 		end = start + size;
 
@@ -445,7 +444,7 @@ void free_page(int pid, int page) {
 
 	t_adm_table* adm_table = list_get(adm_tables, page);
 	adm_table->pid = -1;
-	adm_table->pag = 0; //TODO falta actualizar la tabla adm_list o se hace algo turbio y anda asi?
+	adm_table->pag = 0;
 
 	pthread_mutex_unlock(&frames_mutex);
 }

@@ -23,7 +23,7 @@
  * @return	Puntero a la variable recien asignada
  */
 t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
-	bool is_digit = isdigit(identificador_variable) ? true : false;
+	bool is_digit = isdigit(identificador_variable);
 
 	t_stack* stack = list_get(pcb_actual->i_stack, list_size(pcb_actual->i_stack) - 1);
 
@@ -56,7 +56,7 @@ t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
 		cpu_finalizar();
 	}
 
-	return n_var;
+	return (int) n_var;
 }
 
 /*
@@ -153,7 +153,7 @@ t_valor_variable cpu_obtenerValorCompartida(t_nombre_compartida variable) {
 
 	log_debug(logger, "Obtener Valor Compartida '%d'", kernel_shared_var);
 
-	return atoi(kernel_shared_var);
+	return kernel_shared_var;
 }
 
 /*
@@ -186,9 +186,10 @@ t_valor_variable cpu_asignarValorCompartida(t_nombre_compartida variable, t_valo
  * @return	void
  */
 void cpu_irAlLabel(t_nombre_etiqueta t_nombre_etiqueta) {
-	if (dictionary_has_key(pcb_actual->i_label, t_nombre_etiqueta))
-		pcb_actual->pc = dictionary_get(pcb_actual->i_label, t_nombre_etiqueta);
-	else {
+	if (dictionary_has_key(pcb_actual->i_label, t_nombre_etiqueta)) {
+		int* new_pc = dictionary_get(pcb_actual->i_label, t_nombre_etiqueta);
+		pcb_actual->pc = *new_pc;
+	} else {
 		pcb_actual->exit_code = ERROR_SIN_DEFINIR;
 		cpu_finalizar();
 		return;
@@ -213,7 +214,8 @@ void cpu_irAlLabel(t_nombre_etiqueta t_nombre_etiqueta) {
 void cpu_llamarSinRetorno(t_nombre_etiqueta etiqueta) {
 	log_debug(logger, "Llamar sin retorno");
 	t_stack* stack_aux = stack_create();
-	stack_aux->retpos = pcb_actual->pc;
+	stack_aux->retpos = malloc(sizeof(int));
+	*stack_aux->retpos = pcb_actual->pc;
 	list_add(pcb_actual->i_stack, stack_aux);
 
 	cpu_irAlLabel(etiqueta);
@@ -301,7 +303,7 @@ void cpu_retornar(t_valor_variable retorno) {
  * @return	void
  */
 void kernel_wait(t_nombre_semaforo identificador_semaforo) {
-	pcb_actual->statistics->op_priviliges++;
+	pcb_actual->statistics.op_priviliges++;
 
 	log_debug(logger, "Wait: Semaforo \"%s\"", identificador_semaforo);
 	runFunction(kernel_socket, "cpu_wait_sem", 1, identificador_semaforo);
@@ -318,7 +320,7 @@ void kernel_wait(t_nombre_semaforo identificador_semaforo) {
  * @return	void
  */
 void kernel_signal(t_nombre_semaforo identificador_semaforo) {
-	pcb_actual->statistics->op_priviliges++;
+	pcb_actual->statistics.op_priviliges++;
 
 	log_debug(logger, "Signal: Semaforo \"%s\"", identificador_semaforo);
 	runFunction(kernel_socket, "cpu_signal_sem", 1, identificador_semaforo);
@@ -336,7 +338,7 @@ void kernel_signal(t_nombre_semaforo identificador_semaforo) {
  * @return	puntero a donde esta reservada la memoria
  */
 t_puntero kernel_reservar(t_valor_variable espacio) {
-	pcb_actual->statistics->op_priviliges++;
+	pcb_actual->statistics.op_priviliges++;
 
 	runFunction(kernel_socket, "cpu_malloc", 2, string_itoa(espacio), string_itoa(pcb_actual->pid));
 	wait_response();
@@ -361,7 +363,7 @@ t_puntero kernel_reservar(t_valor_variable espacio) {
  * @return	void
  */
 void kernel_liberar(t_puntero puntero) {
-	pcb_actual->statistics->op_priviliges++;
+	pcb_actual->statistics.op_priviliges++;
 
 	runFunction(kernel_socket, "cpu_free", 2, string_itoa(puntero), string_itoa(pcb_actual->pid));
 	wait_response();
@@ -379,20 +381,20 @@ void kernel_liberar(t_puntero puntero) {
  * @return	El valor del descriptor de archivo abierto por el sistema
  */
 t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion, t_banderas flags) {
-	pcb_actual->statistics->op_priviliges++;
+	pcb_actual->statistics.op_priviliges++;
 
 	char* n_flag = get_flag(flags);
 
-	runFunction(kernel_socket, "cpu_validate_file", 2, string_itoa(direccion), string_itoa(flags.creacion));
+	runFunction(kernel_socket, "cpu_validate_file", 1, direccion);
 	wait_response();
 
-	if (!validate_file) {
+	if (!validate_file && !flags.creacion) {
 		pcb_actual->exit_code = NO_EXISTE_ARCHIVO;
 		cpu_finalizar();
 		return NO_EXISTE_ARCHIVO;
 	}
 
-	runFunction(kernel_socket, "cpu_open_file", 3, string_itoa(direccion), n_flag, string_itoa(pcb_actual->pid));
+	runFunction(kernel_socket, "cpu_open_file", 3, direccion, n_flag, string_itoa(pcb_actual->pid));
 	wait_response();
 	log_debug(logger, "CPU Abrir en FD '%d'", kernel_file_descriptor);
 	return kernel_file_descriptor;
@@ -408,7 +410,7 @@ t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion, t_banderas flag
  * @return	void
  */
 void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
-	pcb_actual->statistics->op_priviliges++;
+	pcb_actual->statistics.op_priviliges++;
 
 	log_debug(logger, "CPU Borrar");
 	runFunction(kernel_socket, "cpu_delete_file", 1, string_itoa(descriptor_archivo));
@@ -429,7 +431,7 @@ void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
  * @return	void
  */
 void kernel_cerrar(t_descriptor_archivo descriptor_archivo) {
-	pcb_actual->statistics->op_priviliges++;
+	pcb_actual->statistics.op_priviliges++;
 
 	log_debug(logger, "CPU Cerrar");
 	runFunction(kernel_socket, "cpu_close_file", 2, string_itoa(descriptor_archivo), string_itoa(pcb_actual->pid));
@@ -451,7 +453,7 @@ void kernel_cerrar(t_descriptor_archivo descriptor_archivo) {
  * @return	void
  */
 void kernel_moverCursor(t_descriptor_archivo descriptor_archivo, t_valor_variable posicion) {
-	pcb_actual->statistics->op_priviliges++;
+	pcb_actual->statistics.op_priviliges++;
 
 	log_debug(logger, "CPU Mover Cursor");
 	runFunction(kernel_socket, "cpu_seek_file", 3, string_itoa(descriptor_archivo), string_itoa(posicion), string_itoa(pcb_actual->pid));
@@ -472,7 +474,7 @@ void kernel_moverCursor(t_descriptor_archivo descriptor_archivo, t_valor_variabl
  * @return	void
  */
 void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion, t_valor_variable tamanio) {
-	pcb_actual->statistics->op_priviliges++;
+	pcb_actual->statistics.op_priviliges++;
 
 	char* buffer = string_new();
 	memcpy(buffer, informacion, tamanio);
@@ -508,7 +510,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
  * @return	void
  */
 void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion, t_valor_variable tamanio) {
-	pcb_actual->statistics->op_priviliges++;
+	pcb_actual->statistics.op_priviliges++;
 
 	log_debug(logger, "CPU Leer FD: '%d', Info: '%d', Tamanio: '%d'", descriptor_archivo, informacion, tamanio);
 
