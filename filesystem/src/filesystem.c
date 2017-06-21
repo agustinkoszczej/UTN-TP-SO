@@ -221,7 +221,8 @@ char* get_data(char* path, int offset, int size) {
 bool validate_file(char* path) {
 	log_debug(logger, "validate_file: path=%s", path);
 
-	FILE* file = fopen(path, "r");
+	char* dir = string_substring_until(path, strlen(path) - 1);
+	FILE* file = fopen(string_from_format("%s/Archivos/%s",mount_point, dir), "r");
 	bool result = false;
 
 	if (file) {
