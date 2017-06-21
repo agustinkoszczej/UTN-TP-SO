@@ -41,6 +41,7 @@ int stack_size;
 /*
  * KERNEL
  */
+int mem_delay;
 int quantum_sleep;
 int kernel_shared_var;
 int kernel_file_descriptor;

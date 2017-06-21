@@ -40,6 +40,11 @@ void short_planning() {
 		free_cpu->xpid = _pcb->pid;
 
 		char* pcb_string = pcb_to_string(_pcb);
+
+		config_destroy(config);
+		config = malloc(sizeof(t_config));
+		config = config_create(path_config);
+
 		quantum_sleep = config_get_int_value(config, QUANTUM_SLEEP);
 
 		runFunction(free_cpu->socket, "kernel_receive_pcb", 4, string_itoa(planning_alg), string_itoa(quantum), pcb_string, string_itoa(quantum_sleep));
@@ -1197,6 +1202,7 @@ int main(int argc, char *argv[]) {
 	logger = log_create("log", "KERNEL", false, LOG_LEVEL_DEBUG);
 	create_function_dictionary();
 
+	path_config = string_from_format("%s", argv[1]);
 	load_config(&config, argc, argv[1]);
 	print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
 

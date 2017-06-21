@@ -7,7 +7,6 @@ void i_start_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
 	char* buffer = args[1];
 
-
 	int size_buffer = string_length(buffer);
 	int n_frames = ceil((float) size_buffer / frame_size);
 
@@ -95,6 +94,7 @@ void client_identify(socket_connection* connection, char** args) {
 		pthread_mutex_lock(&cpu_sockets_mutex);
 		list_add(m_sockets.cpu_sockets, &connection->socket);
 		pthread_mutex_unlock(&cpu_sockets_mutex);
+		runFunction(connection->socket, "memory_retard", 1, string_itoa(mem_delay));
 	} else if (!strcmp(sender, KERNEL)) {
 		m_sockets.k_socket = connection->socket;
 		runFunction(connection->socket, "memory_page_size", 1, string_itoa(frame_size));

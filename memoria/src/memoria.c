@@ -526,6 +526,12 @@ void do_retard(char* sel) {
 		strtok(retard, "\n");
 
 		mem_delay = atoi(retard);
+
+		int i;
+		for(i = 0; i < list_size(m_sockets.cpu_sockets); i++) {
+			int* socket = list_get(m_sockets.cpu_sockets, i);
+			runFunction(*socket, "memory_retard", 1, string_itoa(mem_delay));
+		}
 	}
 }
 

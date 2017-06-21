@@ -15,6 +15,11 @@ void memory_identify(socket_connection* connection, char** args) {
 
 	runFunction(connection->socket, "client_identify", 1, CPU);
 }
+void memory_retard(socket_connection* connection, char** args) {
+	log_debug(logger, "memory_retard: void");
+
+	mem_delay = atoi(args[0]);
+}
 void memory_response_read_bytes_from_page(socket_connection* connection, char** args) {
 	log_debug(logger, "memory_response_read_bytes_from_page: buffer=%s", args[0]);
 

@@ -50,6 +50,7 @@
 #define STACK_SIZE "STACK_SIZE"
 #define CONFIG_FIELDS_N 15
 
+char* path_config;
 t_config *config;
 
 int p_counter;

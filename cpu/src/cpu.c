@@ -54,7 +54,7 @@ int vars_in_stack() {
 void wait_response() {
 	struct timespec abs_time;
 	clock_gettime(CLOCK_REALTIME, &abs_time);
-	abs_time.tv_sec += .5f;
+	abs_time.tv_sec += (double) mem_delay / 1000.0f + (double) quantum_sleep / 1000.0f + .5f;
 	pthread_mutex_timedlock(&planning_mutex, &abs_time);
 }
 
@@ -65,11 +65,11 @@ void signal_response() {
 char* get_flag(t_banderas flags) {
 	char* n_flag = string_new();
 	if (flags.creacion)
-		string_append(n_flag, CREATE);
+		string_append(&n_flag, CREATE);
 	if (flags.lectura)
-		string_append(n_flag, READ);
+		string_append(&n_flag, READ);
 	if (flags.escritura)
-		string_append(n_flag, WRITE);
+		string_append(&n_flag, WRITE);
 
 	log_debug(logger, "get_flag: t_banderas");
 	return n_flag;
@@ -81,6 +81,7 @@ void create_function_dictionary() {
 	fns = dictionary_create();
 
 	dictionary_put(fns, "memory_identify", &memory_identify);
+	dictionary_put(fns, "memory_retard", &memory_retard);
 	dictionary_put(fns, "memory_response_read_bytes_from_page", &memory_response_read_bytes_from_page);
 	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
 
