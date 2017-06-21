@@ -915,7 +915,10 @@ void init_kernel(t_config* config) {
 	char** global_vars_arr = config_get_array_value(config, SHARED_VARS);
 	int i = 0;
 	while (global_vars_arr[i] != NULL) {
-		dictionary_put(shared_vars, string_substring_from(global_vars_arr[i], 1), 0);
+		char* temp = global_vars_arr[i];
+		int* valorVariable = malloc(sizeof(int));
+		*valorVariable = 0;
+		dictionary_put(shared_vars, string_substring_from(temp, 1), valorVariable);
 		i++;
 	}
 

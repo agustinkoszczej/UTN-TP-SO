@@ -88,7 +88,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(n_page), string_itoa(n_offset), string_itoa(n_size));
 		wait_response();
 
-		analizadorLinea(mem_buffer, &functions, &kernel_functions);
+		analizadorLinea(mem_buffer, &functions, &kernel_functions);	//TODO aca falla. No pude encontrar por que
 		pcb_actual->pc++;
 		acum_percent += percent_per_instruction;
 		sleep(quantum_sleep / 1000);

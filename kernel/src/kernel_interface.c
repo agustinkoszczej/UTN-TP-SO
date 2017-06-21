@@ -87,7 +87,8 @@ void cpu_received_page_stack_size(socket_connection* connection, char** args) {
 void cpu_get_shared_var(socket_connection* connection, char** args) {
 	char* var_name = args[0];
 	pthread_mutex_lock(&shared_vars_mutex);
-	int value = atoi(dictionary_get(shared_vars, var_name));
+	char* temp = dictionary_get(shared_vars, var_name);
+	int value = atoi(temp);	//TODO
 	pthread_mutex_unlock(&shared_vars_mutex);
 
 	runFunction(connection->socket, "kernel_response_get_shared_var", 1, string_itoa(value));
