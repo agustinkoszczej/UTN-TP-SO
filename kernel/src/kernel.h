@@ -50,6 +50,8 @@
 #define STACK_SIZE "STACK_SIZE"
 #define CONFIG_FIELDS_N 15
 
+t_config *config;
+
 int p_counter;
 int multiprog;
 int quantum;

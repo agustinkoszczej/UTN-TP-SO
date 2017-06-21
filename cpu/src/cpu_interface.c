@@ -58,6 +58,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	int planning_alg = atoi(args[0]);
 	int quantum = atoi(args[1]);
 	pcb_actual = string_to_pcb(args[2]);
+	quantum_sleep = atoi(args[3]);
 	finished = false;
 	log_debug(logger, "kernel_receive_pcb: planning_alg=%d, quantum=%d, pcb*", planning_alg, quantum);
 

@@ -40,8 +40,9 @@ void short_planning() {
 		free_cpu->xpid = _pcb->pid;
 
 		char* pcb_string = pcb_to_string(_pcb);
+		quantum_sleep = config_get_int_value(config, QUANTUM_SLEEP);
 
-		runFunction(free_cpu->socket, "kernel_receive_pcb", 3, string_itoa(planning_alg), string_itoa(quantum), pcb_string);
+		runFunction(free_cpu->socket, "kernel_receive_pcb", 4, string_itoa(planning_alg), string_itoa(quantum), pcb_string, string_itoa(quantum_sleep));
 	}
 	pthread_mutex_unlock(&planning_mutex);
 }
@@ -1190,7 +1191,7 @@ void do_stop_planification(char* sel) {
 int main(int argc, char *argv[]) {
 	clear_screen();
 	char sel[255];
-	t_config *config = malloc(sizeof(t_config));
+	config = malloc(sizeof(t_config));
 
 	remove("log");
 	logger = log_create("log", "KERNEL", false, LOG_LEVEL_DEBUG);
