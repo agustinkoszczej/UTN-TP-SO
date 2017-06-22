@@ -79,6 +79,4 @@ AnSISOP_kernel kernel_functions;
 
 t_stack* stack_create();
 
-t_puntero* malloc_pointer;
-
 #endif /* CPU_INTERFACE_H_ */

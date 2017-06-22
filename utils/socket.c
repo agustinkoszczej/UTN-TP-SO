@@ -24,6 +24,52 @@
 #define BACKLOG 10			// Cantidad de conexiones pendientes  que se mantienen en cola
 #define MAXDATASIZE 25000 	// máximo número de bytes que se pueden leer de una vez
 
+void send_message(int socket, char* msg, int size) {
+	send(socket, msg, size, 0);
+}
+
+void send_dynamic_message(int socket, char* msj) {
+	char* message_size = string_new();
+	message_size = string_itoa(string_length(msj));
+	send_message(socket, message_size, sizeof(int)); //LE ENVIO PRIMERO EL TAMAÑO DEL MENSAJE A ENVIAR
+	send_message(socket, msj, string_length(msj)); //LE ENVIO EL MENSAJE DE ESE TAMAÑO
+}
+
+char* receipt_message(int socket, int msg_size, int criterio) {
+	char* buffer = malloc(msg_size); //TODO ver que no se pase de vergas con los mallocs
+	//Criterio = 0 -> No-Bloqueante
+	//Criterio = MSG_WAITALL -> Bloqueante
+
+	int bytesRecibidos = recv(socket, buffer, msg_size, criterio);
+	if (bytesRecibidos <= 0) { //SI ESTO SE CUMPLE, EL SOCKET SE DESCONECTO
+		printf("\nSocket %d disconnected\n", socket);
+		perror("Cause"); //PERROR ME MUESTRA EL MOTIVO
+		close(socket);
+	}
+	buffer[msg_size] = '\0';
+	return buffer;
+}
+char* receipt_message_with_waiting(int socket, int msg_size) {
+	return receipt_message(socket, msg_size, MSG_WAITALL); //BLOQUEANTE
+}
+
+int receipt_message_size(int socket) {
+	return atoi(receipt_message_with_waiting(socket, sizeof(int)));
+}
+
+char* receipt_dynamic_message(int socket) {
+	int next_msg_size = receipt_message_size(socket);
+
+	if (next_msg_size != 0) {
+		return receipt_message_with_waiting(socket, next_msg_size);
+	}
+	return "ERROR";
+}
+
+
+
+
+
 //Recibe y procesa un mensaje recibido
 void receiptMessage(void * arguments) {
 	args_receiptMessage * args = arguments;

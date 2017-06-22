@@ -185,22 +185,25 @@ void cpu_malloc(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_malloc");
 	int pos = malloc_memory(pid, space);
 	log_debug(logger, "cpu_malloc: pos '%d'", pos);
-	runFunction(connection->socket, "kernel_response_malloc_pointer", 1, string_itoa(pos));
-	log_debug(logger, "kernel_response_malloc_pointer: send");
+	//runFunction(connection->socket, "kernel_response_malloc_pointer", 1, string_itoa(pos));
+	send_dynamic_message(connection->socket, string_itoa(pos));
+	log_debug(logger, "cpu_malloc: send");
 }
 
 void cpu_free(socket_connection* connection, char** args) {
 	int pointer = atoi(args[0]);
 	int pid = atoi(args[1]);
 	free_memory(pid, pointer);
-	runFunction(connection->socket, "kernel_response", 0);
+	//runFunction(connection->socket, "kernel_response", 0);
+	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
 }
 
 void cpu_validate_file(socket_connection* connection, char** args) {
 	char* path = args[0];
 	bool validate = validate_file_from_fs(path);
 
-	runFunction(connection->socket, "kernel_response_validate_file", 1, string_itoa(validate));
+	//runFunction(connection->socket, "kernel_response_validate_file", 1, string_itoa(validate));
+	send_dynamic_message(connection->socket, string_itoa(validate));
 }
 
 void cpu_open_file(socket_connection* connection, char** args) {
@@ -220,7 +223,8 @@ void cpu_open_file(socket_connection* connection, char** args) {
 
 	int fd_assigned = open_file_in_process_table(path, flags, pid);
 
-	runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd_assigned));
+	send_dynamic_message(connection->socket, string_itoa(fd_assigned));
+	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd_assigned));
 }
 
 void cpu_delete_file(socket_connection* connection, char** args) {
@@ -242,7 +246,8 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 		return;
 	}
 
-	runFunction(connection->socket, "kernel_response_file", 1, string_itoa(gfd_delete));
+	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(gfd_delete));
+	send_dynamic_message(connection->socket, string_itoa(gfd_delete));
 }
 
 void cpu_close_file(socket_connection* connection, char** args) {
@@ -251,11 +256,13 @@ void cpu_close_file(socket_connection* connection, char** args) {
 
 	bool result = close_file(fd_close, pid);
 	if (result) {
-		runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd_close));
+		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd_close));
+		send_dynamic_message(connection->socket, string_itoa(fd_close));
 		return;
 	}
 
-	runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+	send_dynamic_message(connection->socket, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 
 }
 
@@ -265,11 +272,14 @@ void cpu_seek_file(socket_connection* connection, char** args) {
 	int pid = atoi(args[2]);
 
 	bool result = set_pointer(pos, fd, pid);
-	if (result)
-		runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
-	else
-		runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
-
+	if (result){
+		send_dynamic_message(connection->socket, string_itoa(fd));
+		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
+	}
+	else{
+		send_dynamic_message(connection->socket, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+	}
 }
 
 void cpu_write_file(socket_connection* connection, char** args) {
@@ -282,14 +292,16 @@ void cpu_write_file(socket_connection* connection, char** args) {
 
 	char* path = string_from_format("%s", get_path_by_fd_and_pid(fd, pid));
 	if (path == NULL && !result) {
-		runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+		send_dynamic_message(connection->socket, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 		return;
 	}
 
 	if (!result)
 		fd = ESCRIBIR_SIN_PERMISOS;
 
-	runFunction(connection->socket, "kernel_response", 1, string_itoa(fd));
+	//runFunction(connection->socket, "kernel_response", 1, string_itoa(fd));
+	send_dynamic_message(connection->socket, string_itoa(fd));
 
 	log_debug(logger, "runFunction a socket: '%d', Resultado Kernel Escribir '%d'", connection->socket, result);
 }
@@ -307,11 +319,14 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	if (is_allowed(pid, fd, flags)) {
 		runFunction(fs_socket, "kernel_get_data", 3, path, offset, size);
 		wait_response(&fs_mutex);
-		runFunction(connection->socket, "kernel_response_read_file", 2, fs_read_buffer, string_itoa(fd));
+		//runFunction(connection->socket, "kernel_response_read_file", 2, fs_read_buffer, string_itoa(fd));
+		send_dynamic_message(connection->socket, fs_read_buffer);
+		//send_dynamic_message(connection->socket, string_itoa(fd));
 	} else
 		fd = LEER_SIN_PERMISOS;
 
-	runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
+	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
+	send_dynamic_message(connection->socket, string_itoa(fd));
 }
 
 /*

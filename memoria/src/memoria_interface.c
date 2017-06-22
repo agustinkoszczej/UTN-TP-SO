@@ -47,10 +47,24 @@ void i_store_bytes_in_page(socket_connection* connection, char** args) {
 }
 void i_add_pages_to_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
-	int n_frames = atoi(args[1]);
+	int n_page = atoi(args[1]);
 
-	if (has_available_frames(n_frames)) {
-		add_pages(pid, n_frames);
+	if (has_available_frames(1)) {
+		pthread_mutex_lock(&frames_mutex);
+			bool find(void* element) {
+				t_adm_table* adm_table = element;
+				return adm_table->pid == pid && adm_table->pag == n_page;
+			}
+			int i;
+			for (i = 0; i < list_size(adm_list); i++) {
+				t_adm_table* adm_table = list_get(adm_list, i);
+				if (adm_table->pid < 0) {
+					adm_table->pid = pid;
+					adm_table->pag = n_page;
+					break;
+				}
+			}
+			pthread_mutex_unlock(&frames_mutex);
 
 		runFunction(connection->socket, "memory_response_heap", 1, string_itoa(NO_ERRORES));
 	} else
@@ -63,8 +77,8 @@ void i_finish_program(socket_connection* connection, char** args) {
 
 void i_free_page(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
-	int page = atoi(args[0]);
-
+	int page = atoi(args[1]);
+	//TODO habria que ver de limpiar la cache tambien
 	free_page(pid, page);
 	runFunction(connection->socket, "memory_response_heap", 1, string_itoa(NO_ERRORES));
 }
@@ -76,9 +90,10 @@ void kernel_stack_size(socket_connection* connection, char** args) {
 }
 
 void i_get_page_from_pointer(socket_connection* connection, char** args) {
-	int pointer = args[0];
+	int pointer = atoi(args[0]);
 
 	int page = get_page_from_pointer(pointer);
+	log_debug(logger, "i_get_page_from_pointer: '%d'", page);
 	runFunction(connection->socket, "memory_response_get_page_from_pointer", 1, string_itoa(page));
 }
 

@@ -1,0 +1,15 @@
+begin
+	variables a, b, c, d
+	alocar a 246
+	#ocupa pag 3
+	liberar a
+	alocar b 150
+	#ocupa pag 4
+	alocar c 96
+	#ocupa pag 5
+	alocar d 50
+	#ocupa pag 4
+	liberar b
+	liberar c
+	liberard
+end

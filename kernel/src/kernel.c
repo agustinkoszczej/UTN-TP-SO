@@ -595,7 +595,7 @@ int get_suitable_page(int space, t_list* heap_pages, int start) {
 	int i;
 	for (i = start; i < list_size(heap_pages); i++) {
 		t_heap_page* heap = list_get(heap_pages, i);
-		if (heap->free_size <= space && !heap->wasFreed)
+		if (heap->free_size >= space && !heap->wasFreed)
 			return heap->page_n;
 	}
 	return -1;
@@ -619,6 +619,7 @@ HeapMetadata* read_HeapMetadata(char* page, int offset) {
 
 int write_HeapMetadata(HeapMetadata* n_heap, int offset, char* page) {
 	int i, j = 0;
+
 	page[offset] = n_heap->isFree ? '1' : '0';
 	char* aux = string_new();
 	aux = string_itoa(n_heap->size);
@@ -652,6 +653,7 @@ int it_fits_malloc(char* full_page, int space_occupied) {
 				HeapMetadata* n_heap = malloc(sizeof(HeapMetadata));
 				n_heap->isFree = true;
 				n_heap->size = actual_heap->size - space_occupied - heap_metadata_size;
+				//if(n_heap->size != 0) n_heap->size -= heap_metadata_size;
 				write_HeapMetadata(n_heap, offset + heap_metadata_size + space_occupied, full_page);
 				//free(n_heap);
 			}
@@ -704,7 +706,7 @@ int free_heap(char* full_page, int pos) {
 }
 
 int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
-	runFunction(mem_socket, "i_add_pages_to_program", 2, string_itoa(pid), string_itoa(1));
+	runFunction(mem_socket, "i_add_pages_to_program", 2, string_itoa(pid), string_itoa(page));
 	wait_response(&mem_response);
 	if (memory_response == NO_SE_PUEDEN_RESERVAR_RECURSOS) {
 		return NO_SE_PUEDEN_RESERVAR_RECURSOS;
@@ -728,7 +730,7 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	it_fits_malloc(mem_read_buffer, space);
 	runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid), string_itoa(page), string_itoa(0), string_itoa(mem_page_size), mem_read_buffer);
 	wait_response(&mem_response);
-	wait_response(&mem_response); //TODO Con dos locks anda no se porque ¯\_(ツ)_/¯
+	//wait_response(&mem_response); //TODO Con dos locks anda no se porque ¯\_(ツ)_/¯
 	log_debug(logger, "add_heap_page: mem_offset_abs '%d'", mem_offset_abs);
 	return (mem_offset_abs + heap_metadata_size);
 }
@@ -747,7 +749,7 @@ void occupy_space(int pid, int page, int space, bool freed) {
 
 int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 	if (size > mem_page_size - (heap_metadata_size * 2))
-		return NO_SE_PUEDEN_RESERVAR_RECURSOS; //directamente lo rechazo porque excede el tamanio maximo del alloc
+		return RESERVAR_MAS_MEMORIA_TAMANIO_PAGINA; //directamente lo rechazo porque excede el tamanio maximo del alloc
 
 	pcb* pcb_malloc = find_pcb_by_pid(pid);
 	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
@@ -775,7 +777,7 @@ int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 				}
 			}
 		}
-		t_heap_page* last_page = list_get(heap_manage->heap_pages, list_size(heap_manage->heap_pages));
+		t_heap_page* last_page = list_get(heap_manage->heap_pages, list_size(heap_manage->heap_pages) -1);
 		return add_heap_page(pid, heap_manage, (last_page->page_n) + 1, size);
 	}
 }
@@ -786,7 +788,9 @@ void free_memory(int pid, int pointer) {
 	runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page_from_pointer), string_itoa(0), string_itoa(mem_page_size));
 	wait_response(&mem_response);
 
-	int freed_space = free_heap(mem_read_buffer, pointer - heap_metadata_size);
+	int frame_c = pointer / mem_page_size;
+	int offset_rel = pointer - mem_page_size* frame_c;
+	int freed_space = free_heap(mem_read_buffer, offset_rel - heap_metadata_size);
 
 	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
 	heap_manage->heap_stats.free_c++;
@@ -904,6 +908,8 @@ void init_kernel(t_config* config) {
 
 	pthread_mutex_init(&mem_response, NULL);
 	pthread_mutex_init(&fs_mutex, NULL);
+
+	pthread_mutex_lock(&mem_response);
 
 	port_con = config_get_int_value(config, PUERTO_PROG);
 	port_cpu = config_get_int_value(config, PUERTO_CPU);

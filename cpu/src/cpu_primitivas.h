@@ -52,6 +52,4 @@ AnSISOP_kernel kernel_functions;
 
 t_stack* stack_create();
 
-t_puntero* malloc_pointer;
-
 #endif /* CPU_PRIMITIVAS_H_ */

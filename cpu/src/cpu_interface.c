@@ -88,6 +88,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(n_page), string_itoa(n_offset), string_itoa(n_size));
 		wait_response();
 
+		log_debug(logger, "INSTRUCCION LEIDA: %s", mem_buffer);
 		analizadorLinea(mem_buffer, &functions, &kernel_functions);	//TODO aca falla. No pude encontrar por que
 		pcb_actual->pc++;
 		acum_percent += percent_per_instruction;
@@ -104,13 +105,13 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 void kernel_response_malloc_pointer(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_malloc_pointer: malloc_pointer=%s", args[0]);
 
-	*malloc_pointer = atoi(args[0]);
+	//*malloc_pointer = atoi(args[0]);
 	signal_response();
 }
 void kernel_response_file(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_file: kernel_file_descriptor=%s", args[0]);
 
-	kernel_file_descriptor = atoi(args[0]);
+	//kernel_file_descriptor = atoi(args[0]);
 	signal_response();
 }
 void kernel_response(socket_connection* connection, char** args) {
@@ -119,11 +120,11 @@ void kernel_response(socket_connection* connection, char** args) {
 void kernel_response_validate_file(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_file: kernel_file_descriptor=%s", args[0]);
 
-	validate_file = atoi(args[0]);
+	//validate_file = atoi(args[0]);
 	signal_response();
 }
 void kernel_response_read_file(socket_connection* connection, char** args) {
 	read_info = args[0];
-	kernel_file_descriptor = atoi(args[1]);
+	//kernel_file_descriptor = atoi(args[1]);
 	signal_response();
 }
