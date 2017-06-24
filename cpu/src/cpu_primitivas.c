@@ -384,12 +384,12 @@ void kernel_signal(t_nombre_semaforo identificador_semaforo) {
 t_puntero kernel_reservar(t_valor_variable espacio) {
 	pcb_actual->statistics.op_priviliges++;
 
-	runFunction(kernel_socket, "|PRIMITIVA| cpu_malloc", 2, string_itoa(espacio),
+	runFunction(kernel_socket, "cpu_malloc", 2, string_itoa(espacio),
 			string_itoa(pcb_actual->pid));
 
 	int malloc_pointer = atoi(receive_dynamic_message(kernel_socket));
 
-	log_debug(logger, "CPU Reservar '%d' bytes en '%d'", espacio,
+	log_debug(logger, "|PRIMITIVA| Reservar '%d' bytes en '%d'", espacio,
 			malloc_pointer);
 	if (malloc_pointer < 0) {
 		pcb_actual->exit_code = NO_SE_PUEDEN_RESERVAR_RECURSOS;

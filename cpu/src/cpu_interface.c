@@ -102,11 +102,9 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		acum_percent += percent_per_instruction;
 		sleep(quantum_sleep / 1000);
 	}
-
 	printf("[ %%%.2f ]\n\n", acum_percent);
-
+	printf("Finished executing.\n\n");
 	log_debug(logger, "cpu_task_finished");
-
 	runFunction(kernel_socket, "cpu_task_finished", 2, pcb_to_string(pcb_actual), string_itoa(finished));
 }
 void kernel_response_malloc_pointer(socket_connection* connection, char** args) {
