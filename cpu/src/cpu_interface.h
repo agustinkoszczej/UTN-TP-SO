@@ -28,6 +28,8 @@ void server_connectionClosed(socket_connection * connection);
 void memory_identify(socket_connection* connection, char** args);
 void memory_response_read_bytes_from_page(socket_connection* connection, char** args);
 void memory_response_store_bytes_in_page(socket_connection* connection, char** args);
+void memory_response_get_frame_from_pid_and_page(socket_connection* connection, char** args);
+void memory_response_get_page_from_pointer(socket_connection* connection, char** args);
 
 /*
  * KERNEL
@@ -73,10 +75,5 @@ void kernel_cerrar(t_descriptor_archivo descriptor_archivo);
 void kernel_moverCursor(t_descriptor_archivo descriptor_archivo, t_valor_variable posicion);
 void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion, t_valor_variable tamanio);
 void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion, t_valor_variable tamanio);
-
-AnSISOP_funciones functions;
-AnSISOP_kernel kernel_functions;
-
-t_stack* stack_create();
 
 #endif /* CPU_INTERFACE_H_ */

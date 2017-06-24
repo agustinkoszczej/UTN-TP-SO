@@ -25,12 +25,22 @@ void memory_response_read_bytes_from_page(socket_connection* connection, char** 
 
 	mem_buffer = string_new();
 	string_append(&mem_buffer, args[0]);
-	signal_response();
+	signal_response(&planning_mutex);
 }
 void memory_response_store_bytes_in_page(socket_connection* connection, char** args) {
-	log_debug(logger, "memory_response_store_bytes_in_page: void");
 
-	signal_response();
+	signal_response(&planning_mutex);
+}
+void memory_response_get_frame_from_pid_and_page(socket_connection* connection, char** args){
+	frame_from_pid_and_page = atoi(args[0]);
+	signal_response(&planning_mutex);
+}
+
+void memory_response_get_page_from_pointer(socket_connection* connection, char** args) {
+	log_debug(logger, "memory_response_get_page_from_pointer: page_from_pointer=%s", args[0]);
+
+	page_from_pointer = atoi(args[0]);
+	signal_response(&planning_mutex);
 }
 
 /*
@@ -39,13 +49,13 @@ void memory_response_store_bytes_in_page(socket_connection* connection, char** a
 void kernel_response_set_shared_var(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_set_shared_var: void");
 
-	signal_response();
+	signal_response(&planning_mutex);
 }
 void kernel_response_get_shared_var(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_get_shared_var: buffer=%s", args[0]);
 
 	kernel_shared_var = atoi(args[0]);
-	signal_response();
+	signal_response(&planning_mutex);
 }
 void kernel_quantum_page_stack_size(socket_connection* connection, char** args) {
 	int mem_page_size = atoi(args[0]);
@@ -68,10 +78,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_receive_pcb: planning_alg=%d, quantum=%d, pcb*", planning_alg, quantum);
 
 	double percent_per_instruction = 100.0f / (double) (list_size(pcb_actual->i_code) - pcb_actual->pc);
-	double acum_percent = 0;
-
-	pthread_mutex_init(&planning_mutex, NULL);
-	pthread_mutex_lock(&planning_mutex);
+	double acum_percent = percent_per_instruction * pcb_actual->pc;
 
 	printf("> EXECUTING_PID: %d\n", pcb_actual->pid);
 	while ((planning_alg == FIFO || quantum-- >= 0) && !finished) {
@@ -85,8 +92,9 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		int n_offset = start - frame_size * n_page;
 		int n_size = offset;
 
+		log_debug(logger, "\ni_read_bytes_from_page: pid: '%d', n_page: '%d', n_offset: '%d', n_size: '%d'", pid, n_page, n_offset, n_size);
 		runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(n_page), string_itoa(n_offset), string_itoa(n_size));
-		wait_response();
+		wait_response(&planning_mutex);
 
 		log_debug(logger, "INSTRUCCION LEIDA: %s", mem_buffer);
 		analizadorLinea(mem_buffer, &functions, &kernel_functions);	//TODO aca falla. No pude encontrar por que
@@ -95,8 +103,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		sleep(quantum_sleep / 1000);
 	}
 
-	if (acum_percent == 100)
-		printf("[ %%%.2f ]\n\n", acum_percent);
+	printf("[ %%%.2f ]\n\n", acum_percent);
 
 	log_debug(logger, "cpu_task_finished");
 
@@ -106,25 +113,25 @@ void kernel_response_malloc_pointer(socket_connection* connection, char** args) 
 	log_debug(logger, "kernel_response_malloc_pointer: malloc_pointer=%s", args[0]);
 
 	//*malloc_pointer = atoi(args[0]);
-	signal_response();
+	signal_response(&planning_mutex);
 }
 void kernel_response_file(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_file: kernel_file_descriptor=%s", args[0]);
 
 	//kernel_file_descriptor = atoi(args[0]);
-	signal_response();
+	signal_response(&planning_mutex);
 }
 void kernel_response(socket_connection* connection, char** args) {
-	signal_response();
+	signal_response(&planning_mutex);
 }
 void kernel_response_validate_file(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_file: kernel_file_descriptor=%s", args[0]);
 
 	//validate_file = atoi(args[0]);
-	signal_response();
+	signal_response(&planning_mutex);
 }
 void kernel_response_read_file(socket_connection* connection, char** args) {
 	read_info = args[0];
 	//kernel_file_descriptor = atoi(args[1]);
-	signal_response();
+	signal_response(&planning_mutex);
 }

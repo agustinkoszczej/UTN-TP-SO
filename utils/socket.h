@@ -23,7 +23,7 @@ typedef struct {
 	void (*fn_connectionClosed)();
 } args_receiptMessage;
 
-char* receipt_dynamic_message(int socket);
+char* receive_dynamic_message(int socket);
 void send_dynamic_message(int socket, char* msj);
 
 void receiptMessage(void * arguments);

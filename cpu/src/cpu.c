@@ -51,15 +51,15 @@ int vars_in_stack() {
 	return vars_c;
 }
 
-void wait_response() {
-	struct timespec abs_time;
+void wait_response(pthread_mutex_t* mutex) {
+	/*struct timespec abs_time;
 	clock_gettime(CLOCK_REALTIME, &abs_time);
-	abs_time.tv_sec += (double) mem_delay / 1000.0f + (double) quantum_sleep / 1000.0f + .5f;
-	pthread_mutex_timedlock(&planning_mutex, &abs_time);
+	abs_time.tv_sec += (double) mem_delay / 1000.0f + (double) quantum_sleep / 1000.0f + .5f;*/
+	pthread_mutex_lock(mutex);
 }
 
-void signal_response() {
-	pthread_mutex_unlock(&planning_mutex);
+void signal_response(pthread_mutex_t* mutex) {
+	pthread_mutex_unlock(mutex);
 }
 
 char* get_flag(t_banderas flags) {
@@ -84,6 +84,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "memory_retard", &memory_retard);
 	dictionary_put(fns, "memory_response_read_bytes_from_page", &memory_response_read_bytes_from_page);
 	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
+	dictionary_put(fns, "memory_response_get_frame_from_pid_and_page", &memory_response_get_frame_from_pid_and_page);
 
 	dictionary_put(fns, "kernel_receive_pcb", &kernel_receive_pcb);
 	dictionary_put(fns, "kernel_quantum_page_stack_size", &kernel_quantum_page_stack_size);
@@ -93,6 +94,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "kernel_response_validate_file", &kernel_response_validate_file);
 	dictionary_put(fns, "kernel_response", &kernel_response);
 	dictionary_put(fns, "kernel_response_read_file", &kernel_response_read_file);
+	dictionary_put(fns, "memory_response_get_page_from_pointer", &memory_response_get_page_from_pointer);
 
 	log_debug(logger, "create_function_dictionary: void");
 }
@@ -131,6 +133,7 @@ void init_cpu(t_config* config) {
 	log_debug(logger, "init_cpu: void");
 
 	pthread_mutex_init(&mx_main, NULL);
+	pthread_mutex_init(&planning_mutex, NULL);
 
 	connect_to_server(config, MEMORY);
 	connect_to_server(config, KERNEL);
@@ -160,6 +163,8 @@ void init_cpu(t_config* config) {
 	kernel_functions.AnSISOP_escribir = kernel_escribir;
 	kernel_functions.AnSISOP_leer = kernel_leer;
 
+
+	pthread_mutex_lock(&planning_mutex);
 	pthread_mutex_lock(&mx_main);
 	pthread_mutex_lock(&mx_main);
 
@@ -167,6 +172,7 @@ void init_cpu(t_config* config) {
 }
 
 int main(int argc, char *argv[]) {
+
 	clear_screen();
 	t_config* config = malloc(sizeof(t_config));
 

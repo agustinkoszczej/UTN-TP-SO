@@ -31,8 +31,8 @@ void i_read_bytes_from_page(socket_connection* connection, char** args) {
 
 	char* buffer = read_bytes(pid, page, offset, size);
 
-	log_debug(logger, "memory_response_read_bytes_from_page: '%s'", buffer);
 	runFunction(connection->socket, "memory_response_read_bytes_from_page", 1, buffer);
+	log_debug(logger, "memory_response_read_bytes_from_page: '%s'", buffer);
 }
 void i_store_bytes_in_page(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -42,8 +42,9 @@ void i_store_bytes_in_page(socket_connection* connection, char** args) {
 	char* buffer = args[4];
 
 	int offset_abs = store_bytes(pid, page, offset, size, buffer);
-	log_debug(logger, "i_store_bytes_in_page: '%d'", offset_abs);
+
 	runFunction(connection->socket, "memory_response_store_bytes_in_page", 2, string_itoa(NO_ERRORES), string_itoa(offset_abs));
+	log_debug(logger, "i_store_bytes_in_page: socket: '%d', pid: '%d', page: '%d', offset_rel: '%d', offset_abs: '%d', size: '%d'\nbuffer: '%s'", connection->socket, pid, page, offset, offset_abs, size, buffer);
 }
 void i_add_pages_to_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -95,6 +96,26 @@ void i_get_page_from_pointer(socket_connection* connection, char** args) {
 	int page = get_page_from_pointer(pointer);
 	log_debug(logger, "i_get_page_from_pointer: '%d'", page);
 	runFunction(connection->socket, "memory_response_get_page_from_pointer", 1, string_itoa(page));
+}
+
+void i_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
+
+	int pid = atoi(args[0]);
+	int page = atoi(args[1]);
+
+	//TODO y aqui llamaria a la funcion de Hashing...SI TUVIERA UNA!!! (*inserte meme de papa de Timy) xd
+	int i, frame = -1;
+	for(i=0;i<list_size(adm_list);i++){
+		t_adm_table* adm_table = list_get(adm_list, i);
+
+		if(adm_table->pid == pid && adm_table->pag == page){
+			frame = adm_table->frame;
+			break;
+		}
+	}
+	//send_dynamic_message(connection->socket, string_itoa(frame));
+	runFunction(connection->socket, "memory_response_get_frame_from_pid_and_page", 1, string_itoa(frame));
+	log_debug(logger, "i_get_frame_from_pid_and_page: '%d'", frame);
 }
 
 /*

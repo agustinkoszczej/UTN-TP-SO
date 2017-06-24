@@ -36,7 +36,7 @@
 								<option id="gnu.c.link.option.libs.1896302640" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="utils"/>
 									<listOptionValue builtIn="false" value="pthread"/>
-									<listOptionValue builtIn="false" value="commons"/>
+									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="commons"/>
 								</option>
 								<option id="gnu.c.link.option.paths.2103019489" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/utils/Debug}&quot;"/>

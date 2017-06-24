@@ -50,6 +50,4 @@ void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 AnSISOP_funciones functions;
 AnSISOP_kernel kernel_functions;
 
-t_stack* stack_create();
-
 #endif /* CPU_PRIMITIVAS_H_ */

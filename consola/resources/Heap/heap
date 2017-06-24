@@ -5,7 +5,7 @@ begin
         #a va a tener el valor de la posicion de memoria en el heap
     *a = 5
         # pondría al principio de ese cachito de stack el numero 5 en los primeros 4 bytes
-    print n *a
+    print n a
         #deberia imprimir 20
     b = 3 + *a
     *b = 10

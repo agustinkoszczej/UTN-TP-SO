@@ -37,7 +37,8 @@
 char* mem_buffer;
 int frame_size;
 int stack_size;
-
+int frame_from_pid_and_page;
+int page_from_pointer;
 /*
  * KERNEL
  */
@@ -56,8 +57,8 @@ t_log* logger;
 int vars_in_stack();
 int calculate_page_for_var();
 int calculate_offset_for_var();
-void wait_response();
-void signal_response();
+void wait_response(pthread_mutex_t* mutex);
+void signal_response(pthread_mutex_t* mutex);
 
 char* get_flag(t_banderas flags);
 

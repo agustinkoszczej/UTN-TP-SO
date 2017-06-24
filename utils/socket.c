@@ -35,7 +35,7 @@ void send_dynamic_message(int socket, char* msj) {
 	send_message(socket, msj, string_length(msj)); //LE ENVIO EL MENSAJE DE ESE TAMAÑO
 }
 
-char* receipt_message(int socket, int msg_size, int criterio) {
+char* receive_message(int socket, int msg_size, int criterio) {
 	char* buffer = malloc(msg_size); //TODO ver que no se pase de vergas con los mallocs
 	//Criterio = 0 -> No-Bloqueante
 	//Criterio = MSG_WAITALL -> Bloqueante
@@ -49,19 +49,19 @@ char* receipt_message(int socket, int msg_size, int criterio) {
 	buffer[msg_size] = '\0';
 	return buffer;
 }
-char* receipt_message_with_waiting(int socket, int msg_size) {
-	return receipt_message(socket, msg_size, MSG_WAITALL); //BLOQUEANTE
+char* receive_message_with_waiting(int socket, int msg_size) {
+	return receive_message(socket, msg_size, MSG_WAITALL); //BLOQUEANTE
 }
 
-int receipt_message_size(int socket) {
-	return atoi(receipt_message_with_waiting(socket, sizeof(int)));
+int receive_message_size(int socket) {
+	return atoi(receive_message_with_waiting(socket, sizeof(int)));
 }
 
-char* receipt_dynamic_message(int socket) {
-	int next_msg_size = receipt_message_size(socket);
+char* receive_dynamic_message(int socket) {
+	int next_msg_size = receive_message_size(socket);
 
 	if (next_msg_size != 0) {
-		return receipt_message_with_waiting(socket, next_msg_size);
+		return receive_message_with_waiting(socket, next_msg_size);
 	}
 	return "ERROR";
 }

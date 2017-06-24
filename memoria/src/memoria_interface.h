@@ -22,6 +22,7 @@ pthread_mutex_t cpu_sockets_mutex;
 
 void kernel_stack_size(socket_connection* connection, char** args);
 void i_get_page_from_pointer(socket_connection* connection, char** args);
+void i_get_frame_from_pid_and_page(socket_connection* connection, char** args);
 
 /*
  * INTERFACE

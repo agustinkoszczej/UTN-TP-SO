@@ -323,6 +323,9 @@ void init_console() {
 	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS), "Pages overflow.");
 	dictionary_put(message_map, string_itoa(STACK_OVERFLOW), "Stack overflow.");
 	dictionary_put(message_map, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE), "File not opened.");
+
+	//dictionary_put(message_map, string_itoa(ERROR_SINTAXIS), "Syntax error."); //FIXME no se actualizan los exits codes :c
+
 	log_debug(logger, "init_console: void");
 }
 

@@ -16,6 +16,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "i_finish_program", &i_finish_program);
 	dictionary_put(fns, "i_free_page", &i_free_page);
 	dictionary_put(fns, "i_get_page_from_pointer", &i_get_page_from_pointer);
+	dictionary_put(fns, "i_get_frame_from_pid_and_page", &i_get_frame_from_pid_and_page);
 
 	dictionary_put(fns, "kernel_stack_size", &kernel_stack_size);
 }
