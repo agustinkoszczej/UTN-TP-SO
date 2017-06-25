@@ -108,7 +108,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		string_trim(&mem_buffer);
 		log_debug(logger, "INSTRUCCION LEIDA: %s", mem_buffer);
 		printf("Executing: %s\n", mem_buffer);
-		//analizadorLinea(mem_buffer, &functions, &kernel_functions);
+		analizadorLinea(mem_buffer, &functions, &kernel_functions);
 		pcb_actual->pc++;
 		pcb_actual->statistics.cycles++;
 		sleep(quantum_sleep / 1000);
