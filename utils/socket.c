@@ -58,6 +58,7 @@ char* receive_message(int socket, int msg_size, int criterio) {
 		printf("\nSocket %d disconnected\n", socket);
 		perror("Cause"); //PERROR ME MUESTRA EL MOTIVO
 		close(socket);
+		exit(1);
 	}
 	buffer[msg_size] = '\0';
 	return buffer;

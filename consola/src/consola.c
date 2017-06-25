@@ -97,7 +97,8 @@ void new_message(char* text, int pid) {
 	message->time = temporal_get_string_time();
 
 	t_process* process = find_process_by_pid(pid);
-	process->c_message++;
+	if (process != NULL)
+		process->c_message++;
 
 	pthread_mutex_lock(&messages_list_mutex);
 	list_add(messages_list, message);

@@ -198,7 +198,7 @@ t_valor_variable cpu_obtenerValorCompartida(t_nombre_compartida variable) {
  * @return	Valor que se asigno
  */
 t_valor_variable cpu_asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
-	runFunction(kernel_socket, "cpu_set_shared_var", 2, variable, valor);
+	runFunction(kernel_socket, "cpu_set_shared_var", 2, variable, string_itoa(valor));
 	receive_dynamic_message(kernel_socket);
 
 	log_debug(logger, "|PRIMITIVA| Asignar Valor Compartida '%d'", valor);

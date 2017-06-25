@@ -59,8 +59,19 @@ int quantum;
 int stack_size;
 int quantum_sleep;
 int planning_alg;
-t_dictionary* shared_vars;
-t_dictionary* sem_ids;
+
+typedef struct {
+	char* var;
+	int value;
+} t_shared_var;
+t_list* shared_vars;
+
+typedef struct {
+	char* id;
+	int value;
+	char* blocked_pids;
+} t_sem;
+t_list* sem_ids;
 
 t_queue* new_queue;
 t_list* ready_list;

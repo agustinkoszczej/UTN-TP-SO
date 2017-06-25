@@ -87,8 +87,13 @@ void cpu_received_page_stack_size(socket_connection* connection, char** args) {
 void cpu_get_shared_var(socket_connection* connection, char** args) {
 	char* var_name = args[0];
 	pthread_mutex_lock(&shared_vars_mutex);
-	int* value = dictionary_get(shared_vars, var_name);
-	send_dynamic_message(connection->socket, string_itoa(*value));
+	bool find_var(void* s) {
+		t_shared_var* shared = s;
+		return !strcmp(shared->var, var_name);
+	}
+
+	t_shared_var* shared = list_find(shared_vars, &find_var);
+	send_dynamic_message(connection->socket, string_itoa(shared->value));
 	pthread_mutex_unlock(&shared_vars_mutex);
 }
 void cpu_set_shared_var(socket_connection* connection, char** args) {
@@ -98,11 +103,15 @@ void cpu_set_shared_var(socket_connection* connection, char** args) {
 	}
 
 	char* var_name = args[0];
-	int* var_value = malloc(sizeof(int));
-	*var_value = atoi(args[1]);
+	int var_value = atoi(args[1]);
 	pthread_mutex_lock(&shared_vars_mutex);
-	dictionary_remove_and_destroy(shared_vars, var_name, &free_var);
-	dictionary_put(shared_vars, var_name, var_value);
+	bool find_var(void* s) {
+		t_shared_var* shared = s;
+		return !strcmp(shared->var, var_name);
+	}
+
+	t_shared_var* shared = list_find(shared_vars, &find_var);
+	shared->value = var_value;
 	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
 	pthread_mutex_unlock(&shared_vars_mutex);
 }
@@ -144,6 +153,17 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	short_planning();
 }
 
+char* add_blocked_process(char* blocked_pids, int process_pid) {
+	char** arr = string_get_string_as_array(blocked_pids);
+	char* res = string_new();
+	int i = 0;
+	while (arr[i] != NULL)
+		string_append_with_format(&res, "%s,", arr[i++]);
+	string_append_with_format(&res, "[%d]", process_pid);
+
+	return res;
+}
+
 void cpu_wait_sem(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&sems_mutex);
 	void free_sem(void* v) {
@@ -154,25 +174,55 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 	char* id_sem = args[0];
 	string_trim(&id_sem);
 	t_cpu* _cpu = find_cpu_by_socket(connection->socket);
-	int* process_pid = malloc(sizeof(int));
-	*process_pid = _cpu->xpid;
+	int process_pid = _cpu->xpid;
 	pcb *process = find_pcb_by_pid(_cpu->xpid);
 
-	sem_status *sem_curr = dictionary_get(sem_ids, id_sem);
+	bool find_sem(void* s) {
+		t_sem* sem = s;
+		return !strcmp(sem->id, id_sem);
+	}
+
+	t_sem* sem_curr = list_find(sem_ids, &find_sem);
 	sem_curr->value--;
 
 	bool is_locked = false;
 	if (sem_curr->value < 0) {
-		queue_push(sem_curr->blocked_pids, process_pid);
-		move_to_list(process, BLOCK_LIST);
+		char* temp = add_blocked_process(sem_curr->blocked_pids, process_pid);
+		sem_curr->blocked_pids = string_new();
+		string_append(&sem_curr->blocked_pids, temp);
+		process->state = BLOCK_LIST;
 		is_locked = true;
 	}
 
-	dictionary_remove(sem_ids, id_sem);
-	dictionary_put(sem_ids, id_sem, sem_curr);
-
-	pthread_mutex_unlock(&sems_mutex);
 	send_dynamic_message(connection->socket, string_itoa(is_locked));
+	pthread_mutex_unlock(&sems_mutex);
+}
+
+int get_last(char* blocked_pids) {
+	char** arr = string_get_string_as_array(blocked_pids);
+
+	int i = 0;
+	while (arr[i] != NULL)
+		if (arr[++i] == NULL)
+			return atoi(arr[--i]);
+	return -1;
+}
+
+char* remove_last(char* blocked_pids) {
+	char** arr = string_get_string_as_array(blocked_pids);
+	char* res = string_new();
+
+	int i = 0;
+	while (arr[i] != NULL)
+		if (arr[++i] != NULL)
+			string_append_with_format(&res, "%s,", arr[--i]);
+		else
+			break;
+
+	if (string_length(res) > 0)
+		res = string_substring_until(res, string_length(res) - 1);
+	string_append_with_format(&res, "[%s]", res);
+	return res;
 }
 
 void cpu_signal_sem(socket_connection* connection, char** args) {
@@ -185,20 +235,28 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 	char* id_sem = args[0];
 	string_trim(&id_sem);
 
-	sem_status *sem_curr = dictionary_get(sem_ids, id_sem);
+	bool find_sem(void* s) {
+		t_sem* sem = s;
+		return !strcmp(sem->id, id_sem);
+	}
+
+	t_sem* sem_curr = list_find(sem_ids, &find_sem);
+
 	sem_curr->value++;
 
 	if (sem_curr->value >= 0) {
-		pcb *process = queue_pop(sem_curr->blocked_pids);
-		if (process != NULL)
-			move_to_list(process, READY_LIST);
+		int process = get_last(sem_curr->blocked_pids);
+		char* temp = remove_last(sem_curr->blocked_pids);
+		sem_curr->blocked_pids = string_new();
+		string_append(&sem_curr->blocked_pids, temp);
+		if (process >= 0) {
+			pcb* _pcb = find_pcb_by_pid(process);
+			move_to_list(_pcb, READY_LIST);
+		}
 	}
 
-	dictionary_remove(sem_ids, id_sem);
-	dictionary_put(sem_ids, id_sem, sem_curr);
-
-	pthread_mutex_unlock(&sems_mutex);
 	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
+	pthread_mutex_unlock(&sems_mutex);
 }
 
 void cpu_malloc(socket_connection* connection, char** args) {
@@ -386,6 +444,7 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 	}
 
 	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
+	pthread_mutex_unlock(&console_mutex);
 }
 void memory_page_size(socket_connection* connection, char** args) {
 	int page_size = atoi(args[0]);

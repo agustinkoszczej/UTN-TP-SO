@@ -809,7 +809,6 @@ void free_memory(int pid, int pointer) {
 	int offset_rel = pointer - mem_page_size * frame_c;
 	int freed_space = free_heap(mem_read_buffer, offset_rel - heap_metadata_size);
 
-	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
 	t_heap_stats* heap_stats = find_heap_stats_by_pid(pid);
 	heap_stats->free_c++;
 	heap_stats->free_b += freed_space;
@@ -936,27 +935,27 @@ void init_kernel(t_config* config) {
 	stack_size = config_get_int_value(config, STACK_SIZE);
 	quantum_sleep = config_get_int_value(config, QUANTUM_SLEEP);
 
-	shared_vars = dictionary_create();
+	shared_vars = list_create();
 	char** global_vars_arr = config_get_array_value(config, SHARED_VARS);
 	int i = 0;
 	while (global_vars_arr[i] != NULL) {
-		char* temp = global_vars_arr[i];
-		int* valorVariable = malloc(sizeof(int));
-		*valorVariable = 0;
-		dictionary_put(shared_vars, string_substring_from(temp, 1), valorVariable);
+		t_shared_var* shared_var = malloc(sizeof(t_shared_var));
+		shared_var->var = string_substring_from(global_vars_arr[i], 1);
+		shared_var->value = 0;
+		list_add(shared_vars, shared_var);
 		i++;
 	}
 
-	sem_ids = dictionary_create();
+	sem_ids = list_create();
 	char** sem_ids_arr = config_get_array_value(config, SEM_IDS);
 	char** sem_vals_arr = config_get_array_value(config, SEM_INIT);
 	i = 0;
 	while (sem_ids_arr[i] != NULL) {
-
-		sem_status *sems = malloc(sizeof(sem_status));
-		sems->value = atoi(sem_vals_arr[i]);
-		sems->blocked_pids = queue_create();
-		dictionary_put(sem_ids, sem_ids_arr[i], sems);
+		t_sem* sem = malloc(sizeof(t_sem));
+		sem->id = sem_ids_arr[i];
+		sem->value = atoi(sem_vals_arr[i]);
+		sem->blocked_pids = "[]";
+		list_add(sem_ids, sem);
 		i++;
 	}
 
