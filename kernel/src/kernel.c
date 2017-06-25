@@ -923,6 +923,7 @@ void init_kernel(t_config* config) {
 	pthread_mutex_init(&planning_mutex, NULL);
 	pthread_mutex_init(&process_in_memory_mutex, NULL);
 	pthread_mutex_init(&shared_vars_mutex, NULL);
+	pthread_mutex_init(&sems_mutex, NULL);
 
 	pthread_mutex_init(&mem_response, NULL);
 	pthread_mutex_init(&fs_mutex, NULL);

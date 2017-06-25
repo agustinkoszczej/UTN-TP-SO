@@ -179,7 +179,7 @@ void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
  */
 t_valor_variable cpu_obtenerValorCompartida(t_nombre_compartida variable) {
 	runFunction(kernel_socket, "cpu_get_shared_var", 1, variable);
-	wait_response(&planning_mutex);
+	kernel_shared_var = atoi(receive_dynamic_message(kernel_socket));
 
 	log_debug(logger, "|PRIMITIVA| Obtener Valor Compartida '%d'", kernel_shared_var);
 
@@ -199,7 +199,7 @@ t_valor_variable cpu_obtenerValorCompartida(t_nombre_compartida variable) {
  */
 t_valor_variable cpu_asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
 	runFunction(kernel_socket, "cpu_set_shared_var", 2, variable, valor);
-	wait_response(&planning_mutex);
+	receive_dynamic_message(kernel_socket);
 
 	log_debug(logger, "|PRIMITIVA| Asignar Valor Compartida '%d'", valor);
 
@@ -218,7 +218,7 @@ t_valor_variable cpu_asignarValorCompartida(t_nombre_compartida variable, t_valo
 void cpu_irAlLabel(t_nombre_etiqueta t_nombre_etiqueta) {
 	if (dictionary_has_key(pcb_actual->i_label, t_nombre_etiqueta)) {
 		int* pos_label = dictionary_get(pcb_actual->i_label, t_nombre_etiqueta);
-		pcb_actual->pc = *pos_label;
+		pcb_actual->pc = *pos_label - 1;
 	} else {
 		pcb_actual->exit_code = ERROR_SIN_DEFINIR;
 		cpu_finalizar();
@@ -357,7 +357,10 @@ void kernel_wait(t_nombre_semaforo identificador_semaforo) {
 
 	log_debug(logger, "|PRIMITIVA| Wait: Semaforo \"%s\"", identificador_semaforo);
 	runFunction(kernel_socket, "cpu_wait_sem", 1, identificador_semaforo);
-	wait_response(&planning_mutex);
+	bool is_locked = atoi(receive_dynamic_message(kernel_socket));
+
+	if (is_locked)
+		cpu_finalizar();
 }
 /*
  * SIGNAL
@@ -374,7 +377,7 @@ void kernel_signal(t_nombre_semaforo identificador_semaforo) {
 
 	log_debug(logger, "|PRIMITIVA| Signal: Semaforo \"%s\"", identificador_semaforo);
 	runFunction(kernel_socket, "cpu_signal_sem", 1, identificador_semaforo);
-	wait_response(&planning_mutex);
+	receive_dynamic_message(kernel_socket);
 }
 
 /*

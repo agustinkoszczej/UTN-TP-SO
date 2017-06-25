@@ -163,6 +163,7 @@ pthread_mutex_t planning_mutex;
 pthread_mutex_t cpu_mutex;
 pthread_mutex_t process_in_memory_mutex;
 pthread_mutex_t shared_vars_mutex;
+pthread_mutex_t sems_mutex;
 
 pthread_mutex_t mem_response;
 

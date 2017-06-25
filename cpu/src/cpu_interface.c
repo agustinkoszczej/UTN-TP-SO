@@ -82,13 +82,8 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	finished = false;
 	log_debug(logger, "kernel_receive_pcb: planning_alg=%d, quantum=%d, pcb*", planning_alg, quantum);
 
-	// TODO Muy lindo el porcentaje, pero vamos a tener que sacarlo porque ahora los programas no son lineales, pueden ser recursivos y eternos
-	double percent_per_instruction = 100.0f / (double) (list_size(pcb_actual->i_code) - pcb_actual->pc);
-	double acum_percent = percent_per_instruction * pcb_actual->pc;
-
 	printf("> EXECUTING_PID: %d\n", pcb_actual->pid);
 	while ((planning_alg == FIFO || quantum-- >= 0) && !finished) {
-		printf("[ %%%.2f ]\n", acum_percent);
 		t_intructions* i_code = list_get(pcb_actual->i_code, pcb_actual->pc);
 		int start = i_code->start;
 		int offset = i_code->offset;
@@ -102,14 +97,14 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(n_page), string_itoa(n_offset), string_itoa(n_size));
 		wait_response(&planning_mutex);
 
+		string_trim(&mem_buffer);
 		log_debug(logger, "INSTRUCCION LEIDA: %s", mem_buffer);
+		printf("Executing: %s\n", mem_buffer);
 		analizadorLinea(mem_buffer, &functions, &kernel_functions);	//TODO aca falla. No pude encontrar por que
 		pcb_actual->pc++;
 		pcb_actual->statistics.cycles++;
-		acum_percent += percent_per_instruction;
 		sleep(quantum_sleep / 1000);
 	}
-	printf("[ %%%.2f ]\n\n", acum_percent);
 	printf("Finished executing.\n\n");
 	log_debug(logger, "cpu_task_finished");
 	runFunction(kernel_socket, "cpu_task_finished", 2, pcb_to_string(pcb_actual), string_itoa(finished));

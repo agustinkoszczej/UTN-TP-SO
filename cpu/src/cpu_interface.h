@@ -44,7 +44,6 @@ void kernel_response_read_file(socket_connection* connection, char** args);
 void memory_retard(socket_connection* connection, char** args);
 void kernel_response(socket_connection* connection, char** args);
 
-
 bool finished;
 
 /*

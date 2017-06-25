@@ -87,11 +87,9 @@ void cpu_received_page_stack_size(socket_connection* connection, char** args) {
 void cpu_get_shared_var(socket_connection* connection, char** args) {
 	char* var_name = args[0];
 	pthread_mutex_lock(&shared_vars_mutex);
-	char* temp = dictionary_get(shared_vars, var_name);
-	int value = atoi(temp);	//TODO
+	int* value = dictionary_get(shared_vars, var_name);
+	send_dynamic_message(connection->socket, string_itoa(*value));
 	pthread_mutex_unlock(&shared_vars_mutex);
-
-	runFunction(connection->socket, "kernel_response_get_shared_var", 1, string_itoa(value));
 }
 void cpu_set_shared_var(socket_connection* connection, char** args) {
 	void free_var(void* v) {
@@ -105,9 +103,8 @@ void cpu_set_shared_var(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&shared_vars_mutex);
 	dictionary_remove_and_destroy(shared_vars, var_name, &free_var);
 	dictionary_put(shared_vars, var_name, var_value);
+	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
 	pthread_mutex_unlock(&shared_vars_mutex);
-
-	runFunction(connection->socket, "kernel_response_set_shared_var", 0);
 }
 void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 	*o_pcb = n_pcb;
@@ -117,6 +114,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	bool finished = atoi(args[1]);
 
 	pcb* o_pcb = find_pcb_by_pid(n_pcb->pid);
+	bool is_locked = o_pcb->state == BLOCK_LIST;
 	set_new_pcb(&o_pcb, n_pcb);
 
 	t_cpu* n_cpu = find_cpu_by_socket(connection->socket);
@@ -128,54 +126,79 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			free(heap);
 		}
 
-		int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
-		list_remove_and_destroy_element(process_heap_pages, pos, &free_heap);
-		move_to_list(n_pcb, EXIT_LIST);
-		substract_process_in_memory();
-		runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
-		t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
-		runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
+		if (is_locked) {
+			move_to_list(o_pcb, BLOCK_LIST);
+		} else {
+			int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
+			list_remove_and_destroy_element(process_heap_pages, pos, &free_heap);
+			move_to_list(n_pcb, EXIT_LIST);
+			substract_process_in_memory();
+			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
+			t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
+			runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
+		}
 	} else {
-		move_to_list(n_pcb, READY_LIST);
+		move_to_list(o_pcb, READY_LIST);
 	}
 
 	short_planning();
 }
 
 void cpu_wait_sem(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&sems_mutex);
+	void free_sem(void* v) {
+		sem_status* sem = v;
+		free(sem);
+	}
+
 	char* id_sem = args[0];
 	string_trim(&id_sem);
 	t_cpu* _cpu = find_cpu_by_socket(connection->socket);
 	int* process_pid = malloc(sizeof(int));
 	*process_pid = _cpu->xpid;
-	pcb *process = find_pcb_by_pid(*process_pid);
-	sem_status *sem_curr = dictionary_get(sem_ids, id_sem);
+	pcb *process = find_pcb_by_pid(_cpu->xpid);
 
+	sem_status *sem_curr = dictionary_get(sem_ids, id_sem);
 	sem_curr->value--;
 
+	bool is_locked = false;
 	if (sem_curr->value < 0) {
 		queue_push(sem_curr->blocked_pids, process_pid);
 		move_to_list(process, BLOCK_LIST);
-		short_planning();
+		is_locked = true;
 	}
 
-	dictionary_remove_and_destroy(sem_ids, id_sem, free);
+	dictionary_remove(sem_ids, id_sem);
 	dictionary_put(sem_ids, id_sem, sem_curr);
+
+	pthread_mutex_unlock(&sems_mutex);
+	send_dynamic_message(connection->socket, string_itoa(is_locked));
 }
 
 void cpu_signal_sem(socket_connection* connection, char** args) {
-	char* id_sem = args[0];
-	sem_status *sem_curr = dictionary_get(sem_ids, id_sem);
-
-	sem_curr->value++;
-
-	if (sem_curr->value <= 0) {
-		pcb *process = queue_pop(sem_curr->blocked_pids);
-		move_to_list(process, READY_LIST);
+	pthread_mutex_lock(&sems_mutex);
+	void free_sem(void* v) {
+		sem_status* sem = v;
+		free(sem);
 	}
 
-	dictionary_remove_and_destroy(sem_ids, id_sem, free);
+	char* id_sem = args[0];
+	string_trim(&id_sem);
+
+	sem_status *sem_curr = dictionary_get(sem_ids, id_sem);
+	sem_curr->value++;
+
+	if (sem_curr->value >= 0) {
+		pcb *process = queue_pop(sem_curr->blocked_pids);
+		if (process != NULL)
+			move_to_list(process, READY_LIST);
+	}
+
+	dictionary_remove(sem_ids, id_sem);
 	dictionary_put(sem_ids, id_sem, sem_curr);
+
+	pthread_mutex_unlock(&sems_mutex);
+	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
 }
 
 void cpu_malloc(socket_connection* connection, char** args) {
