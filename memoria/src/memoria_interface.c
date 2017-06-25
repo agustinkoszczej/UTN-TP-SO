@@ -57,7 +57,7 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 				return adm_table->pid == pid && adm_table->pag == n_page;
 			}
 			int i;
-			for (i = 0; i < list_size(adm_list); i++) {
+			for (i = hash(pid, n_page); i < list_size(adm_list); i++) {
 				t_adm_table* adm_table = list_get(adm_list, i);
 				if (adm_table->pid < 0) {
 					adm_table->pid = pid;
@@ -104,8 +104,8 @@ void i_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
 	int page = atoi(args[1]);
 
 	//TODO y aqui llamaria a la funcion de Hashing...SI TUVIERA UNA!!! (*inserte meme de papa de Timy) xd
-	int i, frame = -1;
-	for(i=0;i<list_size(adm_list);i++){
+	int i, frame;
+	for(i=hash(pid,page);i<list_size(adm_list);i++){
 		t_adm_table* adm_table = list_get(adm_list, i);
 
 		if(adm_table->pid == pid && adm_table->pag == page){
@@ -113,10 +113,26 @@ void i_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
 			break;
 		}
 	}
+
 	//send_dynamic_message(connection->socket, string_itoa(frame));
 	runFunction(connection->socket, "memory_response_get_frame_from_pid_and_page", 1, string_itoa(frame));
 	log_debug(logger, "i_get_frame_from_pid_and_page: '%d'", frame);
 }
+
+unsigned int hash(int pid, int page) {
+	char* str = malloc(strlen(string_itoa(pid)));
+	strcpy(str, string_itoa(pid));
+	strcat(str, string_itoa(page));
+	unsigned int indice = atoi(str) % frames_count;
+	free(str);
+	return indice;
+}
+/*
+int hash(int pid, int pag){
+	int index = (pid * frames_count) + (pag * pid);
+
+	return index;
+}*
 
 /*
  * SERVER
@@ -158,3 +174,9 @@ void connectionClosed(socket_connection* connection) {
 		pthread_mutex_unlock(&cpu_sockets_mutex);
 	}
 }
+
+
+
+
+
+
