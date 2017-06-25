@@ -221,8 +221,7 @@ char* get_data(char* path, int offset, int size) {
 bool validate_file(char* path) {
 	log_debug(logger, "validate_file: path=%s", path);
 
-	char* dir = string_substring_until(path, strlen(path) - 1);
-	FILE* file = fopen(string_from_format("%s/Archivos/%s",mount_point, dir), "r");
+	FILE* file = fopen(string_from_format("%s/Archivos/%s",mount_point, path), "r");
 	bool result = false;
 
 	if (file) {
@@ -270,24 +269,21 @@ bool delete_file(char* path) {
 
 bool create_file(char* path) {
 	log_debug(logger, "create_file: path=%s", path);
+		int first_block_pos = create_block();
 
-	char* path_file = string_from_format("%s/Archivos/%s", mount_point, path);
-	mkdir(path_file, 0777);
+		if (first_block_pos < 0) {
+			log_debug(logger, "create_file: bool=%d", false);
+			return false;
+		}
 
-	int first_block_pos = create_block();
+		FILE *file = fopen(string_from_format("%s/Archivos/%s",mount_point, path), "w");
+		fputs("TAMANIO=0\n", file);
+		char* bloq = string_from_format("BLOQUES=[%d]", first_block_pos);
+		fputs(bloq, file);
+		fclose(file);
 
-	if (first_block_pos < 0) {
-		log_debug(logger, "create_file: bool=%d", false);
-		return false;
-	}
-
-	FILE* f = fopen(path_file, "w");
-	fputs("TAMANIO=0\n", f);
-	fputs(string_from_format("BLOQUES=[%d]", first_block_pos), f);
-	fclose(f);
-
-	log_debug(logger, "create_file: bool=%d", true);
-	return true;
+		log_debug(logger, "create_file: bool=%d", true);
+		return true;
 }
 
 void create_function_dictionary() {

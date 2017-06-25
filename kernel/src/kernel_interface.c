@@ -323,7 +323,7 @@ void cpu_open_file(socket_connection* connection, char** args) {
 	char* flags = args[1];
 	int pid = atoi(args[2]);
 
-	if (!strcmp(flags, "c")) {
+	if (strcmp(flags, "c")) {
 		runFunction(fs_socket, "kernel_create_file", 1, path);
 		wait_response(&fs_mutex);
 		if (fs_response == 0) {
