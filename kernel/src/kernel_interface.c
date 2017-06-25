@@ -78,10 +78,27 @@ void console_load_program(socket_connection* connection, char** args) {
 	process_struct.state = new_pcb->state;
 	runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program);
 }
+void console_abort_program(socket_connection* connection, char** args) {
+	int pid = atoi(args[0]);
+	pcb* l_pcb = find_pcb_by_pid(pid);
+	l_pcb->exit_code = FINALIZADO_CONSOLA;
+
+	if (l_pcb->state != EXEC_LIST) {
+		substract_process_in_memory();
+		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
+	}
+}
 
 /*
  * CPU
  */
+void cpu_has_aborted(socket_connection* connection, char** args) {
+	int pid = atoi(args[0]);
+	pcb* l_pcb = find_pcb_by_pid(pid);
+	bool result = l_pcb->exit_code == FINALIZADO_CONSOLA;
+
+	send_dynamic_message(connection->socket, string_itoa(result));
+}
 void cpu_received_page_stack_size(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_received_page_stack_size");
 	short_planning();
@@ -126,9 +143,9 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_task_finished");
 	pcb* n_pcb = string_to_pcb(args[0]);
 	bool finished = atoi(args[1]);
+	bool is_locked = atoi(args[2]);
 
 	pcb* o_pcb = find_pcb_by_pid(n_pcb->pid);
-	bool is_locked = o_pcb->state == BLOCK_LIST;
 	set_new_pcb(&o_pcb, n_pcb);
 
 	t_cpu* n_cpu = find_cpu_by_socket(connection->socket);
@@ -148,8 +165,10 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			move_to_list(n_pcb, EXIT_LIST);
 			substract_process_in_memory();
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
-			t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
-			runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
+			if (n_pcb->exit_code != FINALIZADO_CONSOLA) {
+				t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
+				runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
+			}
 		}
 	} else {
 		move_to_list(o_pcb, READY_LIST);
@@ -182,7 +201,6 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 	string_trim(&id_sem);
 	t_cpu* _cpu = find_cpu_by_socket(connection->socket);
 	int process_pid = _cpu->xpid;
-	pcb *process = find_pcb_by_pid(_cpu->xpid);
 
 	bool find_sem(void* s) {
 		t_sem* sem = s;
@@ -197,7 +215,6 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 		char* temp = add_blocked_process(sem_curr->blocked_pids, process_pid);
 		sem_curr->blocked_pids = string_new();
 		string_append(&sem_curr->blocked_pids, temp);
-		process->state = BLOCK_LIST;
 		is_locked = true;
 	}
 
@@ -551,9 +568,11 @@ void connectionClosed(socket_connection* connection) {
 
 	if (!strcmp(client, CONSOLE)) {
 		pcb* l_pcb = find_pcb_by_socket(connection->socket);
-		move_to_list(l_pcb, EXIT_LIST);
-		substract_process_in_memory();
-		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
+		if (l_pcb->state != EXIT_LIST) {
+			move_to_list(l_pcb, EXIT_LIST);
+			substract_process_in_memory();
+			runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
+		}
 	} else if (!strcmp(client, CPU)) {
 		t_cpu* cpu = find_cpu_by_socket(connection->socket);
 		remove_cpu_from_cpu_list(cpu);

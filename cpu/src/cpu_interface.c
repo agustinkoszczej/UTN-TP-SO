@@ -80,10 +80,18 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	pcb_actual = string_to_pcb(args[2]);
 	quantum_sleep = atoi(args[3]);
 	finished = false;
+	is_locked = false;
 	log_debug(logger, "kernel_receive_pcb: planning_alg=%d, quantum=%d, pcb*", planning_alg, quantum);
 
 	printf("> EXECUTING_PID: %d\n", pcb_actual->pid);
 	while ((planning_alg == FIFO || quantum-- >= 0) && !finished) {
+		runFunction(kernel_socket, "cpu_has_aborted", 1, string_itoa(pcb_actual->pid));
+		finished = atoi(receive_dynamic_message(kernel_socket));
+		if (finished) {
+			pcb_actual->exit_code = FINALIZADO_CONSOLA;
+			break;
+		}
+
 		t_intructions* i_code = list_get(pcb_actual->i_code, pcb_actual->pc);
 		int start = i_code->start;
 		int offset = i_code->offset;
@@ -100,14 +108,14 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		string_trim(&mem_buffer);
 		log_debug(logger, "INSTRUCCION LEIDA: %s", mem_buffer);
 		printf("Executing: %s\n", mem_buffer);
-		analizadorLinea(mem_buffer, &functions, &kernel_functions);	//TODO aca falla. No pude encontrar por que
+		//analizadorLinea(mem_buffer, &functions, &kernel_functions);
 		pcb_actual->pc++;
 		pcb_actual->statistics.cycles++;
 		sleep(quantum_sleep / 1000);
 	}
 	printf("Finished executing.\n\n");
 	log_debug(logger, "cpu_task_finished");
-	runFunction(kernel_socket, "cpu_task_finished", 2, pcb_to_string(pcb_actual), string_itoa(finished));
+	runFunction(kernel_socket, "cpu_task_finished", 3, pcb_to_string(pcb_actual), string_itoa(finished), string_itoa(is_locked));
 }
 void kernel_response_malloc_pointer(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_malloc_pointer: malloc_pointer=%s", args[0]);

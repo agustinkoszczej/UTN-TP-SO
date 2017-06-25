@@ -174,7 +174,10 @@ void do_disconnect_console(char* sel) {
 			pthread_mutex_lock(&process_list_mutex);
 			t_process* process = list_get(process_list, i);
 			pthread_mutex_unlock(&process_list_mutex);
-			abort_program(process, FINALIZADO_CONSOLA);
+			if (process->pid >= 0) {
+				runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
+				abort_program(process, FINALIZADO_CONSOLA);
+			}
 		}
 	}
 
@@ -235,6 +238,8 @@ void abort_program(t_process* process, int exit_code) {
 	char* message = string_from_format("[%s] [%s] [%d]", process->time_start, process->time_finish, process->c_message);
 	new_message(message, process->pid);
 
+	process->pid = -1;
+	process->socket = -1;
 	//list_clean(messages_list);
 	//log_debug(logger, dictionary_get(message_map, string_itoa(exit_code)));
 	//runFunction(process->socket, "console_abort_program", 2, CONSOLE, string_itoa(process->pid));
@@ -265,6 +270,7 @@ void do_abort_program(char* sel) {
 			pthread_mutex_unlock(&process_list_mutex);
 
 			if (!strcmp(string_itoa(process->pid), pid)) {
+				runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
 				abort_program(process, FINALIZADO_CONSOLA);
 				break;
 			}

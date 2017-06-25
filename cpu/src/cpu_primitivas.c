@@ -357,7 +357,7 @@ void kernel_wait(t_nombre_semaforo identificador_semaforo) {
 
 	log_debug(logger, "|PRIMITIVA| Wait: Semaforo \"%s\"", identificador_semaforo);
 	runFunction(kernel_socket, "cpu_wait_sem", 1, identificador_semaforo);
-	bool is_locked = atoi(receive_dynamic_message(kernel_socket));
+	is_locked = atoi(receive_dynamic_message(kernel_socket));
 
 	if (is_locked)
 		cpu_finalizar();

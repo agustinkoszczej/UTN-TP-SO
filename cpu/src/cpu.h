@@ -47,6 +47,7 @@ int mem_delay;
 int quantum_sleep;
 int kernel_shared_var;
 char* read_info;
+bool is_locked;
 
 pcb* pcb_actual;
 

@@ -81,6 +81,20 @@ void remove_cpu_from_cpu_list(t_cpu* cpu) {
 	pthread_mutex_unlock(&cpu_mutex);
 }
 
+t_cpu* find_cpu_by_xpid(int pid) {
+	log_debug(logger, "find_cpu_by_xpid");
+	pthread_mutex_lock(&cpu_mutex);
+	bool find(void* element) {
+		t_cpu* cpu = element;
+		return cpu->xpid == pid;
+	}
+
+	t_cpu* cpu = list_find(cpu_list, &find);
+	pthread_mutex_unlock(&cpu_mutex);
+
+	return cpu;
+}
+
 t_cpu* find_cpu_by_socket(int socket) {
 	log_debug(logger, "find_cpu_by_socket");
 	pthread_mutex_lock(&cpu_mutex);
@@ -142,7 +156,7 @@ pcb* find_pcb_by_socket(int socket) {
 		return n_pcb->socket == socket;
 	}
 
-	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find); //TODO: CUANDO list_find DEVUELVE NULL ROMPE
+	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find);
 	if (socket_pcb != NULL) {
 		pthread_mutex_lock(&pcb_list_mutex);
 		int pos;
@@ -881,6 +895,8 @@ void create_function_dictionary() {
 	fns = dictionary_create();
 
 	dictionary_put(fns, "console_load_program", &console_load_program);
+	dictionary_put(fns, "console_abort_program", &console_abort_program);
+
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);
@@ -889,6 +905,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
 	dictionary_put(fns, "memory_response_get_page_from_pointer", &memory_response_get_page_from_pointer);
 
+	dictionary_put(fns, "cpu_has_aborted", &cpu_has_aborted);
 	dictionary_put(fns, "cpu_received_page_stack_size", &cpu_received_page_stack_size);
 	dictionary_put(fns, "cpu_task_finished", &cpu_task_finished);
 	dictionary_put(fns, "cpu_get_shared_var", &cpu_get_shared_var);

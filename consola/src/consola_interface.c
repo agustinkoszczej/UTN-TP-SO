@@ -12,7 +12,9 @@ void kernel_stop_process(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_stop_process: pid=%d, exit_code=%d", pid, exit_code);
 
 	t_process* process = find_process_by_pid(pid);
-	abort_program(process, exit_code);
+
+	if (process != NULL)
+		abort_program(process, exit_code);
 }
 
 void kernel_print_message(socket_connection* connection, char** args) {
@@ -32,7 +34,7 @@ void kernel_response_load_program(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_load_program: response=%d, pid=%d", response, pid);
 
 	t_process* process = find_process_by_socket(connection->socket);
-	if(response == NO_ERRORES) {
+	if (response == NO_ERRORES) {
 		pthread_mutex_lock(&p_counter_mutex);
 		p_counter++;
 		pthread_mutex_unlock(&p_counter_mutex);

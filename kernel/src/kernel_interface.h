@@ -25,6 +25,7 @@ int fs_socket;
  * CONSOLE
  */
 void console_load_program(socket_connection* connection, char** args);
+void console_abort_program(socket_connection* connection, char** args);
 
 /*
  * MEMORY
@@ -40,6 +41,7 @@ void memory_response_get_page_from_pointer(socket_connection* connection, char**
 /*
  * CPU
  */
+void cpu_has_aborted(socket_connection* connection, char** args);
 void cpu_received_page_stack_size(socket_connection* connection, char** args);
 void cpu_get_shared_var(socket_connection* connection, char** args);
 void cpu_set_shared_var(socket_connection* connection, char** args);
