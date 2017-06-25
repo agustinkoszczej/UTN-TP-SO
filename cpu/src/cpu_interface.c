@@ -36,7 +36,7 @@ void memory_response_store_bytes_in_page(socket_connection* connection, char** a
 
 	signal_response(&planning_mutex);
 }
-void memory_response_get_frame_from_pid_and_page(socket_connection* connection, char** args){
+void memory_response_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
 	frame_from_pid_and_page = atoi(args[0]);
 	signal_response(&planning_mutex);
 }
@@ -82,6 +82,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	finished = false;
 	log_debug(logger, "kernel_receive_pcb: planning_alg=%d, quantum=%d, pcb*", planning_alg, quantum);
 
+	// TODO Muy lindo el porcentaje, pero vamos a tener que sacarlo porque ahora los programas no son lineales, pueden ser recursivos y eternos
 	double percent_per_instruction = 100.0f / (double) (list_size(pcb_actual->i_code) - pcb_actual->pc);
 	double acum_percent = percent_per_instruction * pcb_actual->pc;
 
@@ -104,6 +105,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		log_debug(logger, "INSTRUCCION LEIDA: %s", mem_buffer);
 		analizadorLinea(mem_buffer, &functions, &kernel_functions);	//TODO aca falla. No pude encontrar por que
 		pcb_actual->pc++;
+		pcb_actual->statistics.cycles++;
 		acum_percent += percent_per_instruction;
 		sleep(quantum_sleep / 1000);
 	}

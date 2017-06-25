@@ -38,9 +38,9 @@ void console_load_program(socket_connection* connection, char** args) {
 	new_pcb->pc = metadata->instruccion_inicio;
 	int i;
 
-	if (metadata->cantidad_de_etiquetas > 0) {
+	if (metadata->cantidad_de_etiquetas + metadata->cantidad_de_funciones > 0) {
 		char** labels = string_split(metadata->etiquetas, "\0");
-		for (i = 0; i < metadata->cantidad_de_etiquetas; i++) {
+		for (i = 0; i < metadata->cantidad_de_etiquetas + metadata->cantidad_de_funciones; i++) {
 			char* label = labels[i];
 			t_puntero_instruccion* instruction = malloc(sizeof(t_puntero_instruccion));
 			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas, metadata->etiquetas_size); //aca rompia con Program3, por el cantidad_de_etiquetas
@@ -272,11 +272,10 @@ void cpu_seek_file(socket_connection* connection, char** args) {
 	int pid = atoi(args[2]);
 
 	bool result = set_pointer(pos, fd, pid);
-	if (result){
+	if (result) {
 		send_dynamic_message(connection->socket, string_itoa(fd));
 		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
-	}
-	else{
+	} else {
 		send_dynamic_message(connection->socket, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 	}
@@ -342,14 +341,20 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 	n_pcb->exit_code = response;
 
 	if (response == NO_ERRORES) {
-		t_heap_manage* heap = malloc(sizeof(t_heap_manage));
-		heap->heap_pages = list_create();
-		heap->pid = n_pcb->pid;
-		heap->heap_stats.malloc_c = 0;
-		heap->heap_stats.malloc_b = 0;
-		heap->heap_stats.free_c = 0;
-		heap->heap_stats.free_b = 0;
-		list_add(process_heap_pages, heap);
+		t_heap_manage* heap_manage = malloc(sizeof(t_heap_manage));
+		t_heap_stats* heap_stats = malloc(sizeof(t_heap_stats));
+
+		heap_manage->heap_pages = list_create();
+		heap_manage->pid = n_pcb->pid;
+
+		heap_stats->pid = n_pcb->pid;
+		heap_stats->malloc_c = 0;
+		heap_stats->malloc_b = 0;
+		heap_stats->free_c = 0;
+		heap_stats->free_b = 0;
+
+		list_add(process_heap_pages, heap_manage);
+		list_add(heap_stats_list, heap_stats);
 		move_to_list(n_pcb, READY_LIST);
 		add_process_in_memory();
 		short_planning();

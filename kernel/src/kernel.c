@@ -539,11 +539,19 @@ bool write_file(int fd_write, int pid, char* info, int size) {
 }
 
 void show_global_file_table() {
-	int i;
-	for (i = 0; i < list_size(fs_global_table); i++) {
-		t_global_file_table* global_file = list_get(fs_global_table, i);
-		printf("> GLOBAL_FD: %d\t> OPEN: %d\t> FILE: %s\n", global_file->gfd, global_file->open, global_file->path);
+	clear_screen();
+
+	if (list_size(fs_global_table) == 0)
+		println("No hay archivos abiertos.");
+	else {
+		int i;
+		for (i = 0; i < list_size(fs_global_table); i++) {
+			t_global_file_table* global_file = list_get(fs_global_table, i);
+			printf("> GLOBAL_FD: %d\t> OPEN: %d\t> FILE: %s\n", global_file->gfd, global_file->open, global_file->path);
+		}
 	}
+
+	wait_any_key();
 }
 
 void show_all_processes_file_table() {
@@ -559,7 +567,7 @@ void show_all_processes_file_table() {
 void show_process_file_table(int pid) {
 	t_process_file_table* files_process = get_process_file_by_pid(pid);
 	if (files_process == NULL)
-		printf("El Proceso %d no tiene procesos abiertos!\n", pid);
+		printf("El Proceso %d no tiene archivos abiertos!\n", pid);
 	//TODO podria poner una validacion para un PID que no existe, sino va a mostrar esto
 	else {
 		int i;
@@ -573,6 +581,14 @@ void show_process_file_table(int pid) {
 /*
  * HEAP
  */
+t_heap_stats* find_heap_stats_by_pid(int pid) {
+	bool find(void* element) {
+		t_heap_stats* n_heap = element;
+		return n_heap->pid == pid;
+	}
+	t_heap_stats* heap = list_find(heap_stats_list, &find);
+	return heap;
+}
 t_heap_manage* find_heap_manage_by_pid(int pid) {
 	bool find(void* element) {
 		t_heap_manage* n_heap = element;
@@ -753,9 +769,10 @@ int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 
 	pcb* pcb_malloc = find_pcb_by_pid(pid);
 	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
+	t_heap_stats* heap_stats = find_heap_stats_by_pid(pid);
 
-	heap_manage->heap_stats.malloc_c++;
-	heap_manage->heap_stats.malloc_b += size;
+	heap_stats->malloc_c++;
+	heap_stats->malloc_b += size;
 
 	int page = pcb_malloc->page_c + stack_size;
 
@@ -777,7 +794,7 @@ int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 				}
 			}
 		}
-		t_heap_page* last_page = list_get(heap_manage->heap_pages, list_size(heap_manage->heap_pages) -1);
+		t_heap_page* last_page = list_get(heap_manage->heap_pages, list_size(heap_manage->heap_pages) - 1);
 		return add_heap_page(pid, heap_manage, (last_page->page_n) + 1, size);
 	}
 }
@@ -789,12 +806,13 @@ void free_memory(int pid, int pointer) {
 	wait_response(&mem_response);
 
 	int frame_c = pointer / mem_page_size;
-	int offset_rel = pointer - mem_page_size* frame_c;
+	int offset_rel = pointer - mem_page_size * frame_c;
 	int freed_space = free_heap(mem_read_buffer, offset_rel - heap_metadata_size);
 
 	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
-	heap_manage->heap_stats.free_c++;
-	heap_manage->heap_stats.free_b += freed_space;
+	t_heap_stats* heap_stats = find_heap_stats_by_pid(pid);
+	heap_stats->free_c++;
+	heap_stats->free_b += freed_space;
 
 	if (freed_space == -1) {
 		runFunction(mem_socket, "i_free_page", 2, string_itoa(pid), string_itoa(page_from_pointer));
@@ -967,6 +985,7 @@ void init_kernel(t_config* config) {
 	fs_process_table = list_create();
 	fs_global_table = list_create();
 
+	heap_stats_list = list_create();
 	process_heap_pages = list_create();
 	heap_metadata_size = sizeof(bool) + sizeof(uint32_t);
 
@@ -1091,23 +1110,28 @@ void do_show_active_process(char* sel) {
 
 // Cantidad de páginas de Heap
 void show_heap_pages(int pid) {
-	printf("HEAP PAGES: %d\n", list_size(find_heap_manage_by_pid(pid)->heap_pages));
+	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
+	int pages = 0;
+	if (heap_manage != NULL)
+		pages = list_size(heap_manage->heap_pages);
+
+	printf("HEAP PAGES: %d\n", pages);
 }
 
 // Cantidad de acciones alocar en operaciones y bytes
 void show_allocates(int pid) {
-	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
+	t_heap_stats* heap_stats = find_heap_stats_by_pid(pid);
 
-	printf("HEAP MALLOC NUM: %d\n", heap_manage->heap_stats.malloc_c);
-	printf("HEAP MALLOC BYTES: %d\n", heap_manage->heap_stats.malloc_b);
+	printf("HEAP MALLOC NUM: %d\n", heap_stats->malloc_c);
+	printf("HEAP MALLOC BYTES: %d\n", heap_stats->malloc_b);
 }
 
 // Cantidad de acciones liberar en operaciones y bytes
 void show_free(int pid) {
-	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
+	t_heap_stats* heap_stats = find_heap_stats_by_pid(pid);
 
-	printf("HEAP FREE NUM: %d\n", heap_manage->heap_stats.free_c);
-	printf("HEAP FREE BYTES: %d\n", heap_manage->heap_stats.free_b);
+	printf("HEAP FREE NUM: %d\n", heap_stats->free_c);
+	printf("HEAP FREE BYTES: %d\n", heap_stats->free_b);
 }
 
 // Cantidad de syscalls

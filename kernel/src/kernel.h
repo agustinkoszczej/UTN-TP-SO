@@ -102,16 +102,16 @@ t_list* fs_global_table;
 t_list* fs_process_table;
 
 typedef struct {
+	int pid;
 	int malloc_c;
 	int malloc_b;
 	int free_c;
 	int free_b;
-} t_stats;
+} t_heap_stats;
 
 typedef struct {
 	int pid;
 	t_list* heap_pages;
-	t_stats heap_stats;
 } t_heap_manage;
 
 typedef struct {
@@ -121,6 +121,7 @@ typedef struct {
 } t_heap_page;
 
 t_list* process_heap_pages;
+t_list* heap_stats_list;
 
 typedef struct {
 	uint32_t size;
