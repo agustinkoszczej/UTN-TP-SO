@@ -329,7 +329,6 @@ void cpu_open_file(socket_connection* connection, char** args) {
 		if (fs_response == 0) {
 			//TODO aca llega cuando create_file = false, que no se que significa del lado de FileSystem xd
 			log_debug(logger, "Error de cpu_open_file que nunca deberia llegar");
-			return;
 		}
 	}
 
@@ -343,9 +342,9 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_delete_file");
 	int gfd_delete = atoi(args[0]);
 
-	bool result = delete_file_from_global_table(gfd_delete);
-	if (!result) {
-		runFunction(connection->socket, "kernel_response_file", 1, string_itoa(NO_EXISTE_ARCHIVO));
+	int result = delete_file_from_global_table(gfd_delete);
+	if (result < 0) {
+		send_dynamic_message(connection->socket, string_itoa(result));
 		return;
 	}
 
@@ -356,6 +355,7 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 	if (fs_response == 0) {
 		//TODO aca llega cuando delete_file = false, que no se que significa del lado de FileSystem xd
 		log_debug(logger, "Error de cpu_delete_file que nunca deberia llegar");
+		send_dynamic_message(connection->socket, string_itoa(ERROR_SIN_DEFINIR));
 		return;
 	}
 
@@ -403,18 +403,14 @@ void cpu_write_file(socket_connection* connection, char** args) {
 	int size = atoi(args[2]);
 	int pid = atoi(args[3]);
 
-	bool result = write_file(fd, pid, info, size);
+	int result = write_file(fd, pid, info, size);
 
 	char* path = string_from_format("%s", get_path_by_fd_and_pid(fd, pid));
-	if (path == NULL && !result) {
+	if (result < 0) {
 		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
-		send_dynamic_message(connection->socket, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+		send_dynamic_message(connection->socket, string_itoa(result));
 		return;
 	}
-
-	if (!result)
-		fd = ESCRIBIR_SIN_PERMISOS;
-
 	//runFunction(connection->socket, "kernel_response", 1, string_itoa(fd));
 	send_dynamic_message(connection->socket, string_itoa(fd));
 
