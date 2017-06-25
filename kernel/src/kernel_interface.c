@@ -4,6 +4,7 @@
  * CONSOLE
  */
 void console_load_program(socket_connection* connection, char** args) {
+	log_debug(logger, "console_load_program");
 	char* program = args[0];
 
 	if (process_in_memory + 1 > multiprog) {
@@ -82,9 +83,11 @@ void console_load_program(socket_connection* connection, char** args) {
  * CPU
  */
 void cpu_received_page_stack_size(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_received_page_stack_size");
 	short_planning();
 }
 void cpu_get_shared_var(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_get_shared_var");
 	char* var_name = args[0];
 	pthread_mutex_lock(&shared_vars_mutex);
 	bool find_var(void* s) {
@@ -97,6 +100,7 @@ void cpu_get_shared_var(socket_connection* connection, char** args) {
 	pthread_mutex_unlock(&shared_vars_mutex);
 }
 void cpu_set_shared_var(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_set_shared_var");
 	void free_var(void* v) {
 		int* val = v;
 		free(val);
@@ -119,6 +123,7 @@ void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 	*o_pcb = n_pcb;
 }
 void cpu_task_finished(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_task_finished");
 	pcb* n_pcb = string_to_pcb(args[0]);
 	bool finished = atoi(args[1]);
 
@@ -154,6 +159,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 }
 
 char* add_blocked_process(char* blocked_pids, int process_pid) {
+	log_debug(logger, "add_blocked_process");
 	char** arr = string_get_string_as_array(blocked_pids);
 	char* res = string_new();
 	int i = 0;
@@ -165,6 +171,7 @@ char* add_blocked_process(char* blocked_pids, int process_pid) {
 }
 
 void cpu_wait_sem(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_wait_sem");
 	pthread_mutex_lock(&sems_mutex);
 	void free_sem(void* v) {
 		sem_status* sem = v;
@@ -199,6 +206,7 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 }
 
 int get_last(char* blocked_pids) {
+	log_debug(logger, "get_last");
 	char** arr = string_get_string_as_array(blocked_pids);
 
 	int i = 0;
@@ -209,6 +217,7 @@ int get_last(char* blocked_pids) {
 }
 
 char* remove_last(char* blocked_pids) {
+	log_debug(logger, "remove_last");
 	char** arr = string_get_string_as_array(blocked_pids);
 	char* res = string_new();
 
@@ -226,6 +235,7 @@ char* remove_last(char* blocked_pids) {
 }
 
 void cpu_signal_sem(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_signal_sem");
 	pthread_mutex_lock(&sems_mutex);
 	void free_sem(void* v) {
 		sem_status* sem = v;
@@ -260,6 +270,7 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 }
 
 void cpu_malloc(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_malloc");
 	int space = atoi(args[0]);
 	int pid = atoi(args[1]);
 
@@ -272,6 +283,7 @@ void cpu_malloc(socket_connection* connection, char** args) {
 }
 
 void cpu_free(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_free");
 	int pointer = atoi(args[0]);
 	int pid = atoi(args[1]);
 	free_memory(pid, pointer);
@@ -280,6 +292,7 @@ void cpu_free(socket_connection* connection, char** args) {
 }
 
 void cpu_validate_file(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_validate_file");
 	char* path = args[0];
 	bool validate = validate_file_from_fs(path);
 
@@ -288,6 +301,7 @@ void cpu_validate_file(socket_connection* connection, char** args) {
 }
 
 void cpu_open_file(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_open_file");
 	char* path = args[0];
 	char* flags = args[1];
 	int pid = atoi(args[2]);
@@ -309,6 +323,7 @@ void cpu_open_file(socket_connection* connection, char** args) {
 }
 
 void cpu_delete_file(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_delete_file");
 	int gfd_delete = atoi(args[0]);
 
 	bool result = delete_file_from_global_table(gfd_delete);
@@ -332,6 +347,7 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 }
 
 void cpu_close_file(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_close_file");
 	int fd_close = atoi(args[0]);
 	int pid = atoi(args[1]);
 
@@ -348,6 +364,7 @@ void cpu_close_file(socket_connection* connection, char** args) {
 }
 
 void cpu_seek_file(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_seek_file");
 	int fd = atoi(args[0]);
 	int pos = atoi(args[1]);
 	int pid = atoi(args[2]);
@@ -363,6 +380,7 @@ void cpu_seek_file(socket_connection* connection, char** args) {
 }
 
 void cpu_write_file(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_write_file");
 	int fd = atoi(args[0]);
 	char* info = args[1];
 	int size = atoi(args[2]);
@@ -387,6 +405,7 @@ void cpu_write_file(socket_connection* connection, char** args) {
 }
 
 void cpu_read_file(socket_connection* connection, char** args) {
+	log_debug(logger, "cpu_read_file");
 	int fd = atoi(args[0]);
 	int offset = atoi(args[1]);
 	int size = atoi(args[2]);
@@ -416,6 +435,7 @@ void memory_identify(socket_connection* connection, char** args) {
 	runFunction(connection->socket, "client_identify", 1, KERNEL);
 }
 void memory_response_start_program(socket_connection* connection, char** args) {
+	log_debug(logger, "memory_response_start_program");
 	int response = atoi(args[0]);
 
 	pcb* n_pcb = find_pcb_by_pid(process_struct.pid);
@@ -447,6 +467,7 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 	pthread_mutex_unlock(&console_mutex);
 }
 void memory_page_size(socket_connection* connection, char** args) {
+	log_debug(logger, "memory_response_start_program");
 	int page_size = atoi(args[0]);
 
 	mem_page_size = page_size;
@@ -454,6 +475,7 @@ void memory_page_size(socket_connection* connection, char** args) {
 }
 
 void memory_response_heap(socket_connection* connection, char** args) {
+	log_debug(logger, "memory_response_heap");
 	memory_response = atoi(args[0]);
 	signal_response(&mem_response);
 }
@@ -484,11 +506,13 @@ void memory_response_get_page_from_pointer(socket_connection* connection, char**
  * FILESYSTEM
  */
 void fs_response_file(socket_connection* connection, char** args) {
+	log_debug(logger, "fs_response_file");
 	fs_response = atoi(args[0]);
 	signal_response(&fs_mutex);
 }
 
 void fs_response_get_data(socket_connection* connection, char** args) {
+	log_debug(logger, "fs_response_get_data");
 	fs_read_buffer = args[0];
 	signal_response(&fs_mutex);
 }

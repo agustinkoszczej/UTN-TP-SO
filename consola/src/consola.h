@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <dirent.h>
 #include <commons/string.h>
 #include <commons/collections/dictionary.h>
 #include <commons/collections/list.h>
@@ -30,6 +31,7 @@ typedef struct {
 	int pid;
 	int socket;
 	int c_message;
+	char* name;
 	char* time_start;
 	char* time_finish;
 } t_process;
@@ -37,6 +39,7 @@ typedef struct {
 typedef struct {
 	int pid;
 	char* time;
+	char* name;
 	char* message;
 } t_message;
 
@@ -57,6 +60,5 @@ void new_message(char* text, int pid);
 void abort_program(t_process* process, int exit_code);
 t_process* find_process_by_pid(int pid);
 t_process* find_process_by_socket(int socket);
-void remove_from_process_list(t_process* process);
 
 #endif /* CONSOLA_H_ */

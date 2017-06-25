@@ -6,6 +6,7 @@ QUANTUM_SLEEP, ALGORITMO, GRADO_MULTIPROG, SEM_IDS, SEM_INIT,
 SHARED_VARS, STACK_SIZE };
 
 bool is_cpu_free() {
+	log_debug(logger, "is_cpu_free");
 	pthread_mutex_lock(&cpu_mutex);
 	bool find(void* e) {
 		t_cpu* cpu = e;
@@ -18,6 +19,7 @@ bool is_cpu_free() {
 }
 
 t_cpu* get_cpu_free() {
+	log_debug(logger, "get_cpu_free");
 	pthread_mutex_lock(&cpu_mutex);
 	bool find(void* e) {
 		t_cpu* cpu = e;
@@ -30,6 +32,7 @@ t_cpu* get_cpu_free() {
 }
 
 void short_planning() {
+	log_debug(logger, "short_planning");
 	pthread_mutex_lock(&planning_mutex);
 	if (planning_running && is_cpu_free() && list_size(ready_list) > 0) {
 		t_cpu* free_cpu = get_cpu_free();
@@ -53,6 +56,7 @@ void short_planning() {
 }
 
 int find_pcb_pos_in_list(t_list* list, int pid) {
+	log_debug(logger, "find_pcb_pos_in_list");
 	int i;
 	for (i = 0; i < list_size(list); i++) {
 		pcb* f_pcb = list_get(list, i);
@@ -64,6 +68,7 @@ int find_pcb_pos_in_list(t_list* list, int pid) {
 }
 
 void remove_cpu_from_cpu_list(t_cpu* cpu) {
+	log_debug(logger, "remove_cpu_from_cpu_list");
 	pthread_mutex_lock(&cpu_mutex);
 	int i;
 	for (i = 0; i < list_size(cpu_list); i++) {
@@ -77,6 +82,7 @@ void remove_cpu_from_cpu_list(t_cpu* cpu) {
 }
 
 t_cpu* find_cpu_by_socket(int socket) {
+	log_debug(logger, "find_cpu_by_socket");
 	pthread_mutex_lock(&cpu_mutex);
 	bool find(void* element) {
 		t_cpu* cpu = element;
@@ -90,6 +96,7 @@ t_cpu* find_cpu_by_socket(int socket) {
 }
 
 pcb* find_pcb_by_pid(int pid) {
+	log_debug(logger, "find_pcb_by_pid");
 	pthread_mutex_lock(&socket_pcb_mutex);
 	bool find(void* element) {
 		t_socket_pcb* n_pcb = element;
@@ -128,6 +135,7 @@ pcb* find_pcb_by_pid(int pid) {
 }
 
 pcb* find_pcb_by_socket(int socket) {
+	log_debug(logger, "find_pcb_by_socket");
 	pthread_mutex_lock(&socket_pcb_mutex);
 	bool find(void* element) {
 		t_socket_pcb* n_pcb = element;
@@ -168,6 +176,7 @@ pcb* find_pcb_by_socket(int socket) {
 }
 
 void substract_process_in_memory() {
+	log_debug(logger, "substract_process_in_memory");
 	pthread_mutex_lock(&process_in_memory_mutex);
 
 	process_in_memory--;
@@ -178,6 +187,7 @@ void substract_process_in_memory() {
 }
 
 void add_process_in_memory() {
+	log_debug(logger, "add_process_in_memory");
 	pthread_mutex_lock(&process_in_memory_mutex);
 
 	process_in_memory++;
@@ -188,6 +198,7 @@ void add_process_in_memory() {
 }
 
 void move_to_list(pcb* pcb, int list_name) {
+	log_debug(logger, "move_to_list");
 	int pos;
 
 	if (pcb->state == list_name)
@@ -252,18 +263,21 @@ void move_to_list(pcb* pcb, int list_name) {
  */
 
 bool validate_file_from_fs(char* path) {
+	log_debug(logger, "validate_file_from_fs");
 	runFunction(fs_socket, "kernel_validate_file", 1, path);
 	wait_response(&fs_mutex);
 	return fs_response;
 }
 
 void create_file_from_fs(char* path) {
+	log_debug(logger, "create_file_from_fs");
 	runFunction(fs_socket, "kernel_create_file", 1, path);
 	wait_response(&fs_mutex);
 }
 
 //GETTERS TABLA GLOBAL
 int get_gfd_by_path(char* path) {
+	log_debug(logger, "get_gfd_by_path");
 	int i;
 	for (i = 0; i < list_size(fs_global_table); i++) {
 		t_global_file_table* file = list_get(fs_global_table, i);
@@ -274,6 +288,7 @@ int get_gfd_by_path(char* path) {
 }
 
 int get_pos_in_fs_global_table_by_gfd(int gfd) {
+	log_debug(logger, "get_pos_in_fs_global_table_by_gfd");
 	int i;
 	for (i = 0; i < list_size(fs_global_table); i++) {
 		t_global_file_table* global_files = list_get(fs_global_table, i);
@@ -284,12 +299,14 @@ int get_pos_in_fs_global_table_by_gfd(int gfd) {
 }
 
 char* get_path_by_gfd(int gfd) {
+	log_debug(logger, "get_path_by_gfd");
 	int pos = get_pos_in_fs_global_table_by_gfd(gfd);
 	t_global_file_table* n_file = list_get(fs_global_table, pos);
 	return n_file->path;
 }
 
 t_global_file_table* get_global_file_by_gfd(int gfd) {
+	log_debug(logger, "get_global_file_by_gfd");
 	int i;
 	for (i = 0; i < list_size(fs_global_table); i++) {
 		t_global_file_table* file = list_get(fs_global_table, i);
@@ -302,6 +319,7 @@ t_global_file_table* get_global_file_by_gfd(int gfd) {
 ////GETTERS TABLA DE ARCHIVOS DE PROCESOS
 
 t_process_file_table* get_process_file_by_pid( pid) {
+	log_debug(logger, "get_process_file_by_pid");
 	int i;
 	for (i = 0; i < list_size(fs_process_table); i++) {
 		t_process_file_table* file = list_get(fs_process_table, i);
@@ -312,6 +330,7 @@ t_process_file_table* get_process_file_by_pid( pid) {
 }
 
 int get_pos_open_file_by_fd(t_list* open_files, int fd) {
+	log_debug(logger, "get_pos_open_file_by_fd");
 	int i;
 	for (i = 0; i < list_size(open_files); i++) {
 		t_open_file* file = list_get(open_files, i);
@@ -322,6 +341,7 @@ int get_pos_open_file_by_fd(t_list* open_files, int fd) {
 }
 
 int get_pos_in_fs_process_table_by_pid(int pid) {
+	log_debug(logger, "get_pos_in_fs_process_table_by_pid");
 	int i;
 	for (i = 0; i < list_size(fs_process_table); i++) {
 		t_process_file_table* file = list_get(fs_process_table, i);
@@ -332,6 +352,7 @@ int get_pos_in_fs_process_table_by_pid(int pid) {
 }
 
 t_open_file* get_open_file_by_fd_and_pid(int fd, int pid) {
+	log_debug(logger, "get_open_file_by_fd_and_pid");
 	t_process_file_table* files_open_process = get_process_file_by_pid(pid);
 	if (files_open_process == NULL)
 		return NULL;
@@ -345,6 +366,7 @@ t_open_file* get_open_file_by_fd_and_pid(int fd, int pid) {
 }
 
 char* get_path_by_fd_and_pid(int fd, int pid) {
+	log_debug(logger, "get_path_by_fd_and_pid");
 	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
 	if (process == NULL)
 		return NULL;
@@ -354,7 +376,7 @@ char* get_path_by_fd_and_pid(int fd, int pid) {
 //ADDS
 
 int open_file_in_process_table(char* path, char* flag, int pid) {
-
+	log_debug(logger, "open_file_in_process_table");
 	int pos = get_pos_in_fs_process_table_by_pid(pid);
 	if (pos == -1) {
 		t_process_file_table* n_file = malloc(sizeof(t_process_file_table));
@@ -380,6 +402,7 @@ int open_file_in_process_table(char* path, char* flag, int pid) {
 }
 
 int add_file_in_global_table(char* path) {
+	log_debug(logger, "add_file_in_global_table");
 	t_global_file_table* n_file = malloc(sizeof(t_global_file_table));
 
 	int gfd = get_gfd_by_path(path);
@@ -399,7 +422,7 @@ int add_file_in_global_table(char* path) {
 }
 
 int remove_open_file_by_fd_and_pid(int fd, int pid) {
-
+	log_debug(logger, "remove_open_file_by_fd_and_pid");
 	t_process_file_table* files = get_process_file_by_pid(pid);
 	if (files == NULL)
 		return -1; //El proceso no abrio nunca un archivo
@@ -421,7 +444,7 @@ int remove_open_file_by_fd_and_pid(int fd, int pid) {
 }
 
 bool close_file(int fd_close, int pid) {
-
+	log_debug(logger, "close_file");
 	if (is_default(fd_close))
 		return false;
 
@@ -445,6 +468,7 @@ bool close_file(int fd_close, int pid) {
 }
 
 bool delete_file_from_global_table(int gfd) {
+	log_debug(logger, "delete_file_from_global_table");
 	int pos = get_pos_in_fs_global_table_by_gfd(gfd);
 	if (pos == -1)
 		return false; //No existe archivo
@@ -471,6 +495,7 @@ bool delete_file_from_global_table(int gfd) {
 }
 
 bool is_allowed(int pid, int fd, char* flag) {
+	log_debug(logger, "is_allowed");
 	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
 	if (process == NULL || is_default(fd))
 		return false;
@@ -478,6 +503,7 @@ bool is_allowed(int pid, int fd, char* flag) {
 }
 
 void set_process_file_by_fd(int fd, int pid, t_open_file* n_file) {
+	log_debug(logger, "set_process_file_by_fd");
 	int pos_table = get_pos_in_fs_process_table_by_pid(pid);
 	t_process_file_table* files_open_process = list_get(fs_process_table, pos_table);
 
@@ -487,6 +513,7 @@ void set_process_file_by_fd(int fd, int pid, t_open_file* n_file) {
 }
 
 bool set_pointer(int n_pointer, int fd, int pid) {
+	log_debug(logger, "set_pointer");
 	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
 	if (process == NULL || is_default(fd))
 		return false;
@@ -496,12 +523,14 @@ bool set_pointer(int n_pointer, int fd, int pid) {
 }
 
 bool is_default(int fd) {
+	log_debug(logger, "is_default");
 	if (fd == 0 || fd == 1 || fd == 2)
 		return true;
 	return false;
 }
 
 t_list* add_defaults_fds() {
+	log_debug(logger, "add_defaults_fds");
 	t_list* defaults = list_create();
 	int i;
 	for (i = 0; i < 3; i++) {
@@ -514,6 +543,7 @@ t_list* add_defaults_fds() {
 }
 
 bool write_file(int fd_write, int pid, char* info, int size) {
+	log_debug(logger, "write_file");
 	t_socket_pcb* socket_console = find_socket_by_pid(pid);
 	if (fd_write == 1) {
 		runFunction(socket_console->socket, "kernel_print_message", 2, info, string_itoa(pid));
@@ -539,6 +569,7 @@ bool write_file(int fd_write, int pid, char* info, int size) {
 }
 
 void show_global_file_table() {
+	log_debug(logger, "show_global_file_table");
 	clear_screen();
 
 	if (list_size(fs_global_table) == 0)
@@ -555,6 +586,7 @@ void show_global_file_table() {
 }
 
 void show_all_processes_file_table() {
+	log_debug(logger, "show_all_processes_file_table");
 	int i;
 	for (i = 0; i < list_size(fs_process_table); i++) {
 		t_process_file_table* file = list_get(fs_process_table, i);
@@ -565,6 +597,7 @@ void show_all_processes_file_table() {
 }
 
 void show_process_file_table(int pid) {
+	log_debug(logger, "show_process_file_table");
 	t_process_file_table* files_process = get_process_file_by_pid(pid);
 	if (files_process == NULL)
 		printf("El Proceso %d no tiene archivos abiertos!\n", pid);
@@ -582,6 +615,7 @@ void show_process_file_table(int pid) {
  * HEAP
  */
 t_heap_stats* find_heap_stats_by_pid(int pid) {
+	log_debug(logger, "find_heap_stats_by_pid");
 	bool find(void* element) {
 		t_heap_stats* n_heap = element;
 		return n_heap->pid == pid;
@@ -590,6 +624,7 @@ t_heap_stats* find_heap_stats_by_pid(int pid) {
 	return heap;
 }
 t_heap_manage* find_heap_manage_by_pid(int pid) {
+	log_debug(logger, "find_heap_manage_by_pid");
 	bool find(void* element) {
 		t_heap_manage* n_heap = element;
 		return n_heap->pid == pid;
@@ -598,6 +633,7 @@ t_heap_manage* find_heap_manage_by_pid(int pid) {
 	return heap;
 }
 int find_heap_pages_pos_in_list(t_list* list, int pid) {
+	log_debug(logger, "find_heap_pages_pos_in_list");
 	int i;
 	for (i = 0; i < list_size(list); i++) {
 		t_heap_manage* f_heap = list_get(list, i);
@@ -608,6 +644,7 @@ int find_heap_pages_pos_in_list(t_list* list, int pid) {
 }
 
 int get_suitable_page(int space, t_list* heap_pages, int start) {
+	log_debug(logger, "get_suitable_page");
 	int i;
 	for (i = start; i < list_size(heap_pages); i++) {
 		t_heap_page* heap = list_get(heap_pages, i);
@@ -618,6 +655,7 @@ int get_suitable_page(int space, t_list* heap_pages, int start) {
 }
 
 HeapMetadata* read_HeapMetadata(char* page, int offset) {
+	log_debug(logger, "read_HeapMetadata");
 	if (offset == mem_page_size)
 		return NULL;
 
@@ -634,6 +672,7 @@ HeapMetadata* read_HeapMetadata(char* page, int offset) {
 }
 
 int write_HeapMetadata(HeapMetadata* n_heap, int offset, char* page) {
+	log_debug(logger, "write_HeapMetadata");
 	int i, j = 0;
 
 	page[offset] = n_heap->isFree ? '1' : '0';
@@ -653,6 +692,7 @@ int write_HeapMetadata(HeapMetadata* n_heap, int offset, char* page) {
 }
 //Esta funcion ocupa un espacio en una pagina, caso contrario retorna -1
 int it_fits_malloc(char* full_page, int space_occupied) {
+	log_debug(logger, "it_fits_malloc");
 	int offset;
 	HeapMetadata* actual_heap;
 
@@ -684,6 +724,7 @@ int it_fits_malloc(char* full_page, int space_occupied) {
 }
 //Esta funcion libera una posicion de pagina y hace la parte de fragmentacion si hay dos bloques continuos libres y retorna la cantidad de espacio liberado o -1 si se libero toda la pagina
 int free_heap(char* full_page, int pos) {
+	log_debug(logger, "free_heap");
 	HeapMetadata* heap = read_HeapMetadata(full_page, pos);
 	heap->isFree = true;
 	write_HeapMetadata(heap, pos, full_page);
@@ -722,6 +763,7 @@ int free_heap(char* full_page, int pos) {
 }
 
 int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
+	log_debug(logger, "add_heap_page");
 	runFunction(mem_socket, "i_add_pages_to_program", 2, string_itoa(pid), string_itoa(page));
 	wait_response(&mem_response);
 	if (memory_response == NO_SE_PUEDEN_RESERVAR_RECURSOS) {
@@ -752,6 +794,7 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 }
 
 void occupy_space(int pid, int page, int space, bool freed) {
+	log_debug(logger, "occupy_space");
 	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
 	int i;
 	for (i = 0; i < list_size(heap_manage->heap_pages); i++) {
@@ -764,6 +807,7 @@ void occupy_space(int pid, int page, int space, bool freed) {
 }
 
 int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
+	log_debug(logger, "malloc_memory");
 	if (size > mem_page_size - (heap_metadata_size * 2))
 		return RESERVAR_MAS_MEMORIA_TAMANIO_PAGINA; //directamente lo rechazo porque excede el tamanio maximo del alloc
 
@@ -800,6 +844,7 @@ int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
 }
 
 void free_memory(int pid, int pointer) {
+	log_debug(logger, "free_memory");
 	runFunction(mem_socket, "i_get_page_from_pointer", 1, string_itoa(pointer));
 	wait_response(&mem_response);
 	runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(page_from_pointer), string_itoa(0), string_itoa(mem_page_size));
@@ -822,14 +867,17 @@ void free_memory(int pid, int pointer) {
 }
 
 void wait_response(pthread_mutex_t* mutex) {
+	log_debug(logger, "wait_response");
 	pthread_mutex_lock(mutex);
 }
 
 void signal_response(pthread_mutex_t* mutex) {
+	log_debug(logger, "signal_response");
 	pthread_mutex_unlock(mutex);
 }
 
 void create_function_dictionary() {
+	log_debug(logger, "create_function_dictionary");
 	fns = dictionary_create();
 
 	dictionary_put(fns, "console_load_program", &console_load_program);
@@ -863,6 +911,7 @@ void create_function_dictionary() {
 }
 
 void open_socket(t_config* config, char* name) {
+	log_debug(logger, "open_socket");
 	int port;
 
 	if (!strcmp(name, CONSOLE))
@@ -884,6 +933,7 @@ void open_socket(t_config* config, char* name) {
 }
 
 void connect_to_server(t_config* config, char* name) {
+	log_debug(logger, "connect_to_server");
 	int port;
 	char* ip_server;
 	int* socket;
@@ -912,7 +962,7 @@ void connect_to_server(t_config* config, char* name) {
 }
 
 void init_kernel(t_config* config) {
-	log_debug(logger, "Initiating KERNEL");
+	log_debug(logger, "init_kernel");
 
 	pthread_mutex_init(&cpu_mutex, NULL);
 	pthread_mutex_init(&p_counter_mutex, NULL);
@@ -998,6 +1048,7 @@ void init_kernel(t_config* config) {
 }
 
 void print_menu() {
+	log_debug(logger, "print_menu");
 	clear_screen();
 
 	show_title("KERNEL - MAIN MENU");
@@ -1014,6 +1065,7 @@ void print_menu() {
 }
 
 void ask_option(char *sel) {
+	log_debug(logger, "ask_option");
 	print_menu();
 	fgets(sel, 255, stdin);
 	strtok(sel, "\n");
@@ -1021,6 +1073,7 @@ void ask_option(char *sel) {
 }
 
 void show_active_process(char option) {
+	log_debug(logger, "show_active_process");
 	pthread_mutex_lock(&pcb_list_mutex);
 	t_list* list = list_create();
 	char* list_name = string_new();
@@ -1091,6 +1144,7 @@ void show_active_process(char option) {
 }
 
 void do_show_active_process(char* sel) {
+	log_debug(logger, "do_show_active_process");
 	if (!strcmp(sel, "A")) {
 		char queue[255];
 		println("> [A] ALL");
@@ -1110,6 +1164,7 @@ void do_show_active_process(char* sel) {
 
 // Cantidad de páginas de Heap
 void show_heap_pages(int pid) {
+	log_debug(logger, "show_heap_pages");
 	t_heap_manage* heap_manage = find_heap_manage_by_pid(pid);
 	int pages = 0;
 	if (heap_manage != NULL)
@@ -1120,6 +1175,7 @@ void show_heap_pages(int pid) {
 
 // Cantidad de acciones alocar en operaciones y bytes
 void show_allocates(int pid) {
+	log_debug(logger, "show_allocates");
 	t_heap_stats* heap_stats = find_heap_stats_by_pid(pid);
 
 	printf("HEAP MALLOC NUM: %d\n", heap_stats->malloc_c);
@@ -1128,6 +1184,7 @@ void show_allocates(int pid) {
 
 // Cantidad de acciones liberar en operaciones y bytes
 void show_free(int pid) {
+	log_debug(logger, "show_free");
 	t_heap_stats* heap_stats = find_heap_stats_by_pid(pid);
 
 	printf("HEAP FREE NUM: %d\n", heap_stats->free_c);
@@ -1136,12 +1193,14 @@ void show_free(int pid) {
 
 // Cantidad de syscalls
 void show_syscalls(int pid) {
+	log_debug(logger, "show_syscalls");
 	pcb* n_pcb = find_pcb_by_pid(pid);
 
 	printf("SYSCALLS NUM: %d\n", n_pcb->statistics.op_priviliges);
 }
 
 void show_info(int pid) {
+	log_debug(logger, "show_info");
 	pcb* n_pcb = find_pcb_by_pid(pid);
 	char* info = string_new();
 	string_append_with_format(&info, "PID: %d\n", n_pcb->pid);
@@ -1189,6 +1248,7 @@ void do_change_multiprogramming(char* sel) {
 }
 
 t_socket_pcb* find_socket_by_pid(int pid) {
+	log_debug(logger, "find_socket_by_pid");
 	pthread_mutex_lock(&socket_pcb_mutex);
 	bool find(void* element) {
 		t_socket_pcb* n_socket_pcb = element;
@@ -1201,6 +1261,7 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 }
 
 void stop_process(int pid) {
+	log_debug(logger, "stop_process");
 	t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
 	pcb* n_pcb = find_pcb_by_pid(pid);
 	n_pcb->exit_code = ERROR_SIN_DEFINIR;

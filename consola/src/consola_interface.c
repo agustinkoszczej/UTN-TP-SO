@@ -40,7 +40,6 @@ void kernel_response_load_program(socket_connection* connection, char** args) {
 		process->pid = pid;
 		new_message("Started program.", pid);
 	} else {
-		remove_from_process_list(process);
 		abort_program(process, response);
 	}
 }

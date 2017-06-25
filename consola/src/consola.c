@@ -30,32 +30,15 @@ t_process* find_process_by_pid(int pid) {
 	t_process* process = list_find(process_list, &find_pid);
 	pthread_mutex_unlock(&process_list_mutex);
 
-	log_debug(logger, "find_process_by_pid: t_process*");
+	log_debug(logger, "find_process_by_pid: IS NULL = %s", process == NULL ? "true" : "false");
 	return process;
-}
-
-void remove_from_process_list(t_process* process) {
-	log_debug(logger, "remove_from_process_list: t_process*");
-
-	int i;
-	pthread_mutex_lock(&process_list_mutex);
-	for (i = 0; i < list_size(process_list); i++) {
-		t_process* process2 = list_get(process_list, i);
-		if (process->socket == process2->socket) {
-			list_remove(process_list, i);
-			break;
-		}
-	}
-	pthread_mutex_unlock(&process_list_mutex);
-
-	log_debug(logger, "remove_from_process_list: void");
 }
 
 void show_message(int i) {
 	log_debug(logger, "show_message: i=%d", i);
 
 	t_message* message = list_get(messages_list, i);
-	printf("[%s] [%d] %s\n", message->time, message->pid, message->message);
+	printf("[%s] [%d] [%s] %s\n", message->time, message->pid, message->name, message->message);
 
 	log_debug(logger, "show_message: void");
 }
@@ -69,7 +52,7 @@ void print_menu() {
 
 	printf("[Procesos: %02d]\n", p_counter);
 	pthread_mutex_lock(&messages_list_mutex);
-	for (i = 0; i < 5; i++)
+	for (i = 0; i < 10; i++)
 		if (i < list_size(messages_list))
 			show_message(i);
 		else
@@ -92,17 +75,20 @@ void new_message(char* text, int pid) {
 	log_debug(logger, "new_message: text=%s, pid=%d", text, pid);
 
 	t_message* message = malloc(sizeof(t_message));
+	message->name = string_new();
 	message->pid = pid;
 	message->message = text;
 	message->time = temporal_get_string_time();
 
 	t_process* process = find_process_by_pid(pid);
-	if (process != NULL)
+	if (process != NULL) {
+		string_append(&message->name, process->name);
 		process->c_message++;
+	}
 
 	pthread_mutex_lock(&messages_list_mutex);
 	list_add(messages_list, message);
-	if (list_size(messages_list) > 5)
+	if (list_size(messages_list) > 10)
 		list_remove(messages_list, 0);
 	pthread_mutex_unlock(&messages_list_mutex);
 
@@ -137,6 +123,8 @@ void start_program(char* location) {
 	int size;
 	t_process* process = malloc(sizeof(t_process));
 
+	process->name = string_new();
+	string_append(&process->name, location);
 	char* time_start = temporal_get_string_time();
 	process->time_start = malloc(string_length(time_start));
 	process->time_start = time_start;
@@ -188,9 +176,6 @@ void do_disconnect_console(char* sel) {
 			pthread_mutex_unlock(&process_list_mutex);
 			abort_program(process, FINALIZADO_CONSOLA);
 		}
-		pthread_mutex_lock(&process_list_mutex);
-		list_clean(process_list);
-		pthread_mutex_unlock(&process_list_mutex);
 	}
 
 	log_debug(logger, "do_disconnect_console: void");
@@ -200,15 +185,34 @@ void do_start_program(char* sel) {
 	log_debug(logger, "do_start_program: sel=%s", sel);
 
 	if (!strcmp(sel, "S")) {
-		char location[255];
+		char pos[255];
 
 		pthread_mutex_lock(&print_menu_mutex);
-		printf("> File path: ");
-		fgets(location, sizeof(location), stdin);
-		strtok(location, "\n");
+		clear_screen();
+		struct dirent **namelist;
+		int n;
+		int i = 0;
+		t_list* files = list_create();
+		n = scandir("resources", &namelist, NULL, alphasort);
+		if (n < 0)
+			perror("scandir");
+		else {
+			while (i < n) {
+				if (strcmp(namelist[i]->d_name, ".") && strcmp(namelist[i]->d_name, "..")) {
+					printf("%d. %s\n", files->elements_count + 1, namelist[i]->d_name);
+					list_add(files, namelist[i]->d_name);
+				} else
+					free(namelist[i]);
+				++i;
+			}
+			free(namelist);
+		}
+		printf("\n> Selection: ");
+		fgets(pos, sizeof(pos), stdin);
+		strtok(pos, "\n");
 		pthread_mutex_unlock(&print_menu_mutex);
 
-		start_program(location);
+		start_program(list_get(files, atoi(pos) - 1));
 	}
 
 	log_debug(logger, "do_start_program: void");
@@ -231,8 +235,6 @@ void abort_program(t_process* process, int exit_code) {
 	char* message = string_from_format("[%s] [%s] [%d]", process->time_start, process->time_finish, process->c_message);
 	new_message(message, process->pid);
 
-	process->pid = -1;
-	process->socket = -1;
 	//list_clean(messages_list);
 	//log_debug(logger, dictionary_get(message_map, string_itoa(exit_code)));
 	//runFunction(process->socket, "console_abort_program", 2, CONSOLE, string_itoa(process->pid));
