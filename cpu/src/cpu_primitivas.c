@@ -241,14 +241,14 @@ void cpu_irAlLabel(t_nombre_etiqueta t_nombre_etiqueta) {
  * @return	void
  */
 void cpu_llamarSinRetorno(t_nombre_etiqueta etiqueta) {
-	log_debug(logger, "Llamar sin retorno");
+	log_debug(logger, "|PRIMITIVA| Llamar sin retorno");
 	/*t_stack* stack_aux = stack_create();
 	 stack_aux->retpos = malloc(sizeof(int));
 	 *stack_aux->retpos = pcb_actual->pc;
 	 list_add(pcb_actual->i_stack, stack_aux);
 
 	 cpu_irAlLabel(etiqueta);*/
-	//pcb_actual->exit_code = ERROR_SINTAXIS; //FIXME no se actualizan los exits codes :c
+	pcb_actual->exit_code = ERROR_SINTAXIS; //FIXME no se actualizan los exits codes :c
 	cpu_finalizar();
 }
 
