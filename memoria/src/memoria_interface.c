@@ -32,7 +32,7 @@ void i_read_bytes_from_page(socket_connection* connection, char** args) {
 	char* buffer = read_bytes(pid, page, offset, size);
 
 	runFunction(connection->socket, "memory_response_read_bytes_from_page", 1, buffer);
-	log_debug(logger, "memory_response_read_bytes_from_page: '%s'", buffer);
+	log_debug(logger, "memory_response_read_bytes_from_page: socket: '%d', pid: '%d', page: '%d', offset_rel: '%d', size: '%d', buffer: '%s'", connection->socket, pid, page, offset, size, buffer);
 }
 void i_store_bytes_in_page(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);

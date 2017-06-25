@@ -26,6 +26,10 @@ typedef struct {
 char* receive_dynamic_message(int socket);
 void send_dynamic_message(int socket, char* msj);
 
+char* intToChar4(int num);
+int char4ToInt(char* chars);
+
+
 void receiptMessage(void * arguments);
 
 //envia un mensaje a un socket

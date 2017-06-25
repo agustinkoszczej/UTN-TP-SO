@@ -36,7 +36,7 @@ t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
 
 	int vars_c = vars_in_stack();
 
-	int occupied_bytes = vars_c * 4;
+	int occupied_bytes = vars_c * sizeof(int);
 	int relative_page = occupied_bytes / frame_size;
 
 	if (relative_page > stack_size) {
@@ -49,7 +49,7 @@ t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
 	n_var->id = identificador_variable;
 	n_var->pag = pcb_actual->page_c + relative_page;
 	n_var->off = occupied_bytes - relative_page * frame_size;
-	n_var->size = 4;
+	n_var->size = sizeof(int);
 
 	if (!is_digit)
 		list_add(stack->vars, n_var);
@@ -92,8 +92,7 @@ t_puntero cpu_obtenerPosicionVariable(t_nombre_variable identificador_variable) 
 				int n_offset = space_occupied - relative_page * frame_size;
 				int n_page = pcb_actual->page_c + relative_page;
 
-				runFunction(mem_socket, "i_get_frame_from_pid_and_page", 2,
-						string_itoa(pcb_actual->pid), string_itoa(n_page));
+				runFunction(mem_socket, "i_get_frame_from_pid_and_page", 2, string_itoa(pcb_actual->pid), string_itoa(n_page));
 				wait_response(&planning_mutex);
 
 				offset_abs = frame_from_pid_and_page * frame_size + n_offset;
@@ -101,7 +100,7 @@ t_puntero cpu_obtenerPosicionVariable(t_nombre_variable identificador_variable) 
 						identificador_variable, offset_abs);
 				return offset_abs;
 			} else
-				space_occupied += 4;
+				space_occupied += sizeof(int);
 		}
 	}
 
@@ -127,20 +126,22 @@ t_valor_variable cpu_dereferenciar(t_puntero direccion_variable) {
 			string_itoa(direccion_variable));
 	wait_response(&planning_mutex);
 
-	int n_page = page_from_pointer; //direccion_variable / frame_size;
+	int n_page = page_from_pointer;
 	int n_offset = direccion_variable % frame_size;
 
 	char* pid = string_itoa(pcb_actual->pid);
 	char* page = string_itoa(n_page);
 	char* offset = string_itoa(n_offset);
-	char* size = string_itoa(4);
+	char* size = string_itoa(sizeof(int));
 
 	runFunction(mem_socket, "i_read_bytes_from_page", 4, pid, page, offset,
 			size);
 	wait_response(&planning_mutex);
-	log_debug(logger, "|PRIMITIVA| Dereferenciar en '%d', page: '%s', offset: '%s', value: '%s', ",
-			direccion_variable, page, offset, mem_buffer);
-	return atoi(mem_buffer);
+
+
+	log_debug(logger, "|PRIMITIVA| Dereferenciar en '%d', page: '%s', offset: '%s', value: '%d', ",
+			direccion_variable, page, offset, mem_value);
+	return (t_valor_variable) mem_value;
 }
 
 /*
@@ -165,14 +166,14 @@ void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
 	char* pid = string_itoa(pcb_actual->pid);
 	char* page = string_itoa(n_page);
 	char* offset = string_itoa(n_offset);
-	char* size = string_itoa(4);
-	char* buffer = string_itoa(valor);
+	char* size = string_itoa(sizeof(int));
+	char* buffer = intToChar4(valor);
 
 	runFunction(mem_socket, "i_store_bytes_in_page", 5, pid, page, offset, size,
 			buffer);
 	wait_response(&planning_mutex);
-	log_debug(logger, "|PRIMITIVA| Asignar '%s' en offset_abs: '%d', offset_rel: '%s'",
-			buffer, direccion_variable, offset);
+	log_debug(logger, "|PRIMITIVA| Asignar '%d' en offset_abs: '%d', offset_rel: '%s'",
+			char4ToInt(buffer), direccion_variable, offset);
 }
 
 /*
@@ -288,7 +289,7 @@ void cpu_llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) 
 
 	n_retvar->pag = page_from_pointer;
 	n_retvar->off = donde_retornar % frame_size;
-	n_retvar->size = 4;
+	n_retvar->size = sizeof(int);
 
 	n_stack->retvar = n_retvar;
 	n_stack->retpos = pcb_actual->pc;

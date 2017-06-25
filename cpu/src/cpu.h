@@ -34,6 +34,7 @@
 /*
  * MEMORY
  */
+int mem_value;
 char* mem_buffer;
 int frame_size;
 int stack_size;

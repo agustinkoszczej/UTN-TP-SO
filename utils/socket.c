@@ -24,6 +24,19 @@
 #define BACKLOG 10			// Cantidad de conexiones pendientes  que se mantienen en cola
 #define MAXDATASIZE 25000 	// máximo número de bytes que se pueden leer de una vez
 
+char* intToChar4(int num){
+	//RECORDAR: liberar el puntero con free()
+	char* n_char = string_new();//malloc(sizeof(int));
+	memcpy(n_char, &num, sizeof(int));
+	return n_char;
+}
+
+int char4ToInt(char* chars){
+	int a;
+	memcpy(&a, chars, sizeof(int));
+	return a;
+}
+
 void send_message(int socket, char* msg, int size) {
 	send(socket, msg, size, 0);
 }

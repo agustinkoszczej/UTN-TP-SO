@@ -21,10 +21,15 @@ void memory_retard(socket_connection* connection, char** args) {
 	mem_delay = atoi(args[0]);
 }
 void memory_response_read_bytes_from_page(socket_connection* connection, char** args) {
-	log_debug(logger, "memory_response_read_bytes_from_page: buffer=%s", args[0]);
-
 	mem_buffer = string_new();
 	string_append(&mem_buffer, args[0]);
+
+	char* aux = string_new();
+	aux = args[0];
+	mem_value = char4ToInt(aux);
+
+	//log_debug(logger, "memory_response_read_bytes_from_page: buffer=%s", mem_buffer);
+
 	signal_response(&planning_mutex);
 }
 void memory_response_store_bytes_in_page(socket_connection* connection, char** args) {
