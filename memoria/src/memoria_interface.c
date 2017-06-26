@@ -57,7 +57,7 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 				return adm_table->pid == pid && adm_table->pag == n_page;
 			}
 			int i;
-			for (i = hash(pid, n_page); i < list_size(adm_list); i++) {
+			for (i = 0; i < list_size(adm_list); i++) {
 				t_adm_table* adm_table = list_get(adm_list, i);
 				if (adm_table->pid < 0) {
 					adm_table->pid = pid;

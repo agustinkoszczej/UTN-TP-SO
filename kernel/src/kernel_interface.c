@@ -554,7 +554,7 @@ void newClient(socket_connection* connection) {
 		pthread_mutex_lock(&cpu_mutex);
 		list_add(cpu_list, cpu);
 		pthread_mutex_unlock(&cpu_mutex);
-		runFunction(connection->socket, "kernel_quantum_page_stack_size", 3, string_itoa(mem_page_size), string_itoa(stack_size), string_itoa(quantum_sleep));
+		runFunction(connection->socket, "kernel_page_stack_size", 2, string_itoa(mem_page_size), string_itoa(stack_size));
 	}
 }
 void connectionClosed(socket_connection* connection) {

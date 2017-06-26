@@ -80,21 +80,24 @@ void create_function_dictionary() {
 
 	fns = dictionary_create();
 
+	//MEMORY
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "memory_retard", &memory_retard);
 	dictionary_put(fns, "memory_response_read_bytes_from_page", &memory_response_read_bytes_from_page);
 	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
 	dictionary_put(fns, "memory_response_get_frame_from_pid_and_page", &memory_response_get_frame_from_pid_and_page);
-
+	dictionary_put(fns, "memory_response_get_page_from_pointer", &memory_response_get_page_from_pointer);
+	//KERNEL
 	dictionary_put(fns, "kernel_receive_pcb", &kernel_receive_pcb);
-	dictionary_put(fns, "kernel_quantum_page_stack_size", &kernel_quantum_page_stack_size);
+	dictionary_put(fns, "kernel_page_stack_size", &kernel_page_stack_size);
 	dictionary_put(fns, "kernel_response_get_shared_var", &kernel_response_get_shared_var);
 	dictionary_put(fns, "kernel_response_set_shared_var", &kernel_response_set_shared_var);
 	dictionary_put(fns, "kernel_response_file", &kernel_response_file);
 	dictionary_put(fns, "kernel_response_validate_file", &kernel_response_validate_file);
 	dictionary_put(fns, "kernel_response", &kernel_response);
 	dictionary_put(fns, "kernel_response_read_file", &kernel_response_read_file);
-	dictionary_put(fns, "memory_response_get_page_from_pointer", &memory_response_get_page_from_pointer);
+	dictionary_put(fns, "kernel_update_quantum_sleep", &kernel_update_quantum_sleep);
+
 
 	log_debug(logger, "create_function_dictionary: void");
 }
