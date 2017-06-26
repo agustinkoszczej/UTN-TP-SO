@@ -35,7 +35,7 @@ void memory_response_get_page_from_pointer(socket_connection* connection, char**
  * KERNEL
  */
 void kernel_receive_pcb(socket_connection* connection, char** args);
-void kernel_quantum_page_stack_size(socket_connection* connection, char** args);
+void kernel_page_stack_size(socket_connection* connection, char** args);
 void kernel_response_get_shared_var(socket_connection* connection, char** args);
 void kernel_response_set_shared_var(socket_connection* connection, char** args);
 void kernel_response_file(socket_connection* connection, char** args);
@@ -43,6 +43,7 @@ void kernel_response_validate_file(socket_connection* connection, char** args);
 void kernel_response_read_file(socket_connection* connection, char** args);
 void memory_retard(socket_connection* connection, char** args);
 void kernel_response(socket_connection* connection, char** args);
+void kernel_update_quantum_sleep(socket_connection* connection, char** args);
 
 bool finished;
 

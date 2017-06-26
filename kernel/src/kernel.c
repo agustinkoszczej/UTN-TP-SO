@@ -1292,12 +1292,12 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 	return n_socket_pcb;
 }
 
-void stop_process(int pid) {
+void stop_process(int pid) { //TODO esto esta mal
 	log_debug(logger, "stop_process");
 	t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
 	pcb* n_pcb = find_pcb_by_pid(pid);
 	n_pcb->exit_code = ERROR_SIN_DEFINIR;
-	runFunction(n_socket_pcb->socket, "kernel_stop_process", 2, n_socket_pcb->pid, n_pcb->exit_code);
+	runFunction(n_socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_socket_pcb->pid), string_itoa(n_pcb->exit_code));
 }
 
 void do_stop_process(char* sel) {
@@ -1319,6 +1319,93 @@ void do_stop_planification(char* sel) {
 	}
 }
 
+void init_notify(char* path_file){
+	if (watch_descriptor > 0 && fd_inotify > 0) {
+		inotify_rm_watch(fd_inotify, watch_descriptor);
+	}
+	fd_inotify = inotify_init();
+		if (fd_inotify > 0) {
+			watch_descriptor = inotify_add_watch(fd_inotify, path_file, IN_MODIFY);
+		}
+}
+
+void do_notify(int argc){
+
+	/*int length, i = 0;
+	char buffer[BUF_LEN];
+	length = read(fd_inotify, buffer, BUF_LEN);
+
+	if (length <= 0){
+		log_debug(logger, "inotify error");
+	} else {
+
+		struct inotify_event *event = (struct inotify_event *) &buffer[i];
+		t_config * new_config = NULL;
+		new_config = config_create(path_file);
+
+		if( new_config == NULL || !config_has_property(new_config, "QUANTUM_SLEEP") ){
+			return;
+		}
+
+		log_debug(logger, "Se ha modificado el archivo de configuracion.");
+
+		int n_quantum_sleep = config_get_int_value(new_config, "QUANTUM_SLEEP");
+
+		if(quantum_sleep != n_quantum_sleep){
+			quantum_sleep = n_quantum_sleep;
+		}
+		free(new_config);
+		i += EVENT_SIZE + event->len;
+		FD_CLR(fd_inotify, &readfds);
+		init_notify(path_file);
+		max_fd = (max_fd < fd_inotify)? fd_inotify : max_fd;
+		FD_SET(fd_inotify, &readfds);
+	} // fin else-if*/
+	char buffer[BUF_LEN];
+		int length = read(fd_inotify, buffer, BUF_LEN);
+		int e = 0;
+		while (e < length) {
+			struct inotify_event *event =
+					(struct inotify_event *) &buffer[e];
+			if (event->len) {
+				if (event->mask & IN_CLOSE_WRITE) {
+					if (strcmp(event->name, "nucleo.cfg") == 0) {
+						log_debug(logger,
+								"Se modifico el archivo %s y se releera",
+								event->name);
+						load_config(&config, argc, path_config);
+					}
+				}
+			}
+			e += EVENT_SIZE + event->len;
+		}
+}
+
+void notify_all_cpus(){
+	int i;
+	log_debug(logger, "notify_all_cpus : quantum_sleep: '%d'", quantum_sleep);
+	for(i=0; i<list_size(cpu_list); i++){
+		t_cpu* cpu_elem = list_get(cpu_list, i);
+		runFunction(cpu_elem->socket, "kernel_update_quantum_sleep", 1, string_itoa(quantum_sleep));
+	}
+}
+
+void thread_continuous_scan_notify(int argc){
+	while(1){
+		FD_ZERO(&readfds);
+		FD_SET(fd_inotify, &readfds);
+		if (max_fd < fd_inotify) max_fd = fd_inotify;
+		waiting.tv_sec = 1;
+		waiting.tv_usec = 5	;
+		select(max_fd + 1, &readfds, NULL, NULL, &waiting);
+
+		if(FD_ISSET(fd_inotify, &readfds)){
+			do_notify(argc);
+			notify_all_cpus();
+		}
+	}
+}
+
 int main(int argc, char *argv[]) {
 	clear_screen();
 	char sel[255];
@@ -1329,10 +1416,15 @@ int main(int argc, char *argv[]) {
 	create_function_dictionary();
 
 	path_config = string_from_format("%s", argv[1]);
-	load_config(&config, argc, argv[1]);
+	load_config(&config, argc, path_config);
 	print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
 
 	init_kernel(config);
+	quantum_sleep = config_get_int_value(config, QUANTUM_SLEEP);
+
+	init_notify(path_config);
+	pthread_t notify_thread;
+	pthread_create(&notify_thread, NULL, thread_continuous_scan_notify, argc);
 
 	wait_any_key();
 

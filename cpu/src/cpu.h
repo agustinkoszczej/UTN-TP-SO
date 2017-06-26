@@ -43,8 +43,8 @@ int page_from_pointer;
 /*
  * KERNEL
  */
-int mem_delay;
 int quantum_sleep;
+int mem_delay;
 int kernel_shared_var;
 char* read_info;
 bool is_locked;

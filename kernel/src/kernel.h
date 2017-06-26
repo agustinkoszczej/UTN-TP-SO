@@ -15,6 +15,12 @@
 #include <config.h>
 #include <socket.h>
 #include <pcb.h>
+
+#include <unistd.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/inotify.h>
+
 #include "kernel_interface.h"
 
 #include<exit_codes.h>
@@ -59,6 +65,15 @@ int quantum;
 int stack_size;
 int quantum_sleep;
 int planning_alg;
+
+
+//inotify
+int fd_inotify, watch_descriptor, max_fd;
+struct timeval waiting;
+fd_set readfds; //el papu del select
+#define EVENT_SIZE  ( sizeof (struct inotify_event) + 24 )
+#define BUF_LEN (1024 * (EVENT_SIZE + 12))
+
 
 typedef struct {
 	char* var;

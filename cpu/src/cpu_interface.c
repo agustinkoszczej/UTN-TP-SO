@@ -51,6 +51,10 @@ void memory_response_get_page_from_pointer(socket_connection* connection, char**
 /*
  * KERNEL
  */
+void kernel_update_quantum_sleep(socket_connection* connection, char** args){
+	quantum_sleep = atoi(args[0]);
+	log_debug(logger, "kernel_update_quantum_sleep: quantum_sleep: '%d'", quantum_sleep);
+}
 void kernel_response_set_shared_var(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_set_shared_var: void");
 
@@ -62,16 +66,14 @@ void kernel_response_get_shared_var(socket_connection* connection, char** args) 
 	kernel_shared_var = atoi(args[0]);
 	signal_response(&planning_mutex);
 }
-void kernel_quantum_page_stack_size(socket_connection* connection, char** args) {
+void kernel_page_stack_size(socket_connection* connection, char** args) {
 	int mem_page_size = atoi(args[0]);
 	int stack_s = atoi(args[1]);
-	int quantum_s = atoi(args[2]);
 
-	log_debug(logger, "kernel_quantum_page_stack_size: quantum_sleep=%d, mem_page_size=%d, stack_size=%d", quantum_s, mem_page_size, stack_s);
+	log_debug(logger, "kernel_quantum_page_stack_size: mem_page_size=%d, stack_size=%d",mem_page_size, stack_s);
 
 	frame_size = mem_page_size;
 	stack_size = stack_s;
-	quantum_sleep = quantum_s;
 	runFunction(connection->socket, "cpu_received_page_stack_size", 0);
 }
 void kernel_receive_pcb(socket_connection* connection, char** args) {
@@ -112,6 +114,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		pcb_actual->pc++;
 		pcb_actual->statistics.cycles++;
 		sleep(quantum_sleep / 1000);
+		log_debug("\n\n\nquantum_sleep: %d\n\n\n", quantum_sleep);
 	}
 	printf("Finished executing.\n\n");
 	log_debug(logger, "cpu_task_finished");
