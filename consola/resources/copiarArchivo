@@ -1,12 +1,14 @@
 #!/usr/bin/ansisop
 
 begin
-	variables a, f, g
+	variables a, f, g, h
+	h = 101
 	alocar a 100
 	abrir f LEC /origen
 	abrir g LEC /destino
-	leer f a 10
-	escribir g a 10
+	escribir f h 1
+	leer f a 3
+	escribir g a 3
 	cerrar f
 	cerrar g
 	liberar a

@@ -52,20 +52,20 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 
 	if (has_available_frames(1)) {
 		pthread_mutex_lock(&frames_mutex);
-			bool find(void* element) {
-				t_adm_table* adm_table = element;
-				return adm_table->pid == pid && adm_table->pag == n_page;
+		bool find(void* element) {
+			t_adm_table* adm_table = element;
+			return adm_table->pid == pid && adm_table->pag == n_page;
+		}
+		int i;
+		for (i = hash(pid, n_page); i < list_size(adm_list); i++) {
+			t_adm_table* adm_table = list_get(adm_list, i);
+			if (adm_table->pid < 0) {
+				adm_table->pid = pid;
+				adm_table->pag = n_page;
+				break;
 			}
-			int i;
-			for (i = hash(pid, n_page); i < list_size(adm_list); i++) {
-				t_adm_table* adm_table = list_get(adm_list, i);
-				if (adm_table->pid < 0) {
-					adm_table->pid = pid;
-					adm_table->pag = n_page;
-					break;
-				}
-			}
-			pthread_mutex_unlock(&frames_mutex);
+		}
+		pthread_mutex_unlock(&frames_mutex);
 
 		runFunction(connection->socket, "memory_response_heap", 1, string_itoa(NO_ERRORES));
 	} else
@@ -105,10 +105,10 @@ void i_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
 
 	//TODO y aqui llamaria a la funcion de Hashing...SI TUVIERA UNA!!! (*inserte meme de papa de Timy) xd
 	int i, frame;
-	for(i=hash(pid,page);i<list_size(adm_list);i++){
+	for (i = hash(pid, page); i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 
-		if(adm_table->pid == pid && adm_table->pag == page){
+		if (adm_table->pid == pid && adm_table->pag == page) {
 			frame = adm_table->frame;
 			break;
 		}
@@ -128,13 +128,13 @@ unsigned int hash(int pid, int page) {
 	return indice;
 }
 /*
-int hash(int pid, int pag){
-	int index = (pid * frames_count) + (pag * pid);
+ int hash(int pid, int pag){
+ int index = (pid * frames_count) + (pag * pid);
 
-	return index;
-}*
+ return index;
+ }*
 
-/*
+ /*
  * SERVER
  */
 void client_identify(socket_connection* connection, char** args) {
@@ -174,9 +174,4 @@ void connectionClosed(socket_connection* connection) {
 		pthread_mutex_unlock(&cpu_sockets_mutex);
 	}
 }
-
-
-
-
-
 

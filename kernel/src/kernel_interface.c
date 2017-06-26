@@ -321,9 +321,10 @@ void cpu_open_file(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_open_file");
 	char* path = args[0];
 	char* flags = args[1];
-	int pid = atoi(args[2]);
+	bool validate = atoi(args[2]);
+	int pid = atoi(args[3]);
 
-	if (string_contains(flags, "c")) {
+	if (!validate && string_contains(flags, "c")) {
 		runFunction(fs_socket, "kernel_create_file", 1, path);
 		wait_response(&fs_mutex);
 		if (fs_response == 0) {
@@ -420,20 +421,31 @@ void cpu_write_file(socket_connection* connection, char** args) {
 void cpu_read_file(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_read_file");
 	int fd = atoi(args[0]);
-	int offset = atoi(args[1]);
+	int direccion_variable = atoi(args[1]);
 	int size = atoi(args[2]);
 	int pid = atoi(args[3]);
 
 	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
 	char* path = get_path_by_gfd(process->gfd);
 	char* flags = process->flag;
+	int offset = process->pointer;
 
 	if (is_allowed(pid, fd, flags)) {
 		runFunction(fs_socket, "kernel_get_data", 3, path, string_itoa(offset), string_itoa(size));
 		wait_response(&fs_mutex);
-		//runFunction(connection->socket, "kernel_response_read_file", 2, fs_read_buffer, string_itoa(fd));
-		send_dynamic_message(connection->socket, fs_read_buffer);
-		//send_dynamic_message(connection->socket, string_itoa(fd));
+
+		runFunction(mem_socket, "i_get_page_from_pointer", 1, string_itoa(direccion_variable));
+		wait_response(&mem_response);
+
+		int n_frame = direccion_variable / mem_page_size;
+		int n_page = page_from_pointer;
+		int n_offset = direccion_variable - n_frame * mem_page_size;
+
+		if (string_length(fs_read_buffer) > 0) {
+			runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid), string_itoa(n_page), string_itoa(n_offset), string_length(fs_read_buffer), fs_read_buffer);
+			wait_response(&mem_response);
+		} else
+			fd = ERROR_LEER_ARCHIVO;
 	} else
 		fd = LEER_SIN_PERMISOS;
 
@@ -520,13 +532,16 @@ void memory_response_get_page_from_pointer(socket_connection* connection, char**
  */
 void fs_response_file(socket_connection* connection, char** args) {
 	log_debug(logger, "fs_response_file");
+
 	fs_response = atoi(args[0]);
 	signal_response(&fs_mutex);
 }
 
 void fs_response_get_data(socket_connection* connection, char** args) {
 	log_debug(logger, "fs_response_get_data");
-	fs_read_buffer = args[0];
+
+	fs_read_buffer = string_new();
+	string_append(&fs_read_buffer, args[0]);
 	signal_response(&fs_mutex);
 }
 
