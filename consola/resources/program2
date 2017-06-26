@@ -1,8 +1,13 @@
 #!/usr/bin/ansisop
 begin
 	variables a, b
-	a = 3
+	a = 0
+	prints n a
+	a = a - 5
+	prints n a
 	b = 5
 	a = b + 12
+	prints n a
+	a = 9999 + 1
 	prints n a
 end

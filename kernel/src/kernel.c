@@ -482,10 +482,21 @@ bool close_file(int fd_close, int pid) {
 	return true;
 }
 
-bool delete_file_from_global_table(int gfd) {
+int delete_file_from_global_table(int gfd) {
 	log_debug(logger, "delete_file_from_global_table");
 	int pos = get_pos_in_fs_global_table_by_gfd(gfd);
-	if (pos == -1)
+	t_global_file_table* g_file = get_global_file_by_gfd(gfd);
+
+	if (pos < 0)
+		return NO_EXISTE_ARCHIVO;
+	else
+		if (g_file->open > 1) return 0;//ARCHIVO_ABIERTO_POR_OTROS; //FIXME no se actualiza exit codes
+
+	list_remove_and_destroy_element(fs_global_table, pos, &free);// lo borro de la global
+
+	return NO_ERRORES;
+
+	/*if (pos == -1)
 		return false; //No existe archivo
 
 	list_remove_and_destroy_element(fs_global_table, pos, &free); // lo borro de la global
@@ -506,7 +517,7 @@ bool delete_file_from_global_table(int gfd) {
 			i--;
 		}
 	}
-	return true;
+	return true*/
 }
 
 bool is_allowed(int pid, int fd, char* flag) {
@@ -557,13 +568,13 @@ t_list* add_defaults_fds() {
 	return defaults;
 }
 
-bool write_file(int fd_write, int pid, char* info, int size) {
+int write_file(int fd_write, int pid, char* info, int size) {
 	log_debug(logger, "write_file");
 	t_socket_pcb* socket_console = find_socket_by_pid(pid);
 	if (fd_write == 1) {
 		runFunction(socket_console->socket, "kernel_print_message", 2, info, string_itoa(pid));
 		log_debug(logger, "Escribir en Consola '%s'", info);
-		return true;
+		return NO_ERRORES;
 	}
 
 	t_open_file* process = get_open_file_by_fd_and_pid(fd_write, pid);
@@ -576,11 +587,11 @@ bool write_file(int fd_write, int pid, char* info, int size) {
 		if (!fs_response) {
 			//TODO overflow al escribir? en FILESYSTEM (esto llega aca cuando save_data = false)
 			log_debug(logger, "Error de write_file que nunca deberias pasar");
-			return false;
+			return ERROR_SIN_DEFINIR;
 		}
 	}
 
-	return false; //ESCRIBIR_SIN_PERMISOS
+	return ESCRIBIR_SIN_PERMISOS; //ESCRIBIR_SIN_PERMISOS
 }
 
 void show_global_file_table() {

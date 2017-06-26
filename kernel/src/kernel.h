@@ -215,8 +215,8 @@ bool validate_file_from_fs(char* path);
 //CAPA FILE SYSTEM
 int open_file_in_process_table(char* path, char* flag, int pid);
 bool close_file(int fd_close, int pid);
-bool delete_file_from_global_table(int gfd);
-bool write_file(int fd_write, int pid, char* info, int size);
+int delete_file_from_global_table(int gfd);
+int write_file(int fd_write, int pid, char* info, int size);
 t_list* add_defaults_fds();
 bool is_default(int fd);
 bool is_allowed(int pid, int fd, char* flag);

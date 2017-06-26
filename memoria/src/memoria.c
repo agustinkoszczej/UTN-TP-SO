@@ -61,7 +61,7 @@ void start_program(int pid, int n_frames) {
 	pthread_mutex_lock(&frames_mutex);
 	int page_c = n_frames;
 	int i;
-	for (i = 0; i < list_size(adm_list); i++) {
+	for (i = hash(pid,0); i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
@@ -83,7 +83,7 @@ void finish_program(int pid) {
 	}
 
 	int i;
-	for (i = 0; i < list_size(adm_list); i++) {
+	for (i = hash(pid,0); i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid != -1 && adm_table->pid != PID_ADM_STRUCT)
 			log_debug(logger,
@@ -118,7 +118,7 @@ void add_pages(int pid, int n_frames) {
 
 	int known_pages = list_size(list_filter(adm_list, &find));
 
-	for (i = 0; i < list_size(adm_list); i++) {
+	for (i = hash(pid,0); i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
@@ -451,7 +451,7 @@ void free_page(int pid, int page) {
 	pthread_mutex_lock(&frames_mutex);
 
 	int i;
-	for (i = 0; list_size(adm_list); i++) {
+	for (i = hash(pid,page); list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid == pid && adm_table->pag == page) {
 			adm_table->pid = -1;
@@ -491,7 +491,7 @@ void dump(int pid) {
 	if (pid == -1) {
 		string_append(&dump_mem_content, frames);
 	} else {
-		for (i = 0; i < list_size(adm_list); i++) {
+		for (i = hash(pid,0); i < list_size(adm_list); i++) {
 			t_adm_table* adm_table = list_get(adm_list, i);
 			if (adm_table->pid == pid) {
 				char* frame = string_substring(frames,
