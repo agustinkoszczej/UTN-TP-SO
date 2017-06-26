@@ -906,9 +906,10 @@ void create_function_dictionary() {
 	log_debug(logger, "create_function_dictionary");
 	fns = dictionary_create();
 
+	//CONSOLE
 	dictionary_put(fns, "console_load_program", &console_load_program);
 	dictionary_put(fns, "console_abort_program", &console_abort_program);
-
+	//MEMORY
 	dictionary_put(fns, "memory_identify", &memory_identify);
 	dictionary_put(fns, "memory_response_start_program", &memory_response_start_program);
 	dictionary_put(fns, "memory_page_size", &memory_page_size);
@@ -916,7 +917,8 @@ void create_function_dictionary() {
 	dictionary_put(fns, "memory_response_read_bytes_from_page", &memory_response_read_bytes_from_page);
 	dictionary_put(fns, "memory_response_store_bytes_in_page", &memory_response_store_bytes_in_page);
 	dictionary_put(fns, "memory_response_get_page_from_pointer", &memory_response_get_page_from_pointer);
-
+	//CPU
+	dictionary_put(fns, "cpu_has_quantum_changed", &cpu_has_quantum_changed);
 	dictionary_put(fns, "cpu_has_aborted", &cpu_has_aborted);
 	dictionary_put(fns, "cpu_received_page_stack_size", &cpu_received_page_stack_size);
 	dictionary_put(fns, "cpu_task_finished", &cpu_task_finished);
@@ -933,7 +935,7 @@ void create_function_dictionary() {
 	dictionary_put(fns, "cpu_read_file", &cpu_read_file);
 	dictionary_put(fns, "cpu_seek_file", &cpu_seek_file);
 	dictionary_put(fns, "cpu_validate_file", &cpu_validate_file);
-
+	//FILESYSTEM
 	dictionary_put(fns, "fs_response_file", &fs_response_file);
 	dictionary_put(fns, "fs_response_get_data", &fs_response_get_data);
 
@@ -1369,7 +1371,7 @@ void do_notify(int argc){
 				if (event->mask & IN_CLOSE_WRITE) {
 					if (strcmp(event->name, "nucleo.cfg") == 0) {
 						log_debug(logger,
-								"Se modifico el archivo %s y se releera",
+								"do_notify:  '%s'",
 								event->name);
 						load_config(&config, argc, path_config);
 					}
@@ -1384,7 +1386,8 @@ void notify_all_cpus(){
 	log_debug(logger, "notify_all_cpus : quantum_sleep: '%d'", quantum_sleep);
 	for(i=0; i<list_size(cpu_list); i++){
 		t_cpu* cpu_elem = list_get(cpu_list, i);
-		runFunction(cpu_elem->socket, "kernel_update_quantum_sleep", 1, string_itoa(quantum_sleep));
+		//runFunction(cpu_elem->socket, "kernel_update_quantum_sleep", 1, string_itoa(quantum_sleep));
+		send_dynamic_message(cpu_elem->socket, string_itoa(quantum_sleep));
 	}
 }
 
@@ -1398,8 +1401,12 @@ void thread_continuous_scan_notify(int argc){
 		select(max_fd + 1, &readfds, NULL, NULL, &waiting);
 
 		if(FD_ISSET(fd_inotify, &readfds)){
+
 			do_notify(argc);
-			notify_all_cpus();
+			quantum_sleep = config_get_int_value(config, "QUANTUM_SLEEP");
+			load_config(&config, argc, path_config);
+			print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
+			//notify_all_cpus();
 		}
 	}
 }

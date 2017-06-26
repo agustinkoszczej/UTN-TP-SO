@@ -92,6 +92,10 @@ void console_abort_program(socket_connection* connection, char** args) {
 /*
  * CPU
  */
+void cpu_has_quantum_changed(socket_connection* connection, char** args){
+	send_dynamic_message(connection->socket, string_itoa(quantum_sleep));
+	log_debug(logger, "cpu_has_quantum_changed: '%d'", quantum_sleep);
+}
 void cpu_has_aborted(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
 	pcb* l_pcb = find_pcb_by_pid(pid);

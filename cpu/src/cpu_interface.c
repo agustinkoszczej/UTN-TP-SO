@@ -89,6 +89,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	while ((planning_alg == FIFO || quantum-- >= 0) && !finished) {
 		runFunction(kernel_socket, "cpu_has_aborted", 1, string_itoa(pcb_actual->pid));
 		finished = atoi(receive_dynamic_message(kernel_socket));
+
 		if (finished) {
 			pcb_actual->exit_code = FINALIZADO_CONSOLA;
 			break;
@@ -113,8 +114,12 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		analizadorLinea(mem_buffer, &functions, &kernel_functions);
 		pcb_actual->pc++;
 		pcb_actual->statistics.cycles++;
+
+		runFunction(kernel_socket, "cpu_has_quantum_changed", 0);
+		quantum_sleep = atoi(receive_dynamic_message(kernel_socket));
+
 		sleep(quantum_sleep / 1000);
-		log_debug("\n\n\nquantum_sleep: %d\n\n\n", quantum_sleep);
+		log_debug(logger, "\n\n\nquantum_sleep: %d\n\n\n", quantum_sleep);
 	}
 	printf("Finished executing.\n\n");
 	log_debug(logger, "cpu_task_finished");
