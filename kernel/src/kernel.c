@@ -579,16 +579,18 @@ int write_file(int fd_write, int pid, char* info, int size) {
 
 	t_open_file* process = get_open_file_by_fd_and_pid(fd_write, pid);
 
-	if (is_allowed(pid, fd_write, process->flag)) {
+	if (is_allowed(pid, fd_write, "w")) {
 		char* path = get_path_by_gfd(process->gfd);
 		int offset = process->pointer;
-		runFunction(fs_socket, "kernel_save_data", 4, path, offset, size, info);
+		runFunction(fs_socket, "kernel_save_data", 4, path, string_itoa(offset), string_itoa(size), info);
 		wait_response(&fs_mutex);
 		if (!fs_response) {
 			//TODO overflow al escribir? en FILESYSTEM (esto llega aca cuando save_data = false)
 			log_debug(logger, "Error de write_file que nunca deberias pasar");
 			return ERROR_SIN_DEFINIR;
 		}
+
+		return NO_ERRORES;
 	}
 
 	return ESCRIBIR_SIN_PERMISOS; //ESCRIBIR_SIN_PERMISOS

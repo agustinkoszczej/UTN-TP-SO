@@ -448,7 +448,7 @@ t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion, t_banderas flag
 		return NO_EXISTE_ARCHIVO;
 	}
 
-	runFunction(kernel_socket, "cpu_open_file", 3, direccion, n_flag, string_itoa(pcb_actual->pid));
+	runFunction(kernel_socket, "cpu_open_file", 4, direccion, n_flag, string_itoa(validate_file), string_itoa(pcb_actual->pid));
 
 	int kernel_fd = atoi(receive_dynamic_message(kernel_socket));
 
@@ -551,10 +551,10 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 	pcb_actual->statistics.op_priviliges++;
 
 	char* buffer = string_new();
-	memcpy(buffer, informacion, tamanio);
-	strtok(buffer, "\n");
-	log_debug(logger, "|PRIMITIVA| Escribir FD: '%d', Info: '%s', Tamanio: '%d'", descriptor_archivo, buffer, tamanio);
+	string_append(&buffer, string_substring_until((char*) informacion, tamanio));
 
+
+	log_debug(logger, "|PRIMITIVA| Escribir FD: '%d', Info: '%s', Tamanio: '%d'", descriptor_archivo, buffer, tamanio);
 	runFunction(kernel_socket, "cpu_write_file", 4, string_itoa(descriptor_archivo), buffer, string_itoa(tamanio), string_itoa(pcb_actual->pid));
 
 	//wait_response();
@@ -586,13 +586,14 @@ void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 
 	log_debug(logger, "|PRIMITIVA| Leer FD: '%d', Info: '%d', Tamanio: '%d'", descriptor_archivo, informacion, tamanio);
 
+	informacion = cpu_dereferenciar(informacion);
 	runFunction(kernel_socket, "cpu_read_file", 4, string_itoa(descriptor_archivo), string_itoa(informacion), string_itoa(tamanio), string_itoa(pcb_actual->pid));
 	//wait_response();
 
-	int kernel_fd = atoi(receive_dynamic_message(kernel_socket));
+	descriptor_archivo = atoi(receive_dynamic_message(kernel_socket));
 
-	if (kernel_fd < 0) {
-		pcb_actual->exit_code = kernel_fd;
+	if (descriptor_archivo < 0) {
+		pcb_actual->exit_code = descriptor_archivo;
 		cpu_finalizar();
 	}
 }

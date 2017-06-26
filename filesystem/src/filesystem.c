@@ -17,7 +17,7 @@ int create_block() {
 
 	int i;
 	for (i = 0; i < bitmap->size; i++) {
-		if (bitarray_test_bit(bitmap, i)) {
+		if (!bitarray_test_bit(bitmap, i)) {
 			bitarray_set_bit(bitmap, i);
 			FILE* f = fopen(string_from_format("%s/Bloques/%d.bin", mount_point, i), "w");
 			if (f == NULL)
@@ -46,7 +46,7 @@ bool add_blocks_if_needed(char* path, int offset, int size) {
 	char** blocks_arr = config_get_array_value(config_file, BLOQUES);
 
 	int start_block = offset / block_size;
-	int end_block = ceil((double) (offset + size) / block_size);
+	int end_block = (offset + size) / block_size;
 
 	int asigned_blocks = 0;
 	while (blocks_arr[++asigned_blocks] != NULL)
@@ -133,7 +133,7 @@ bool save_data(char* path, int offset, int size, char* buffer) {
 	char** blocks_arr = config_get_array_value(config_file, BLOQUES);
 
 	int start_block = offset / block_size;
-	int end_block = ceil((double) (offset + size) / block_size);
+	int end_block = (offset + size) / block_size;
 
 	int offset2 = offset - start_block * block_size;
 	int len = (size > block_size) ? block_size : size;
@@ -193,11 +193,19 @@ char* get_data(char* path, int offset, int size) {
 	t_config* config_file = config_create(path_file);
 
 	int start_block = offset / block_size;
-	int end_block = ceil((double) (offset + size) / block_size);
+	int end_block = (offset + size) / block_size;
+
+	if (config_get_int_value(config_file, TAMANIO) < offset + size) {
+		free(path_file);
+		config_destroy(config_file);
+
+		return "";
+	}
+
 	char** blocks_arr = config_get_array_value(config_file, BLOQUES);
 
-	char* buffer;
-	while (start_block < end_block && blocks_arr[start_block] != NULL) {
+	char* buffer = string_new();
+	while (start_block <= end_block && blocks_arr[start_block] != NULL) {
 		int block_pos = atoi(blocks_arr[start_block]);
 		char* block_buffer = get_block_data(block_pos);
 		int block_size = string_length(block_buffer);
@@ -319,7 +327,9 @@ void init_bitmap() {
 	fread(buffer, size, 1, bitmap_f);
 	buffer = string_substring_until(buffer, size);
 
+	string_append(&buffer, string_repeat('\0', block_quantity / 8 - size));
 	bitmap = bitarray_create_with_mode(buffer, block_quantity, MSB_FIRST);
+
 	free(buffer);
 	fclose(bitmap_f);
 

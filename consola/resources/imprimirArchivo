@@ -4,7 +4,7 @@ begin
 	variables a, b
 	abrir b LC /unArchivo
 	alocar a 200
-	leer b a b 10
-	prints s b
+	leer b a 10
+	prints n b
 	#Sin cerrarlo
 end

@@ -13,7 +13,7 @@ void connectionClosed(socket_connection * connection) {
 }
 
 void kernel_validate_file(socket_connection* connection, char** args) {
-	char* path = args[0];
+	char* path = string_substring_from(args[0], 1);
 	log_debug(logger, "validateFile: path=%s", path);
 
 	pthread_mutex_lock(&request_mutex);
@@ -25,7 +25,7 @@ void kernel_validate_file(socket_connection* connection, char** args) {
 }
 
 void kernel_create_file(socket_connection* connection, char** args) {
-	char* path = args[0];
+	char* path = string_substring_from(args[0], 1);
 	log_debug(logger, "kernel_create_file=path: %s", path);
 
 	pthread_mutex_lock(&request_mutex);
@@ -37,7 +37,7 @@ void kernel_create_file(socket_connection* connection, char** args) {
 }
 
 void kernel_delete_file(socket_connection* connection, char** args) {
-	char* path = args[0];
+	char* path = string_substring_from(args[0], 1);
 	log_debug(logger, "kernel_delete_file=path: %s", path);
 
 	pthread_mutex_lock(&request_mutex);
@@ -49,7 +49,7 @@ void kernel_delete_file(socket_connection* connection, char** args) {
 }
 
 void kernel_get_data(socket_connection* connection, char** args) {
-	char* path = args[0];
+	char* path = string_substring_from(args[0], 1);
 	int offset = atoi(args[1]);
 	int size = atoi(args[2]);
 	log_debug(logger, "kernel_get_data: path=%s, offset=%d, size=%d", path, offset, size);
@@ -63,7 +63,7 @@ void kernel_get_data(socket_connection* connection, char** args) {
 }
 
 void kernel_save_data(socket_connection* connection, char** args) {
-	char* path = args[0];
+	char* path = string_substring_from(args[0], 1);
 	int offset = atoi(args[1]);
 	int size = atoi(args[2]);
 	char* buffer = args[3];
