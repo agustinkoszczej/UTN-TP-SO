@@ -433,7 +433,7 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	char* flags = process->flag;
 
 	if (is_allowed(pid, fd, flags)) {
-		runFunction(fs_socket, "kernel_get_data", 3, path, offset, size);
+		runFunction(fs_socket, "kernel_get_data", 3, path, string_itoa(offset), string_itoa(size));
 		wait_response(&fs_mutex);
 		//runFunction(connection->socket, "kernel_response_read_file", 2, fs_read_buffer, string_itoa(fd));
 		send_dynamic_message(connection->socket, fs_read_buffer);

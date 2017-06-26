@@ -2,7 +2,7 @@
 
 begin
 	variables a, f, g
-	alocar a 500
+	alocar a 100
 	abrir f LEC /origen
 	abrir g LEC /destino
 	leer f a 10

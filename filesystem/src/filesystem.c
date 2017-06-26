@@ -19,7 +19,11 @@ int create_block() {
 	for (i = 0; i < bitmap->size; i++) {
 		if (bitarray_test_bit(bitmap, i)) {
 			bitarray_set_bit(bitmap, i);
-			mkdir(string_from_format("%s/Bloques/%d.bin", mount_point, i), 0777);
+			FILE* f = fopen(string_from_format("%s/Bloques/%d.bin", mount_point, i), "w");
+			if (f == NULL)
+				return -1;
+
+			fclose(f);
 			update_bitmap_file();
 			log_debug(logger, "create_block: int=%d", i);
 			return i;
@@ -221,7 +225,7 @@ char* get_data(char* path, int offset, int size) {
 bool validate_file(char* path) {
 	log_debug(logger, "validate_file: path=%s", path);
 
-	FILE* file = fopen(string_from_format("%s/Archivos/%s",mount_point, path), "r");
+	FILE* file = fopen(string_from_format("%s/Archivos/%s", mount_point, path), "r");
 	bool result = false;
 
 	if (file) {
@@ -269,21 +273,21 @@ bool delete_file(char* path) {
 
 bool create_file(char* path) {
 	log_debug(logger, "create_file: path=%s", path);
-		int first_block_pos = create_block();
+	int first_block_pos = create_block();
 
-		if (first_block_pos < 0) {
-			log_debug(logger, "create_file: bool=%d", false);
-			return false;
-		}
+	if (first_block_pos < 0) {
+		log_debug(logger, "create_file: bool=%d", false);
+		return false;
+	}
 
-		FILE *file = fopen(string_from_format("%s/Archivos/%s",mount_point, path), "w");
-		fputs("TAMANIO=0\n", file);
-		char* bloq = string_from_format("BLOQUES=[%d]", first_block_pos);
-		fputs(bloq, file);
-		fclose(file);
+	FILE *file = fopen(string_from_format("%s/Archivos/%s", mount_point, path), "w");
+	fputs("TAMANIO=0\n", file);
+	char* bloq = string_from_format("BLOQUES=[%d]", first_block_pos);
+	fputs(bloq, file);
+	fclose(file);
 
-		log_debug(logger, "create_file: bool=%d", true);
-		return true;
+	log_debug(logger, "create_file: bool=%d", true);
+	return true;
 }
 
 void create_function_dictionary() {
@@ -315,7 +319,7 @@ void init_bitmap() {
 	fread(buffer, size, 1, bitmap_f);
 	buffer = string_substring_until(buffer, size);
 
-	bitmap = bitarray_create_with_mode(buffer, block_quantity, LSB_FIRST);
+	bitmap = bitarray_create_with_mode(buffer, block_quantity, MSB_FIRST);
 	free(buffer);
 	fclose(bitmap_f);
 

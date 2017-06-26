@@ -456,6 +456,7 @@ t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion, t_banderas flag
 		pcb_actual->exit_code = kernel_fd;
 		cpu_finalizar();
 	}
+
 	log_debug(logger, "|PRIMITIVA| Abrir en FD '%d'", kernel_fd);
 	return kernel_fd;
 }

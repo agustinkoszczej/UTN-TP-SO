@@ -403,7 +403,8 @@ int open_file_in_process_table(char* path, char* flag, int pid) {
 
 	t_open_file* n_file = malloc(sizeof(t_open_file));
 	n_file->gfd = gfd;
-	n_file->flag = flag;
+	n_file->flag = string_new();
+	string_append(&n_file->flag, flag);
 	n_file->pointer = 0;
 
 	t_process_file_table* files_open_process = get_process_file_by_pid(pid);
@@ -421,8 +422,8 @@ int add_file_in_global_table(char* path) {
 
 	int gfd = get_gfd_by_path(path);
 	if (gfd == -1) { //No existe
-		n_file->path = path;
-		//string_append(n_file->path, path);
+		n_file->path = string_new();
+		string_append(&n_file->path, path);
 		n_file->open = 1;
 		n_file->gfd = list_size(fs_global_table);
 		list_add(fs_global_table, n_file);
@@ -995,6 +996,7 @@ void init_kernel(t_config* config) {
 	pthread_mutex_init(&fs_mutex, NULL);
 
 	pthread_mutex_lock(&mem_response);
+	pthread_mutex_lock(&fs_mutex);
 
 	port_con = config_get_int_value(config, PUERTO_PROG);
 	port_cpu = config_get_int_value(config, PUERTO_CPU);
