@@ -119,21 +119,6 @@ void i_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
 	log_debug(logger, "i_get_frame_from_pid_and_page: '%d'", frame);
 }
 
-unsigned int hash(int pid, int page) {
-	char* str = malloc(strlen(string_itoa(pid)));
-	strcpy(str, string_itoa(pid));
-	strcat(str, string_itoa(page));
-	unsigned int indice = atoi(str) % frames_count;
-	free(str);
-	return indice;
-}
-/*
- int hash(int pid, int pag){
- int index = (pid * frames_count) + (pag * pid);
-
- return index;
- }*
-
  /*
  * SERVER
  */
