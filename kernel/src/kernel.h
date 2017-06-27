@@ -71,8 +71,8 @@ int planning_alg;
 int fd_inotify, watch_descriptor, max_fd;
 struct timeval waiting;
 fd_set readfds; //el papu del select
-#define EVENT_SIZE  ( sizeof (struct inotify_event) + 24 )
-#define BUF_LEN (1024 * (EVENT_SIZE + 12))
+#define EVENT_SIZE ( sizeof (struct inotify_event) + 24 )
+#define BUF_LEN ( 1024 * EVENT_SIZE )
 
 
 typedef struct {

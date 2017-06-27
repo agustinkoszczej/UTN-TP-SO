@@ -1332,55 +1332,36 @@ void init_notify(char* path_file){
 }
 
 void do_notify(int argc){
-
-	/*int length, i = 0;
 	char buffer[BUF_LEN];
-	length = read(fd_inotify, buffer, BUF_LEN);
+	int length = read(fd_inotify, buffer, BUF_LEN);
+	int offset = 0;
+		while (offset < length) {
 
-	if (length <= 0){
-		log_debug(logger, "inotify error");
-	} else {
+			struct inotify_event *event = (struct inotify_event *) &buffer[offset];
 
-		struct inotify_event *event = (struct inotify_event *) &buffer[i];
-		t_config * new_config = NULL;
-		new_config = config_create(path_file);
-
-		if( new_config == NULL || !config_has_property(new_config, "QUANTUM_SLEEP") ){
-			return;
-		}
-
-		log_debug(logger, "Se ha modificado el archivo de configuracion.");
-
-		int n_quantum_sleep = config_get_int_value(new_config, "QUANTUM_SLEEP");
-
-		if(quantum_sleep != n_quantum_sleep){
-			quantum_sleep = n_quantum_sleep;
-		}
-		free(new_config);
-		i += EVENT_SIZE + event->len;
-		FD_CLR(fd_inotify, &readfds);
-		init_notify(path_file);
-		max_fd = (max_fd < fd_inotify)? fd_inotify : max_fd;
-		FD_SET(fd_inotify, &readfds);
-	} // fin else-if*/
-	char buffer[BUF_LEN];
-		int length = read(fd_inotify, buffer, BUF_LEN);
-		int e = 0;
-		while (e < length) {
-			struct inotify_event *event =
-					(struct inotify_event *) &buffer[e];
 			if (event->len) {
-				if (event->mask & IN_CLOSE_WRITE) {
-					if (strcmp(event->name, "nucleo.cfg") == 0) {
-						log_debug(logger,
-								"do_notify:  '%s'",
-								event->name);
-						load_config(&config, argc, path_config);
+				if (event->mask & IN_CREATE) {
+					if (event->mask & IN_ISDIR) {
+						printf("The directory %s was created.\n", event->name);
+					} else {
+						printf("The file %s was created.\n", event->name);
+					}
+				} else if (event->mask & IN_DELETE) {
+					if (event->mask & IN_ISDIR) {
+						printf("The directory %s was deleted.\n", event->name);
+					} else {
+						printf("The file %s was deleted.\n", event->name);
+					}
+				} else if (event->mask & IN_MODIFY) {
+					if (event->mask & IN_ISDIR) {
+						printf("The directory %s was modified.\n", event->name);
+					} else {
+						printf("The file %s was modified.\n", event->name);
 					}
 				}
 			}
-			e += EVENT_SIZE + event->len;
-		}
+			offset += sizeof (struct inotify_event) + event->len;
+	}
 }
 
 void notify_all_cpus(){
@@ -1398,17 +1379,16 @@ void thread_continuous_scan_notify(int argc){
 		FD_ZERO(&readfds);
 		FD_SET(fd_inotify, &readfds);
 		if (max_fd < fd_inotify) max_fd = fd_inotify;
-		waiting.tv_sec = 1;
-		waiting.tv_usec = 5	;
+		//waiting.tv_sec = 1;
+		//waiting.tv_usec = 5	;
 		select(max_fd + 1, &readfds, NULL, NULL, &waiting);
 
 		if(FD_ISSET(fd_inotify, &readfds)){
-
 			do_notify(argc);
-			quantum_sleep = config_get_int_value(config, "QUANTUM_SLEEP");
 			load_config(&config, argc, path_config);
 			print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
-			//notify_all_cpus();
+			quantum_sleep = config_get_int_value(config, "QUANTUM_SLEEP");
+			log_debug(logger, "file config modified: QUANTUM_SLEEP: '%d'", quantum_sleep);
 		}
 	}
 }
