@@ -62,6 +62,7 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 			if (adm_table->pid < 0) {
 				adm_table->pid = pid;
 				adm_table->pag = n_page;
+				update_administrative_register_adm_table(adm_table);
 				break;
 			}
 		}

@@ -65,7 +65,9 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer);
 void add_pages(int pid, int n_frames);
 void finish_program(int pid);
 void free_page(int pid, int page);
-//char* parse_t_adm_table(int frame, int pid, int pag);
+void clean_frame(int frame);
+void update_administrative_register_adm_table(t_adm_table* adm_table);
+void update_administrative_register_cache(t_cache* cache, int pos_list);
 
 bool has_available_frames(int n_frames);
 
