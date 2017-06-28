@@ -22,6 +22,9 @@ void kernel_print_message(socket_connection* connection, char** args) {
 	strcpy(message, args[0]);
 	int pid = atoi(args[1]);
 
+	t_process* process = find_process_by_pid(pid);
+	process->c_message++;
+
 	log_debug(logger, "kernel_print_message: message=%s, pid=%d", message, pid);
 
 	new_message(message, pid);
@@ -40,6 +43,10 @@ void kernel_response_load_program(socket_connection* connection, char** args) {
 		pthread_mutex_unlock(&p_counter_mutex);
 
 		process->pid = pid;
+		char* time_start = temporal_get_string_time();
+		process->time_start = malloc(string_length(time_start));
+		process->time_start = time_start;
+
 		new_message("Started program.", pid);
 	} else {
 		abort_program(process, response);

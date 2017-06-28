@@ -599,14 +599,12 @@ int write_file(int fd_write, int pid, char* info, int size) {
 void show_global_file_table() {
 	log_debug(logger, "show_global_file_table");
 	clear_screen();
-
-	if (list_size(fs_global_table) == 0)
-		println("No hay archivos abiertos.");
-	else {
+	printf("FILES OPEN: %d\n", list_size(fs_global_table));
+	if (list_size(fs_global_table) != 0){
 		int i;
 		for (i = 0; i < list_size(fs_global_table); i++) {
 			t_global_file_table* global_file = list_get(fs_global_table, i);
-			printf("> GLOBAL_FD: %d\t> OPEN: %d\t> FILE: %s\n", global_file->gfd, global_file->open, global_file->path);
+			printf("	> GLOBAL_FD: %d\t> OPEN: %d\t> FILE: %s\n", global_file->gfd, global_file->open, global_file->path);
 		}
 	}
 
@@ -628,13 +626,13 @@ void show_process_file_table(int pid) {
 	log_debug(logger, "show_process_file_table");
 	t_process_file_table* files_process = get_process_file_by_pid(pid);
 	if (files_process == NULL)
-		printf("El Proceso %d no tiene archivos abiertos!\n", pid);
-	//TODO podria poner una validacion para un PID que no existe, sino va a mostrar esto
+		printf("FILES OPEN: 0\n", pid);
 	else {
 		int i;
+		printf("FILES OPEN: %d\n", list_size(files_process->open_files));
 		for (i = 3; i < list_size(files_process->open_files); i++) {
 			t_open_file* file = list_get(files_process->open_files, i);
-			printf("> FD: %d\t> GLOBAL_FD: %d\t> FLAGS: %s\t>POINTER: %d\n", file->fd, file->gfd, file->flag, file->pointer);
+			printf("	> FD: %d\t> GLOBAL_FD: %d\t> FLAGS: %s\t>POINTER: %d\n", file->fd, file->gfd, file->flag, file->pointer);
 		}
 	}
 }
@@ -884,7 +882,8 @@ void free_memory(int pid, int pointer) {
 
 	t_heap_stats* heap_stats = find_heap_stats_by_pid(pid);
 	heap_stats->free_c++;
-	heap_stats->free_b += freed_space;
+	if(freed_space < 0) heap_stats->free_b += mem_page_size - (2* heap_metadata_size);
+	else heap_stats->free_b += freed_space;
 
 	if (freed_space == -1) {
 		runFunction(mem_socket, "i_free_page", 2, string_itoa(pid), string_itoa(page_from_pointer));
@@ -1238,17 +1237,16 @@ void show_info(int pid) {
 	pcb* n_pcb = find_pcb_by_pid(pid);
 	char* info = string_new();
 	string_append_with_format(&info, "PID: %d\n", n_pcb->pid);
-	string_append_with_format(&info, "RAFAGAS EJECUTADAS: %d\n", n_pcb->statistics.cycles);
-	string_append_with_format(&info, "OP. PRIVILEGIADAS: %d\n", n_pcb->statistics.op_priviliges);
+	string_append_with_format(&info, "\nRAFAGAS EJECUTADAS: %d", n_pcb->statistics.cycles);
 
 	clear_screen();
 	printf("%s\n", info);
 
+	show_syscalls(pid);
 	show_process_file_table(pid);
 	show_heap_pages(pid);
 	show_allocates(pid);
 	show_free(pid);
-	show_syscalls(pid);
 
 	wait_any_key();
 }
