@@ -39,13 +39,25 @@ void console_load_program(socket_connection* connection, char** args) {
 	new_pcb->pc = metadata->instruccion_inicio;
 	int i;
 
-	if (metadata->cantidad_de_etiquetas + metadata->cantidad_de_funciones > 0) {
+	/*if (metadata->cantidad_de_etiquetas + metadata->cantidad_de_funciones > 0) {
 		char** labels = string_split(metadata->etiquetas, "\0");
 		for (i = 0; i < metadata->cantidad_de_etiquetas + metadata->cantidad_de_funciones; i++) {
 			char* label = labels[i];
 			t_puntero_instruccion* instruction = malloc(sizeof(t_puntero_instruccion));
 			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas, metadata->etiquetas_size); //aca rompia con Program3, por el cantidad_de_etiquetas
 			dictionary_put(new_pcb->i_label, label, instruction);
+		}
+	}*/
+
+	char* label = string_new();
+		for (i = 0; i < metadata->etiquetas_size; i++) {
+			if (metadata->etiquetas[i] != '\0') {
+				string_append_with_format(&label, "%c", metadata->etiquetas[i]);
+			} else{
+				t_puntero_instruccion* instruction = malloc(sizeof(t_puntero_instruccion));
+				*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas, metadata->etiquetas_size);
+				dictionary_put(new_pcb->i_label, label, instruction);
+				label = string_new();
 		}
 	}
 
