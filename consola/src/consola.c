@@ -403,6 +403,9 @@ void init_console() {
 	dictionary_put(message_map, string_itoa(ERROR_SINTAXIS),
 			"Syntax error in the Script.");
 
+	dictionary_put(message_map, string_itoa(ARCHIVO_ABIERTO_POR_OTROS),
+				"Can't delete file in use.");
+
 	log_debug(logger, "init_console: void");
 }
 

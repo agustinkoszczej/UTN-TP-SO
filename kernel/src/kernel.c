@@ -490,7 +490,7 @@ int delete_file_from_global_table(int gfd) {
 	if (pos < 0)
 		return NO_EXISTE_ARCHIVO;
 	else
-		if (g_file->open > 1) return 0;//ARCHIVO_ABIERTO_POR_OTROS; //FIXME no se actualiza exit codes
+		if (g_file->open > 1) return ARCHIVO_ABIERTO_POR_OTROS;
 
 	list_remove_and_destroy_element(fs_global_table, pos, &free);// lo borro de la global
 
@@ -814,7 +814,6 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	it_fits_malloc(mem_read_buffer, space);
 	runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid), string_itoa(page), string_itoa(0), string_itoa(mem_page_size), mem_read_buffer);
 	wait_response(&mem_response);
-	//wait_response(&mem_response); //TODO Con dos locks anda no se porque ¯\_(ツ)_/¯
 	log_debug(logger, "add_heap_page: mem_offset_abs '%d'", mem_offset_abs);
 	return (mem_offset_abs + heap_metadata_size);
 }
@@ -832,7 +831,7 @@ void occupy_space(int pid, int page, int space, bool freed) {
 	}
 }
 
-int malloc_memory(int pid, int size) { // TODO Work in progress, xdxd
+int malloc_memory(int pid, int size) {
 	log_debug(logger, "malloc_memory");
 	if (size > mem_page_size - (heap_metadata_size * 2))
 		return RESERVAR_MAS_MEMORIA_TAMANIO_PAGINA; //directamente lo rechazo porque excede el tamanio maximo del alloc
@@ -1292,7 +1291,7 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 	return n_socket_pcb;
 }
 
-void stop_process(int pid) { //TODO esto esta mal
+void stop_process(int pid) { //TODO esto no anda ¯\_(ツ)_/¯ (es lo de SIGUSR1)
 	log_debug(logger, "stop_process");
 	t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
 	pcb* n_pcb = find_pcb_by_pid(pid);
