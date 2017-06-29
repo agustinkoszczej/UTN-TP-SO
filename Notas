@@ -1,6 +1,6 @@
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspaces/SharedLibrary/Debug -> Tirar esto en el .bashrc
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspace/tp-2017-1c-Lords-of-the-Strings/utils/Debug -> Tirar esto en el .bashrc
 sudo chmod +x path.sh -> A lo mejor no sea necesario
 source path.sh ->Sobre cada Modulo
 path.sh = archivo
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspace/TPSO/SharedLibrary/Debug/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspace/tp-2017-1c-Lords-of-the-Strings/utils/Debug
