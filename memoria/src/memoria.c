@@ -64,8 +64,9 @@ bool has_available_frames(int n_frames) {
 		t_adm_table* adm_table = element;
 		return adm_table->pid < 0;
 	}
-
-	int available_pages = list_size(list_filter(adm_list, find));
+	t_list* available_pages_list = list_filter(adm_list, find);
+	int available_pages = list_size(available_pages_list);
+	list_destroy(available_pages_list);
 	pthread_mutex_unlock(&frames_mutex);
 	return available_pages >= n_frames;
 }
@@ -122,6 +123,7 @@ void finish_program(int pid) {
 	}
 	pthread_mutex_unlock(&frames_cache_mutex);
 	log_debug(logger, "finish_program, pid = %d\n", pid);
+	list_destroy(adm_tables);
 }
 
 void add_pages(int pid, int n_frames) {
@@ -131,8 +133,9 @@ void add_pages(int pid, int n_frames) {
 		return adm_table->pid == pid;
 	}
 	int i;
-
-	int known_pages = list_size(list_filter(adm_list, &find));
+	t_list* know_pages_list = list_filter(adm_list, &find);
+	int known_pages = list_size(know_pages_list);
+	list_destroy(know_pages_list);
 
 	for (i = 0; i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
@@ -214,8 +217,9 @@ void store_in_cache(t_adm_table* n_adm_table) {
 		t_adm_table* adm_table = element;
 		return adm_table->pid == n_adm_table->pid;
 	}
-
-	int cache_proc_size = list_size(list_filter(adm_list, find));
+	t_list* cache_proc_size_list = list_filter(adm_list,find);
+	int cache_proc_size = list_size(cache_proc_size_list);
+	list_destroy(cache_proc_size_list);
 	if (cache_proc_size < 3) {
 		int free_pos = find_free_pos_cache();
 		if (free_pos < 0) {
@@ -335,6 +339,7 @@ void update_administrative_register_adm_table(t_adm_table* adm_table) {
 	buffer = intToChar4(adm_table->pag);
 	for (i = 0; i < sizeof(int); i++)
 		frames[offset + i] = buffer[i];
+	free(buffer);
 }
 
 void update_administrative_register_cache(t_cache* cache, int pos_list) {
@@ -386,6 +391,7 @@ void show_administrative_structures_located_in_memory() {
 			log_debug(logger, "> PAGE: %d\n", char4ToInt(buffer));
 			j = 0;
 		}
+		free(buffer);
 	}
 
 	j = 0;
@@ -415,6 +421,7 @@ void show_administrative_structures_located_in_memory() {
 			log_debug(logger, "> LRU: %d\n", char4ToInt(buffer));
 			j = 0;
 		}
+		free(buffer);
 	}
 }
 
@@ -506,6 +513,7 @@ void store_administrative_structures() {
 
 		offset += sizeof(int);
 	}
+	free(buffer);
 }
 
 void init_memory(t_config *config) {
@@ -658,6 +666,13 @@ void dump(int pid) {
 		/*list_clean_and_destroy_elements(active_process, free);
 		list_clean_and_destroy_elements(active_process_no_duplicates, free);*/
 		wait_any_key();
+		free(dump_act_process);
+		free(dump_cache);
+		free(dump_cache_content);
+		free(dump_cache_struct);
+		free(dump_mem_content);
+		free(dump_mem_struct);
+		free(dump_total);
 	}
 
 	void do_dump(char* sel) {
@@ -683,8 +698,10 @@ void dump(int pid) {
 			int i;
 			for (i = 0; i < list_size(m_sockets.cpu_sockets); i++) {
 				int* socket = list_get(m_sockets.cpu_sockets, i);
+				char* response = string_itoa(mem_delay);
 				runFunction(*socket, "memory_retard", 1,
-						string_itoa(mem_delay));
+						response);
+				free(response);
 			}
 		}
 	}
@@ -721,14 +738,20 @@ void dump(int pid) {
 
 		pthread_mutex_lock(&frames_mutex);
 		if (option < 0) {
-			int used_c = list_size(list_filter(adm_list, find_used));
-			int free_c = list_size(list_filter(adm_list, find_free));
+			t_list* used_c_list = list_filter(adm_list, find_used);
+			int used_c = list_size(used_c_list);
+			list_destroy(used_c_list);
+			t_list* free_c_list = list_filter(adm_list, find_free);
+			int free_c = list_size(free_c_list);
+			list_destroy(free_c_list);
 
 			string_append_with_format(&size_s, "FRAMES: %d\n", frames_count);
 			string_append_with_format(&size_s, "USED: %d\n", used_c);
 			string_append_with_format(&size_s, "FREE: %d\n", free_c);
 		} else {
-			int pid_c = list_size(list_filter(adm_list, find_pid));
+			t_list* pid_c_list = list_filter(adm_list, find_pid);
+			int pid_c = list_size(pid_c_list);
+			list_destroy(pid_c_list);
 			string_append_with_format(&size_s, "USED BY [%d]: %d\n", option,
 					pid_c);
 		}
@@ -737,6 +760,7 @@ void dump(int pid) {
 		printf("%s", size_s);
 
 		wait_any_key();
+		free(size_s);
 	}
 
 	void do_size(char* sel) {
@@ -748,6 +772,14 @@ void dump(int pid) {
 
 			size(atoi(option));
 		}
+	}
+
+	void do_finish(char* sel) {
+			if (!strcmp(sel, "F")) {
+				list_destroy_and_destroy_elements(adm_list, free);
+				list_destroy_and_destroy_elements(cache_list, free);
+				exit(EXIT_SUCCESS);
+			}
 	}
 
 	void ask_option(char *sel) {

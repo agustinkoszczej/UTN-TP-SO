@@ -17,11 +17,16 @@ void i_start_program(socket_connection* connection, char** args) {
 			int size = size_buffer < frame_size ? size_buffer : frame_size;
 			char* buffer2 = string_substring(buffer, frame_size * i, size);
 			store_bytes(pid, i, 0, size, buffer2);
+			free(buffer2);
 		}
-
-		runFunction(m_sockets.k_socket, "memory_response_start_program", 1, string_itoa(NO_ERRORES));
-	} else
-		runFunction(m_sockets.k_socket, "memory_response_start_program", 1, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS));
+		char* response = string_itoa(NO_ERRORES);
+		runFunction(m_sockets.k_socket, "memory_response_start_program", 1, response);
+		free(response);
+	} else{
+		char* response = string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS);
+		runFunction(m_sockets.k_socket, "memory_response_start_program", 1, response);
+		free(response);
+	}
 }
 void i_read_bytes_from_page(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -42,9 +47,12 @@ void i_store_bytes_in_page(socket_connection* connection, char** args) {
 	char* buffer = args[4];
 
 	int offset_abs = store_bytes(pid, page, offset, size, buffer);
-
-	runFunction(connection->socket, "memory_response_store_bytes_in_page", 2, string_itoa(NO_ERRORES), string_itoa(offset_abs));
+	char* response1 = string_itoa(NO_ERRORES);
+	char* response2 = string_itoa(offset_abs);
+	runFunction(connection->socket, "memory_response_store_bytes_in_page", 2, response1, response2);
 	log_debug(logger, "i_store_bytes_in_page: socket: '%d', pid: '%d', page: '%d', offset_rel: '%d', offset_abs: '%d', size: '%d'\nbuffer: '%s'", connection->socket, pid, page, offset, offset_abs, size, buffer);
+	free(response1);
+	free(response2);
 }
 void i_add_pages_to_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -67,10 +75,14 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 			}
 		}
 		pthread_mutex_unlock(&frames_mutex);
-
-		runFunction(connection->socket, "memory_response_heap", 1, string_itoa(NO_ERRORES));
-	} else
-		runFunction(connection->socket, "memory_response_heap", 1, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS));
+		char* response = string_itoa(NO_ERRORES);
+		runFunction(connection->socket, "memory_response_heap", 1, response);
+		free(response);
+	} else{
+		char* response = string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS);
+		runFunction(connection->socket, "memory_response_heap", 1, response);
+		free(response);
+	}
 }
 void i_finish_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -82,7 +94,9 @@ void i_free_page(socket_connection* connection, char** args) {
 	int page = atoi(args[1]);
 	//TODO habria que ver de limpiar la cache tambien
 	free_page(pid, page);
-	runFunction(connection->socket, "memory_response_heap", 1, string_itoa(NO_ERRORES));
+	char* response = string_itoa(NO_ERRORES);
+	runFunction(connection->socket, "memory_response_heap", 1, response);
+	free(response);
 }
 
 void kernel_stack_size(socket_connection* connection, char** args) {
@@ -96,7 +110,9 @@ void i_get_page_from_pointer(socket_connection* connection, char** args) {
 
 	int page = get_page_from_pointer(pointer);
 	log_debug(logger, "i_get_page_from_pointer: '%d'", page);
-	runFunction(connection->socket, "memory_response_get_page_from_pointer", 1, string_itoa(page));
+	char* response = string_itoa(page);
+	runFunction(connection->socket, "memory_response_get_page_from_pointer", 1, response);
+	free(response);
 }
 
 void i_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
@@ -115,11 +131,13 @@ void i_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
 	}
 
 	//send_dynamic_message(connection->socket, string_itoa(frame));
-	runFunction(connection->socket, "memory_response_get_frame_from_pid_and_page", 1, string_itoa(frame));
+	char* response = string_itoa(frame);
+	runFunction(connection->socket, "memory_response_get_frame_from_pid_and_page", 1, response);
 	log_debug(logger, "i_get_frame_from_pid_and_page: '%d'", frame);
+	free(response);
 }
 
- /*
+/*
  * SERVER
  */
 void client_identify(socket_connection* connection, char** args) {
@@ -131,10 +149,14 @@ void client_identify(socket_connection* connection, char** args) {
 		pthread_mutex_lock(&cpu_sockets_mutex);
 		list_add(m_sockets.cpu_sockets, &connection->socket);
 		pthread_mutex_unlock(&cpu_sockets_mutex);
-		runFunction(connection->socket, "memory_retard", 1, string_itoa(mem_delay));
+		char* response = string_itoa(mem_delay);
+		runFunction(connection->socket, "memory_retard", 1, response);
+		free(response);
 	} else if (!strcmp(sender, KERNEL)) {
 		m_sockets.k_socket = connection->socket;
-		runFunction(connection->socket, "memory_page_size", 1, string_itoa(frame_size));
+		char* response = string_itoa(frame_size);
+		runFunction(connection->socket, "memory_page_size", 1, response);
+		free(response);
 	}
 }
 
