@@ -30,6 +30,9 @@ unsigned int hash(int pid, int page) {
 	free(str);
 	return indice;
 }
+t_adm_table* get_adm_table_by_hash(int indice) {
+	return list_get(adm_list, indice);
+}
 
 void mem_allocate_fullspace() {
 	int mem_size = frames_count * frame_size;
@@ -71,7 +74,12 @@ void start_program(int pid, int n_frames) {
 	pthread_mutex_lock(&frames_mutex);
 	int page_c = n_frames;
 	int i;
-	for (i = hash(pid, 0); i < list_size(adm_list); i++) {
+	/*t_adm_table* adm_table = get_adm_table_by_hash(hash(pid, 0));
+	if (adm_table->pid < 0 ){
+	//Al pedo el hashing
+	}*/
+	//else{
+	for (i = 0; i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
@@ -82,6 +90,7 @@ void start_program(int pid, int n_frames) {
 				break;
 		}
 	}
+	//}
 	pthread_mutex_unlock(&frames_mutex);
 	add_pages(pid, stack_size);
 }
@@ -125,7 +134,7 @@ void add_pages(int pid, int n_frames) {
 
 	int known_pages = list_size(list_filter(adm_list, &find));
 
-	for (i = hash(pid, 0); i < list_size(adm_list); i++) {
+	for (i = 0; i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
@@ -564,7 +573,7 @@ void free_page(int pid, int page) {
 	pthread_mutex_lock(&frames_mutex);
 
 	int i;
-	for (i = hash(pid, page); list_size(adm_list); i++) {
+	for (i = 0; list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid == pid && adm_table->pag == page) {
 			adm_table->pid = -1;
@@ -579,7 +588,6 @@ void free_page(int pid, int page) {
 
 void dump(int pid) {
 	int i;
-	t_list* active_process = list_create();
 
 	pthread_mutex_lock(&frames_cache_mutex);
 	char* dump_cache = string_new();
@@ -606,7 +614,7 @@ void dump(int pid) {
 	if (pid == -1) {
 		string_append(&dump_mem_content, frames);
 	} else {
-		for (i = hash(pid, 0); i < list_size(adm_list); i++) {
+		for (i = 0; i < list_size(adm_list); i++) {
 			t_adm_table* adm_table = list_get(adm_list, i);
 			if (adm_table->pid == pid) {
 				char* frame = string_substring(frames,
@@ -626,28 +634,10 @@ void dump(int pid) {
 					"FRAME: %d | PID: %d | PAGE: %d\n", adm_table->frame,
 					adm_table->pid, adm_table->pag);
 		}
-		if (adm_table->pid > 0)
-			list_add(active_process, adm_table);
-		}
-		t_list* active_process_no_duplicates = list_create();
-		int j;
-
-		for (i = 0; i < list_size(active_process); i++) {
-			t_adm_table* adm_table = list_get(active_process, i);
-			list_add(active_process_no_duplicates, adm_table);
-			for (j = i + 1; j < list_size(active_process); j++) {
-				t_adm_table* adm_table_n = list_get(active_process, j);
-				if (adm_table_n->pid == adm_table->pid) {
-					list_remove_and_destroy_element(active_process, j, free);
-					j--;
-				}
-			}
-		}
-
-		for (i = 0; i < list_size(active_process_no_duplicates); i++) {
-			t_adm_table* adm_table = list_get(active_process_no_duplicates, i);
+		if (adm_table->pid > 0 && adm_table->pag == 0){
 			string_append_with_format(&dump_act_process, "ACTIVE PID: %d\n",
-					adm_table->pid);
+								adm_table->pid);
+		}
 		}
 
 		char* dump_total = string_new();

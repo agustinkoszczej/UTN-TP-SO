@@ -104,9 +104,8 @@ void i_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
 	int page = atoi(args[1]);
 
-	//TODO y aqui llamaria a la funcion de Hashing...SI TUVIERA UNA!!! (*inserte meme de papa de Timy) xd
 	int i, frame;
-	for (i = hash(pid, page); i < list_size(adm_list); i++) {
+	for (i = 0; i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 
 		if (adm_table->pid == pid && adm_table->pag == page) {

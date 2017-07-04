@@ -29,7 +29,6 @@ void memory_response_read_bytes_from_page(socket_connection* connection, char** 
 	mem_value = char4ToInt(aux);
 
 	//log_debug(logger, "memory_response_read_bytes_from_page: buffer=%s", mem_buffer);
-
 	signal_response(&planning_mutex);
 }
 void memory_response_store_bytes_in_page(socket_connection* connection, char** args) {
