@@ -1,7 +1,7 @@
 begin
   variables a, f
   alocar a 100
-  abrir f CLE /smallFile.bin
+  abrir f LEC /smallFile.bin
   *a=88
   escribir f a 10
   cerrar f

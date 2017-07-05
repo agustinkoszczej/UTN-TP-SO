@@ -447,6 +447,7 @@ int remove_open_file_by_fd_and_pid(int fd, int pid) {
 		return -1; // El proceso no tiene ese fd asignado
 
 	t_open_file* file_to_remove = list_get(files->open_files, pos);
+	int gfd = file_to_remove->gfd;
 	list_remove_and_destroy_element(files->open_files, pos, &free);
 	pos = get_pos_in_fs_process_table_by_pid(pid);
 
@@ -455,7 +456,7 @@ int remove_open_file_by_fd_and_pid(int fd, int pid) {
 	if (list_size(files->open_files) == 3)
 		list_remove_and_destroy_element(fs_process_table, get_pos_in_fs_process_table_by_pid(pid), &free); //Si no tiene archivos abierto la remuevo de la lista
 
-	return file_to_remove->gfd;
+	return gfd;
 }
 
 bool close_file(int fd_close, int pid) {
