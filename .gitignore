@@ -34,7 +34,30 @@ log
 *.dSYM/
 *.su
 
-Debug
+#Debug
 
 # Settings
 *.settings
+
+# Custom
+consola/Debug/consola
+cpu/Debug/cpu
+filesystem/Debug/filesystem
+kernel/Debug/kernel
+memoria/Debug/memoria
+
+consola/Debug/src/*.o
+cpu/Debug/src/*.o
+filesystem/Debug/src/*.o
+kernel/Debug/src/*.o
+memoria/Debug/src/*.o
+
+consola/Debug/src/*.d
+cpu/Debug/src/*.d
+filesystem/Debug/src/*.d
+kernel/Debug/src/*.d
+memoria/Debug/src/*.d
+
+utils/Debug/*.o
+utils/Debug/*.d
+utils/Debug/*.so
