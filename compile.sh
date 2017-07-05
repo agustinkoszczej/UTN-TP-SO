@@ -2,6 +2,13 @@
 
 clear
 
+cd utils
+cd Debug
+make clean
+make all
+cd ..
+cd ..
+
 cd consola
 cd Debug
 make clean
