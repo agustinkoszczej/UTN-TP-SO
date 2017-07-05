@@ -26,7 +26,7 @@ endif
 all: cpu
 
 dependents:
-	-cd /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/utils/Debug && $(MAKE) clean all
+	-cd /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/utils/Debug && $(MAKE) all
 
 # Tool invocations
 cpu: $(OBJS) $(USER_OBJS) /home/utnso/workspace/tp-2017-1c-Lords-of-the-Strings/utils/Debug/libutils.so

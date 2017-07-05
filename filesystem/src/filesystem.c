@@ -137,7 +137,7 @@ bool save_data(char* path, int offset, int size, char* buffer) {
 
 	int offset2 = offset - start_block * block_size;
 	int len = (size > block_size) ? block_size : size;
-	len = -offset2;
+	len -= offset2;
 	write_block(atoi(blocks_arr[start_block]), offset2, len, string_substring_until(buffer, len));
 	free(blocks_arr[start_block]);
 	start_block++;
