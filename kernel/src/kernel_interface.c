@@ -111,7 +111,7 @@ void cpu_has_quantum_changed(socket_connection* connection, char** args){
 void cpu_has_aborted(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
 	pcb* l_pcb = find_pcb_by_pid(pid);
-	bool result = l_pcb->exit_code == FINALIZADO_CONSOLA;
+	bool result = l_pcb->exit_code == FINALIZADO_CONSOLA; //TODO FINALIZADO_KERNEL
 
 	send_dynamic_message(connection->socket, string_itoa(result));
 }

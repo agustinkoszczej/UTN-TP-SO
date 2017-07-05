@@ -149,6 +149,7 @@ t_valor_variable cpu_dereferenciar(t_puntero direccion_variable) {
  * @param	valor	Valor a insertar
  * @return	void
  */
+
 void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
 	runFunction(mem_socket, "i_get_page_from_pointer", 1, string_itoa(direccion_variable));
 	wait_response(&planning_mutex);
@@ -248,7 +249,8 @@ void cpu_llamarSinRetorno(t_nombre_etiqueta etiqueta) {
 	 list_add(pcb_actual->i_stack, stack_aux);
 
 	 cpu_irAlLabel(etiqueta);*/
-	pcb_actual->exit_code = ERROR_SINTAXIS; //FIXME no se actualizan los exits codes :c
+	pcb_actual->exit_code = ERROR_SINTAXIS;
+
 	cpu_finalizar();
 }
 

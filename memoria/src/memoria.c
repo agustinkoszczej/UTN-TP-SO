@@ -42,7 +42,7 @@ void mem_allocate_fullspace() {
 	frames = malloc(mem_size);
 	frames_cache = malloc(cache_size * frame_size);
 
-	memset(frames, '#', mem_size);
+	memset(frames, '\0', mem_size); //TODO ver si lo saco momentaneamente por los satrapas de SO
 
 	pthread_mutex_unlock(&frames_mutex);
 }
@@ -433,7 +433,7 @@ void store_administrative_structures() {
 	int size_reg_adm_table = (sizeof(int) + sizeof(int) + sizeof(int));
 //(sizeof(nroFrame) + sizeof(nroDePID) + sizeof(nroDePagina)) * cant_frames
 	bytes_reserved_for_page_table += size_reg_adm_table * frames_count;
-//(sizeof(nroFrame) + sizeof(nroDePID) + sizeof(nroDePagina)) + sizeof(lru) * cache_size	TODO ver si es cache size o cache_x_proc
+//(sizeof(nroFrame) + sizeof(nroDePID) + sizeof(nroDePagina)) + sizeof(lru) * cache_size
 	int size_reg_cache = (sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int));
 
 	bytes_reserved_for_cache += size_reg_cache * cache_size;
@@ -573,7 +573,7 @@ void clean_frame(int frame) {
 	int end = start + frame_size;
 	int i;
 	for (i = start; i < end; i++) {
-		frames[i] = '#';
+		frames[i] = '\0'; //TODO ver si setteo en \0
 	}
 }
 

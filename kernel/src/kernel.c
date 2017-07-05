@@ -593,7 +593,7 @@ int write_file(int fd_write, int pid, char* info, int size) {
 		return NO_ERRORES;
 	}
 
-	return ESCRIBIR_SIN_PERMISOS; //ESCRIBIR_SIN_PERMISOS
+	return ESCRIBIR_SIN_PERMISOS;
 }
 
 void show_global_file_table() {
@@ -626,7 +626,7 @@ void show_process_file_table(int pid) {
 	log_debug(logger, "show_process_file_table");
 	t_process_file_table* files_process = get_process_file_by_pid(pid);
 	if (files_process == NULL)
-		printf("FILES OPEN: 0\n", pid);
+		printf("FILES OPEN: 0\n");
 	else {
 		int i;
 		printf("FILES OPEN: %d\n", list_size(files_process->open_files));
@@ -809,6 +809,7 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	HeapMetadata* heap = malloc(sizeof(HeapMetadata));
 	heap->isFree = true;
 	heap->size = mem_page_size - heap_metadata_size;
+	mem_read_buffer = string_repeat('#', mem_page_size); //TODO hago esto porque volé en memoria lo de settiar con hashtag por los putitos con su escribir
 	write_HeapMetadata(heap, 0, mem_read_buffer);
 	//free(heap);
 	it_fits_malloc(mem_read_buffer, space);
@@ -888,8 +889,11 @@ void free_memory(int pid, int pointer) {
 		runFunction(mem_socket, "i_free_page", 2, string_itoa(pid), string_itoa(page_from_pointer));
 		wait_response(&mem_response);
 		occupy_space(pid, page_from_pointer, -freed_space, true);
-	} else
+	} else{
 		occupy_space(pid, page_from_pointer, -freed_space, false);
+		runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid), string_itoa(page_from_pointer), string_itoa(0), string_itoa(mem_page_size), mem_read_buffer);
+		wait_response(&mem_response);
+	}
 }
 
 void wait_response(pthread_mutex_t* mutex) {
@@ -1293,10 +1297,16 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 
 void stop_process(int pid) { //TODO esto no anda ¯\_(ツ)_/¯ (es lo de SIGUSR1)
 	log_debug(logger, "stop_process");
-	t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
-	pcb* n_pcb = find_pcb_by_pid(pid);
-	n_pcb->exit_code = ERROR_SIN_DEFINIR;
-	runFunction(n_socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_socket_pcb->pid), string_itoa(n_pcb->exit_code));
+	pcb* pcb_p = find_pcb_by_pid(pid);
+	if(pcb_p->state == EXEC_LIST){
+		t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
+		pcb* n_pcb = find_pcb_by_pid(pid);
+		n_pcb->exit_code = ERROR_SIN_DEFINIR;
+		runFunction(n_socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_socket_pcb->pid), string_itoa(n_pcb->exit_code));
+	}
+	else{
+		move_to_list(pcb_p, EXIT_LIST);
+	}
 }
 
 void do_stop_process(char* sel) {
