@@ -42,7 +42,7 @@ void mem_allocate_fullspace() {
 	frames = malloc(mem_size);
 	frames_cache = malloc(cache_size * frame_size);
 
-	memset(frames, '\0', mem_size); //TODO ver si lo saco momentaneamente por los satrapas de SO
+	//memset(frames, '#', mem_size); //TODO ver si lo saco momentaneamente por los satrapas de SO
 
 	pthread_mutex_unlock(&frames_mutex);
 }

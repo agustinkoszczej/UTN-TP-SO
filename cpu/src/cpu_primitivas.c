@@ -161,8 +161,9 @@ void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
 	char* pid = string_itoa(pcb_actual->pid);
 	char* page = string_itoa(n_page);
 	char* offset = string_itoa(n_offset);
-	char* size = string_itoa(sizeof(int));
+	//char* size = string_itoa(sizeof(int)); //TODO toco size
 	char* buffer = intToChar4(valor);
+	char* size = string_itoa(sizeof(int));
 
 	runFunction(mem_socket, "i_store_bytes_in_page", 5, pid, page, offset, size, buffer);
 	wait_response(&planning_mutex);
@@ -553,7 +554,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 	pcb_actual->statistics.op_priviliges++;
 
 	char* buffer = string_new();
-	memcpy(buffer, informacion, tamanio - 1);
+	memcpy(buffer, informacion, tamanio);
 
 
 	log_debug(logger, "|PRIMITIVA| Escribir FD: '%d', Info: '%s', Tamanio: '%d'", descriptor_archivo, buffer, tamanio);
