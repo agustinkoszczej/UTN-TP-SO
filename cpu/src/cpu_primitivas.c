@@ -553,7 +553,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 	pcb_actual->statistics.op_priviliges++;
 
 	char* buffer = string_new();
-	string_append(&buffer, string_substring_until((char*) informacion, tamanio));
+	memcpy(buffer, informacion, tamanio - 1);
 
 
 	log_debug(logger, "|PRIMITIVA| Escribir FD: '%d', Info: '%s', Tamanio: '%d'", descriptor_archivo, buffer, tamanio);
