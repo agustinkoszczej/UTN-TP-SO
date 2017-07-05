@@ -12,4 +12,5 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspace/tp-2017-1c-Lords-of-the-Stri
 5° Editar el .bashrc y poner al final -> export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspace/tp-2017-1c-Lords-of-the-Strings/utils/Debug
 6° Ejecutar -> sh compile.sh
 7° Ejecutar -> source import_libraries.sh
-8° Para saber IP -> ifconfig 
+8° Para saber IP -> ifconfig
+9° Cambiar IPs de los config
