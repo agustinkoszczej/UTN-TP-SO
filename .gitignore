@@ -34,4 +34,5 @@ log
 *.dSYM/
 *.su
 
-Debug
+# Settings
+*.settings
