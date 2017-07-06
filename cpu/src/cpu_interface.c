@@ -23,9 +23,17 @@ void memory_retard(socket_connection* connection, char** args) {
 void memory_response_read_bytes_from_page(socket_connection* connection, char** args) {
 	mem_buffer = string_new();
 	string_append(&mem_buffer, args[0]);
-
+	if(mem_buffer[string_length(mem_buffer)-1] == '#'){
+		mem_buffer[string_length(mem_buffer)-1] = '\0';
+	}
 	char* aux = string_new();
 	aux = args[0];
+	int i;
+	for (i=0 ; i<sizeof(int); i++){
+		if (aux[i] == '#'){
+			aux[i] = '\0';
+		}
+	}
 	mem_value = char4ToInt(aux);
 
 	//log_debug(logger, "memory_response_read_bytes_from_page: buffer=%s", mem_buffer);

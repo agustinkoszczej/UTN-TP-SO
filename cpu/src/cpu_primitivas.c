@@ -161,9 +161,15 @@ void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
 	char* pid = string_itoa(pcb_actual->pid);
 	char* page = string_itoa(n_page);
 	char* offset = string_itoa(n_offset);
-	//char* size = string_itoa(sizeof(int)); //TODO toco size
+	char* size = string_itoa(sizeof(int)); //TODO toco size
 	char* buffer = intToChar4(valor);
-	char* size = string_itoa(sizeof(int));
+	int i;
+	for(i=0; i< sizeof(int); i++){
+		if(buffer[i] == '\0'){
+			buffer[i] = '#';
+		}
+	}
+	//char* size = string_itoa(string_length(buffer));
 
 	runFunction(mem_socket, "i_store_bytes_in_page", 5, pid, page, offset, size, buffer);
 	wait_response(&planning_mutex);
@@ -358,7 +364,8 @@ void cpu_retornar(t_valor_variable retorno) {
 void kernel_wait(t_nombre_semaforo identificador_semaforo) {
 	pcb_actual->statistics.op_priviliges++;
 
-	log_debug(logger, "|PRIMITIVA| Wait: Semaforo \"%s\"", identificador_semaforo);
+	log_debug(logger, "|PRIMITIVA| Wait:"
+			" Semaforo \"%s\"", identificador_semaforo);
 	runFunction(kernel_socket, "cpu_wait_sem", 1, identificador_semaforo);
 	is_locked = atoi(receive_dynamic_message(kernel_socket));
 
@@ -538,7 +545,8 @@ void kernel_moverCursor(t_descriptor_archivo descriptor_archivo, t_valor_variabl
 }
 
 /*
- * ESCRIBIR ARCHIVO
+ *
+ ARCHIVO
  *
  * Informa al Kernel que el proceso requiere que se escriba un archivo previamente abierto.
  * El mismo escribira "tamanio" de bytes de "informacion" luego del cursor
@@ -589,7 +597,8 @@ void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 
 	log_debug(logger, "|PRIMITIVA| Leer FD: '%d', Info: '%d', Tamanio: '%d'", descriptor_archivo, informacion, tamanio);
 
-	informacion = cpu_dereferenciar(informacion);
+
+	//informacion = cpu_dereferenciar(informacion);
 	runFunction(kernel_socket, "cpu_read_file", 4, string_itoa(descriptor_archivo), string_itoa(informacion), string_itoa(tamanio), string_itoa(pcb_actual->pid));
 	//wait_response();
 
@@ -598,5 +607,7 @@ void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 	if (descriptor_archivo < 0) {
 		pcb_actual->exit_code = descriptor_archivo;
 		cpu_finalizar();
+	}else{
+
 	}
 }

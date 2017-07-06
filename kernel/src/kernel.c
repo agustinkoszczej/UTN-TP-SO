@@ -379,6 +379,7 @@ t_open_file* get_open_file_by_fd_and_pid(int fd, int pid) {
 	return NULL;
 }
 
+
 char* get_path_by_fd_and_pid(int fd, int pid) {
 	log_debug(logger, "get_path_by_fd_and_pid");
 	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
@@ -1400,7 +1401,6 @@ void thread_continuous_scan_notify(int argc){
 		}
 	}
 }
-
 int main(int argc, char *argv[]) {
 	clear_screen();
 	char sel[255];

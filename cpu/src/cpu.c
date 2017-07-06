@@ -175,7 +175,6 @@ void init_cpu(t_config* config) {
 }
 
 int main(int argc, char *argv[]) {
-
 	clear_screen();
 	t_config* config = malloc(sizeof(t_config));
 
