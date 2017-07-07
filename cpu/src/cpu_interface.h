@@ -45,8 +45,6 @@ void memory_retard(socket_connection* connection, char** args);
 void kernel_response(socket_connection* connection, char** args);
 void kernel_update_quantum_sleep(socket_connection* connection, char** args);
 
-bool finished;
-
 /*
  * PRIMITIVAS CPU
  */

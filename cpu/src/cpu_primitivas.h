@@ -17,6 +17,7 @@
 #include <exit_codes.h>
 
 bool finished;
+int aborted_status;
 
 /*
  * PRIMITIVAS CPU

@@ -1276,16 +1276,13 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 
 void stop_process(int pid) { //TODO esto no anda ¯\_(ツ)_/¯ (es lo de SIGUSR1)
 	log_debug(logger, "stop_process");
-	pcb* pcb_p = find_pcb_by_pid(pid);
-	if(pcb_p->state == EXEC_LIST){
-		t_socket_pcb* n_socket_pcb = find_socket_by_pid(pid);
-		pcb* n_pcb = find_pcb_by_pid(pid);
-		n_pcb->exit_code = ERROR_SIN_DEFINIR;
-		runFunction(n_socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_socket_pcb->pid), string_itoa(n_pcb->exit_code));
-	}
-	else{
-		move_to_list(pcb_p, EXIT_LIST);
-	}
+	pcb* l_pcb = find_pcb_by_pid(pid);
+		l_pcb->exit_code = FINALIZADO_KERNEL;
+
+		if (l_pcb->state != EXEC_LIST) {
+			substract_process_in_memory();
+			runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
+		}
 }
 
 void do_stop_process(char* sel) {

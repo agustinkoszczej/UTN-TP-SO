@@ -379,7 +379,9 @@ void init_console() {
 			"Unknown error.");
 	dictionary_put(message_map, string_itoa(DESCONEXION_CONSOLA),
 			"Console disconnected.");
-	dictionary_put(message_map, string_itoa(FINALIZADO_CONSOLA), "Aborted.");
+	dictionary_put(message_map, string_itoa(FINALIZADO_CONSOLA), "Aborted by console.");
+
+	dictionary_put(message_map, string_itoa(FINALIZADO_KERNEL), "Aborted by kernel.");
 
 	dictionary_put(message_map, string_itoa(NO_EXISTE_ARCHIVO),
 			"File does not exist.");

@@ -95,11 +95,10 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	printf("> EXECUTING_PID: %d\n", pcb_actual->pid);
 	while ((planning_alg == FIFO || quantum-- >= 0) && !finished) {
 		runFunction(kernel_socket, "cpu_has_aborted", 1, string_itoa(pcb_actual->pid));
-		finished = atoi(receive_dynamic_message(kernel_socket));
+		aborted_status = atoi(receive_dynamic_message(kernel_socket));
 
-		if (finished) {
-			pcb_actual->exit_code = FINALIZADO_CONSOLA;
-			break;
+		if (aborted_status<0) {
+			if (aborted_status == FINALIZADO_CONSOLA) break;
 		}
 
 		t_intructions* i_code = list_get(pcb_actual->i_code, pcb_actual->pc);
@@ -128,6 +127,12 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		sleep(quantum_sleep / 1000);
 		free(mem_buffer);
 	}
+
+	if(aborted_status < 0){
+		pcb_actual->exit_code = aborted_status;
+		finished = true;
+	}
+
 	printf("Finished executing.\n\n");
 	log_debug(logger, "cpu_task_finished");
 	runFunction(kernel_socket, "cpu_task_finished", 3, pcb_to_string(pcb_actual), string_itoa(finished), string_itoa(is_locked));

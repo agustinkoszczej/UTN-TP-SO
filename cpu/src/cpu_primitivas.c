@@ -559,15 +559,18 @@ void kernel_moverCursor(t_descriptor_archivo descriptor_archivo, t_valor_variabl
  * @return	void
  */
 void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion, t_valor_variable tamanio) {
-	char* fd = string_itoa(descriptor_archivo);
-	char* size = string_itoa(tamanio);
-	char* pid = string_itoa(pcb_actual->pid);
+	char* fd = string_new();
+	fd =string_itoa(descriptor_archivo);
+	char* size = string_new();
+	size = string_itoa(tamanio);
+	char* pid = string_new();
+	pid = string_itoa(pcb_actual->pid);
 
 	pcb_actual->statistics.op_priviliges++;
 
 	char* buffer = string_new();
 	memcpy(buffer, informacion, tamanio);
-	free(informacion);
+	//string_append(&buffer, "HOLA");
 
 	//log_debug(logger, "|PRIMITIVA| Escribir FD: '%d', Info: '%s', Tamanio: '%d'", descriptor_archivo, buffer, tamanio);
 	runFunction(kernel_socket, "cpu_write_file", 4, fd, buffer, size, pid);
@@ -582,7 +585,12 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 		pcb_actual->exit_code = kernel_fd;
 		cpu_finalizar();
 	}
+
+	free(informacion);
 	free(buffer);
+	free(fd);
+	free(size);
+	free(pid);
 }
 
 /*
