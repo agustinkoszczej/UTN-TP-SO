@@ -121,7 +121,7 @@ void update_file_size(char* path, int offset, int size) {
 
 bool save_data(char* path, int offset, int size, char* buffer) {
 	log_debug(logger, "save_data: path=%s, offset=%d, size=%d, buffer=%s", path, offset, size, buffer);
-
+	int initial_size = size;
 	if (!add_blocks_if_needed(path, offset, size)) {
 		log_debug(logger, "save_data: bool=%d", false);
 		return false;
@@ -159,7 +159,7 @@ bool save_data(char* path, int offset, int size, char* buffer) {
 	config_destroy(config_file);
 	free(path_file);
 
-	update_file_size(path, offset, size); //TODO VER
+	update_file_size(path, offset, initial_size); //TODO VER
 
 	log_debug(logger, "save_data: bool=%d", true);
 	return true;
