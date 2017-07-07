@@ -244,6 +244,7 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 	}
 
 	send_dynamic_message(connection->socket, string_itoa(is_locked));
+	log_debug(logger, "cpu_wait_sem: exit");
 	pthread_mutex_unlock(&sems_mutex);
 }
 

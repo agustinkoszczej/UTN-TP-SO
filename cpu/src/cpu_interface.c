@@ -111,7 +111,9 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		int n_size = offset;
 
 		log_debug(logger, "\ni_read_bytes_from_page: pid: '%d', n_page: '%d', n_offset: '%d', n_size: '%d'", pid, n_page, n_offset, n_size);
+
 		runFunction(mem_socket, "i_read_bytes_from_page", 4, string_itoa(pid), string_itoa(n_page), string_itoa(n_offset), string_itoa(n_size));
+
 		wait_response(&planning_mutex);
 
 		string_trim(&mem_buffer);
