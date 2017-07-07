@@ -367,15 +367,17 @@ void cpu_open_file(socket_connection* connection, char** args) {
 
 void cpu_delete_file(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_delete_file");
-	int gfd_delete = atoi(args[0]);
+	int fd_delete = atoi(args[0]);
+	int pid = atoi(args[1]);
 
-	int result = delete_file_from_global_table(gfd_delete);
+	t_open_file* open_file = get_open_file_by_fd_and_pid(fd_delete, pid);
+	char* path = get_path_by_gfd(open_file->gfd);
+
+	int result = delete_file_from_global_table(open_file->gfd);
 	if (result < 0) {
 		send_dynamic_message(connection->socket, string_itoa(result));
 		return;
 	}
-
-	char* path = get_path_by_gfd(gfd_delete);
 
 	runFunction(fs_socket, "kernel_delete_file", 1, path);
 	wait_response(&fs_mutex);
@@ -388,7 +390,7 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 	}
 
 	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(gfd_delete));
-	send_dynamic_message(connection->socket, string_itoa(gfd_delete));
+	send_dynamic_message(connection->socket, string_itoa(fd_delete));
 }
 
 void cpu_close_file(socket_connection* connection, char** args) {

@@ -468,7 +468,7 @@ t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion, t_banderas flag
 	}
 
 	log_debug(logger, "|PRIMITIVA| Abrir en FD '%d'", kernel_fd);
-	return kernel_fd;
+	return (t_descriptor_archivo) kernel_fd;
 }
 
 /*
@@ -484,14 +484,14 @@ void kernel_borrar(t_descriptor_archivo descriptor_archivo) {
 	pcb_actual->statistics.op_priviliges++;
 
 	log_debug(logger, "|PRIMITIVA| Borrar");
-	runFunction(kernel_socket, "cpu_delete_file", 1, string_itoa(descriptor_archivo));
+	runFunction(kernel_socket, "cpu_delete_file", 2, string_itoa(descriptor_archivo), string_itoa(pcb_actual->pid));
 
 	//wait_response();
 
-	int kernel_gfd = atoi(receive_dynamic_message(kernel_socket));
+	int kernel_fd = atoi(receive_dynamic_message(kernel_socket));
 
-	if (kernel_gfd < 0) {
-		pcb_actual->exit_code = kernel_gfd;
+	if (kernel_fd < 0) {
+		pcb_actual->exit_code = kernel_fd;
 		cpu_finalizar();
 	}
 }
@@ -546,7 +546,7 @@ void kernel_moverCursor(t_descriptor_archivo descriptor_archivo, t_valor_variabl
 
 /*
  *
- ARCHIVO
+ ESCRIBIR ARCHIVO
  *
  * Informa al Kernel que el proceso requiere que se escriba un archivo previamente abierto.
  * El mismo escribira "tamanio" de bytes de "informacion" luego del cursor
@@ -559,14 +559,19 @@ void kernel_moverCursor(t_descriptor_archivo descriptor_archivo, t_valor_variabl
  * @return	void
  */
 void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion, t_valor_variable tamanio) {
+	char* fd = string_itoa(descriptor_archivo);
+	char* size = string_itoa(tamanio);
+	char* pid = string_itoa(pcb_actual->pid);
+
 	pcb_actual->statistics.op_priviliges++;
 
 	char* buffer = string_new();
 	memcpy(buffer, informacion, tamanio);
+	free(informacion);
 
+	//log_debug(logger, "|PRIMITIVA| Escribir FD: '%d', Info: '%s', Tamanio: '%d'", descriptor_archivo, buffer, tamanio);
+	runFunction(kernel_socket, "cpu_write_file", 4, fd, buffer, size, pid);
 
-	log_debug(logger, "|PRIMITIVA| Escribir FD: '%d', Info: '%s', Tamanio: '%d'", descriptor_archivo, buffer, tamanio);
-	runFunction(kernel_socket, "cpu_write_file", 4, string_itoa(descriptor_archivo), buffer, string_itoa(tamanio), string_itoa(pcb_actual->pid));
 
 	//wait_response();
 	int kernel_fd = atoi(receive_dynamic_message(kernel_socket));
@@ -577,6 +582,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 		pcb_actual->exit_code = kernel_fd;
 		cpu_finalizar();
 	}
+	free(buffer);
 }
 
 /*

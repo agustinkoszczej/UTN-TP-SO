@@ -126,6 +126,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		quantum_sleep = atoi(receive_dynamic_message(kernel_socket));
 
 		sleep(quantum_sleep / 1000);
+		free(mem_buffer);
 	}
 	printf("Finished executing.\n\n");
 	log_debug(logger, "cpu_task_finished");

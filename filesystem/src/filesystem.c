@@ -70,7 +70,7 @@ bool add_blocks_if_needed(char* path, int offset, int size) {
 	int file_size = config_get_int_value(config_file, TAMANIO);
 
 	FILE* f = fopen(path_file, "w");
-	fputs(string_from_format("TAMANIO=%d\n", file_size), f);
+	fputs(string_from_format("TAMANIO=%d\n", file_size), f); //TODO Fijate si esta bien Seba
 	fputs(string_from_format("BLOQUES=%s", buffer_blocks_array), f);
 	fclose(f);
 
@@ -159,7 +159,7 @@ bool save_data(char* path, int offset, int size, char* buffer) {
 	config_destroy(config_file);
 	free(path_file);
 
-	update_file_size(path, offset, size);
+	update_file_size(path, offset, size); //TODO VER
 
 	log_debug(logger, "save_data: bool=%d", true);
 	return true;
@@ -252,6 +252,7 @@ void free_blocks(char** blocks_arr) {
 	while (blocks_arr[i] != NULL) {
 		int bit_pos = atoi(blocks_arr[i]);
 		bitarray_clean_bit(bitmap, bit_pos);
+		i++;
 	}
 
 	update_bitmap_file();
@@ -263,7 +264,7 @@ bool delete_file(char* path) {
 	log_debug(logger, "delete_file: path=%s", path);
 
 	char* path_file = string_from_format("%s/Archivos/%s", mount_point, path);
-	if (validate_file(path_file)) {
+	if (validate_file(path)) {
 		t_config* config_file = config_create(path_file);
 		char** blocks_arr = config_get_array_value(config_file, BLOQUES);
 		config_destroy(config_file);

@@ -497,29 +497,6 @@ int delete_file_from_global_table(int gfd) {
 	list_remove_and_destroy_element(fs_global_table, pos, &free);// lo borro de la global
 
 	return NO_ERRORES;
-
-	/*if (pos == -1)
-		return false; //No existe archivo
-
-	list_remove_and_destroy_element(fs_global_table, pos, &free); // lo borro de la global
-	int i, j;
-	//ahora de la de de procesos que lo tenian abierto
-
-	for (i = 0; i < list_size(fs_process_table); i++) {
-		t_process_file_table* process_table = list_get(fs_process_table, i);
-		for (j = 0; j < list_size(process_table->open_files); j++) {
-			t_open_file* process = list_get(process_table->open_files, j);
-			if (process->gfd == gfd) {
-				list_remove_and_destroy_element(process_table->open_files, j, &free);
-				j--;
-			}
-		}
-		if (list_size(process_table->open_files) == 3) {
-			list_remove_and_destroy_element(fs_process_table, i, &free);
-			i--;
-		}
-	}
-	return true*/
 }
 
 bool is_allowed(int pid, int fd, char* flag) {
