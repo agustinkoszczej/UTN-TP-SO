@@ -23,14 +23,14 @@ void memory_retard(socket_connection* connection, char** args) {
 void memory_response_read_bytes_from_page(socket_connection* connection, char** args) {
 	mem_buffer = string_new();
 	string_append(&mem_buffer, args[0]);
-	if(mem_buffer[string_length(mem_buffer)-1] == '#'){
-		mem_buffer[string_length(mem_buffer)-1] = '\0';
+	if (mem_buffer[string_length(mem_buffer) - 1] == '#') {
+		mem_buffer[string_length(mem_buffer) - 1] = '\0';
 	}
 	char* aux = string_new();
 	aux = args[0];
 	int i;
-	for (i=0 ; i<sizeof(int); i++){
-		if (aux[i] == '#'){
+	for (i = 0; i < sizeof(int); i++) {
+		if (aux[i] == '#') {
 			aux[i] = '\0';
 		}
 	}
@@ -58,7 +58,7 @@ void memory_response_get_page_from_pointer(socket_connection* connection, char**
 /*
  * KERNEL
  */
-void kernel_update_quantum_sleep(socket_connection* connection, char** args){
+void kernel_update_quantum_sleep(socket_connection* connection, char** args) {
 	quantum_sleep = atoi(args[0]);
 	log_debug(logger, "kernel_update_quantum_sleep: quantum_sleep: '%d'", quantum_sleep);
 }
@@ -77,7 +77,7 @@ void kernel_page_stack_size(socket_connection* connection, char** args) {
 	int mem_page_size = atoi(args[0]);
 	int stack_s = atoi(args[1]);
 
-	log_debug(logger, "kernel_quantum_page_stack_size: mem_page_size=%d, stack_size=%d",mem_page_size, stack_s);
+	log_debug(logger, "kernel_quantum_page_stack_size: mem_page_size=%d, stack_size=%d", mem_page_size, stack_s);
 
 	frame_size = mem_page_size;
 	stack_size = stack_s;
@@ -97,8 +97,9 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		runFunction(kernel_socket, "cpu_has_aborted", 1, string_itoa(pcb_actual->pid));
 		aborted_status = atoi(receive_dynamic_message(kernel_socket));
 
-		if (aborted_status<0) {
-			if (aborted_status == FINALIZADO_CONSOLA) break;
+		if (aborted_status < 0) {
+			if (aborted_status == FINALIZADO_CONSOLA)
+				break;
 		}
 
 		t_intructions* i_code = list_get(pcb_actual->i_code, pcb_actual->pc);
@@ -130,7 +131,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		free(mem_buffer);
 	}
 
-	if(aborted_status < 0){
+	if (aborted_status < 0) {
 		pcb_actual->exit_code = aborted_status;
 		finished = true;
 	}

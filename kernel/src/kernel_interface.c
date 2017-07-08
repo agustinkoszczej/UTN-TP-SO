@@ -158,21 +158,29 @@ void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 }
 void cpu_task_finished(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_task_finished");
+	printf("");
 	pcb* n_pcb = string_to_pcb(args[0]);
 	bool finished = atoi(args[1]);
 	bool is_locked = atoi(args[2]);
 
+	printf("");
+	printf("");
 	pcb* o_pcb = find_pcb_by_pid(n_pcb->pid);
+	printf("");
 	set_new_pcb(&o_pcb, n_pcb);
 
 	t_cpu* n_cpu = find_cpu_by_socket(connection->socket);
+	printf("");
 	n_cpu->busy = false;
 
 	if (finished) {
 		void free_heap(void* element) {
 			t_heap_manage* heap = element;
+			printf("");
 			free(heap);
+			printf("");
 		}
+		printf("");
 
 		if (is_locked) {
 			move_to_list(o_pcb, BLOCK_LIST);
@@ -188,9 +196,11 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			}
 		}
 	} else {
+
 		move_to_list(o_pcb, READY_LIST);
 	}
 
+	printf("");
 	short_planning();
 }
 
