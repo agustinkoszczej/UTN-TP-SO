@@ -288,7 +288,8 @@ char* read_bytes(int pid, int page, int offset, int size) {
 	} else {
 		int frame_pos = hash(pid, page);
 		adm_table = list_get(adm_list, frame_pos);
-		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, adm_table->pid, adm_table->pag);
+		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
+		log_debug(logger, "%s", (adm_table->pid == pid && adm_table->pag == page) ? "EUREKA!" : "SIGA PARTICIPANDO.");
 		if (adm_table->pid != pid || adm_table->pag != page) {
 			adm_table = list_find(adm_list, find);
 		}
@@ -318,7 +319,8 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 	} else {
 		int frame_pos = hash(pid, page);
 		adm_table = list_get(adm_list, frame_pos);
-		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, adm_table->pid, adm_table->pag);
+		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
+		log_debug(logger, "%s", (adm_table->pid == pid && adm_table->pag == page) ? "EUREKA!" : "SIGA PARTICIPANDO.");
 		if (adm_table->pid != pid || adm_table->pag != page) {
 			adm_table = list_find(adm_list, find);
 		}
@@ -596,16 +598,23 @@ void clean_frame(int frame) {
 }
 
 void free_page(int pid, int page) {
-	pthread_mutex_lock(&frames_mutex);
 	int i;
-	for (i = 0; list_size(adm_list); i++) {
-		t_adm_table* adm_table = list_get(adm_list, i);
-		if (adm_table->pid == pid && adm_table->pag == page) {
-			adm_table->pid = -1;
-			adm_table->pag = 0;
-			update_administrative_register_adm_table(adm_table);
-			clean_frame(adm_table->frame);
-			break;
+
+	pthread_mutex_lock(&frames_mutex);
+	int frame_pos = hash(pid, page);
+	t_adm_table* adm_table = list_get(adm_list, frame_pos);
+	log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
+	log_debug(logger, "%s", (adm_table->pid == pid && adm_table->pag == page) ? "EUREKA!" : "SIGA PARTICIPANDO.");
+	if (adm_table->pid != pid || adm_table->pag != page) {
+		for (i = 0; list_size(adm_list); i++) {
+			adm_table = list_get(adm_list, i);
+			if (adm_table->pid == pid && adm_table->pag == page) {
+				adm_table->pid = -1;
+				adm_table->pag = 0;
+				update_administrative_register_adm_table(adm_table);
+				clean_frame(adm_table->frame);
+				break;
+			}
 		}
 	}
 	pthread_mutex_unlock(&frames_mutex);
