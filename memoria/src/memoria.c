@@ -79,7 +79,22 @@ void start_program(int pid, int n_frames) {
 	 //Al pedo el hashing
 	 }*/
 	//else{
-	for (i = 0; i < list_size(adm_list); i++) {
+	while (page_c > 0) {
+		int frame_pos = hash(pid, n_frames - page_c);
+		t_adm_table* adm_table = list_get(adm_list, frame_pos);
+		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, n_frames - page_c, adm_table->pid, adm_table->pag);
+		if (adm_table->pid < 0) {
+			adm_table->pid = pid;
+			adm_table->frame = frame_pos;
+			adm_table->pag = n_frames - page_c;
+			update_administrative_register_adm_table(adm_table);
+			if (--page_c <= 0)
+				break;
+		} else
+			break;
+	}
+
+	for (i = 0; i < list_size(adm_list) && page_c > 0; i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
@@ -271,7 +286,12 @@ char* read_bytes(int pid, int page, int offset, int size) {
 	if (exists_in_cache(pid, page)) {
 		adm_table = get_from_cache(pid, page);
 	} else {
-		adm_table = list_find(adm_list, find);
+		int frame_pos = hash(pid, page);
+		adm_table = list_get(adm_list, frame_pos);
+		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, adm_table->pid, adm_table->pag);
+		if (adm_table->pid != pid || adm_table->pag != page) {
+			adm_table = list_find(adm_list, find);
+		}
 		sleep(mem_delay / 1000);
 	}
 
@@ -296,7 +316,12 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 	if (is_cache) {
 		adm_table = get_from_cache(pid, page);
 	} else {
-		adm_table = list_find(adm_list, find);
+		int frame_pos = hash(pid, page);
+		adm_table = list_get(adm_list, frame_pos);
+		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, adm_table->pid, adm_table->pag);
+		if (adm_table->pid != pid || adm_table->pag != page) {
+			adm_table = list_find(adm_list, find);
+		}
 		sleep(mem_delay / 1000);
 	}
 	int start, end;
@@ -397,7 +422,7 @@ void show_administrative_structures_located_in_memory() {
 	log_debug(logger, "CACHE:\n");
 
 	int total_bytes = bytes_reserved_for_cache + bytes_reserved_for_page_table;
-	for (offset; offset < total_bytes; offset += sizeof(int)) {
+	for (; offset < total_bytes; offset += sizeof(int)) {
 		char* buffer = string_substring(frames, offset, sizeof(int));
 		j++;
 

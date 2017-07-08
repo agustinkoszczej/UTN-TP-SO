@@ -379,7 +379,6 @@ t_open_file* get_open_file_by_fd_and_pid(int fd, int pid) {
 	return NULL;
 }
 
-
 char* get_path_by_fd_and_pid(int fd, int pid) {
 	log_debug(logger, "get_path_by_fd_and_pid");
 	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
@@ -491,10 +490,10 @@ int delete_file_from_global_table(int gfd) {
 
 	if (pos < 0)
 		return NO_EXISTE_ARCHIVO;
-	else
-		if (g_file->open > 1) return ARCHIVO_ABIERTO_POR_OTROS;
+	else if (g_file->open > 1)
+		return ARCHIVO_ABIERTO_POR_OTROS;
 
-	list_remove_and_destroy_element(fs_global_table, pos, &free);// lo borro de la global
+	list_remove_and_destroy_element(fs_global_table, pos, &free); // lo borro de la global
 
 	return NO_ERRORES;
 }
@@ -579,7 +578,7 @@ void show_global_file_table() {
 	log_debug(logger, "show_global_file_table");
 	clear_screen();
 	printf("FILES OPEN: %d\n", list_size(fs_global_table));
-	if (list_size(fs_global_table) != 0){
+	if (list_size(fs_global_table) != 0) {
 		int i;
 		for (i = 0; i < list_size(fs_global_table); i++) {
 			t_global_file_table* global_file = list_get(fs_global_table, i);
@@ -861,14 +860,16 @@ void free_memory(int pid, int pointer) {
 
 	t_heap_stats* heap_stats = find_heap_stats_by_pid(pid);
 	heap_stats->free_c++;
-	if(freed_space < 0) heap_stats->free_b += mem_page_size - (2* heap_metadata_size);
-	else heap_stats->free_b += freed_space;
+	if (freed_space < 0)
+		heap_stats->free_b += mem_page_size - (2 * heap_metadata_size);
+	else
+		heap_stats->free_b += freed_space;
 
 	if (freed_space == -1) {
 		runFunction(mem_socket, "i_free_page", 2, string_itoa(pid), string_itoa(page_from_pointer));
 		wait_response(&mem_response);
 		occupy_space(pid, page_from_pointer, -freed_space, true);
-	} else{
+	} else {
 		occupy_space(pid, page_from_pointer, -freed_space, false);
 		runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid), string_itoa(page_from_pointer), string_itoa(0), string_itoa(mem_page_size), mem_read_buffer);
 		wait_response(&mem_response);
@@ -1277,12 +1278,12 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 void stop_process(int pid) { //TODO esto no anda ¯\_(ツ)_/¯ (es lo de SIGUSR1)
 	log_debug(logger, "stop_process");
 	pcb* l_pcb = find_pcb_by_pid(pid);
-		l_pcb->exit_code = FINALIZADO_KERNEL;
+	l_pcb->exit_code = FINALIZADO_KERNEL;
 
-		if (l_pcb->state != EXEC_LIST) {
-			substract_process_in_memory();
-			runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
-		}
+	if (l_pcb->state != EXEC_LIST) {
+		substract_process_in_memory();
+		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
+	}
 }
 
 void do_stop_process(char* sel) {
@@ -1304,69 +1305,70 @@ void do_stop_planification(char* sel) {
 	}
 }
 
-void init_notify(char* path_file){
+void init_notify(char* path_file) {
 	if (watch_descriptor > 0 && fd_inotify > 0) {
 		inotify_rm_watch(fd_inotify, watch_descriptor);
 	}
 	fd_inotify = inotify_init();
-		if (fd_inotify > 0) {
-			watch_descriptor = inotify_add_watch(fd_inotify, path_file, IN_MODIFY);
-		}
-}
-
-void do_notify(int argc){
-	char buffer[BUF_LEN];
-	int length = read(fd_inotify, buffer, BUF_LEN);
-	int offset = 0;
-		while (offset < length) {
-
-			struct inotify_event *event = (struct inotify_event *) &buffer[offset];
-
-			if (event->len) {
-				if (event->mask & IN_CREATE) {
-					if (event->mask & IN_ISDIR) {
-						printf("The directory %s was created.\n", event->name);
-					} else {
-						printf("The file %s was created.\n", event->name);
-					}
-				} else if (event->mask & IN_DELETE) {
-					if (event->mask & IN_ISDIR) {
-						printf("The directory %s was deleted.\n", event->name);
-					} else {
-						printf("The file %s was deleted.\n", event->name);
-					}
-				} else if (event->mask & IN_MODIFY) {
-					if (event->mask & IN_ISDIR) {
-						printf("The directory %s was modified.\n", event->name);
-					} else {
-						printf("The file %s was modified.\n", event->name);
-					}
-				}
-			}
-			offset += sizeof (struct inotify_event) + event->len;
+	if (fd_inotify > 0) {
+		watch_descriptor = inotify_add_watch(fd_inotify, path_file, IN_MODIFY);
 	}
 }
 
-void notify_all_cpus(){
+void do_notify(int argc) {
+	char buffer[BUF_LEN];
+	int length = read(fd_inotify, buffer, BUF_LEN);
+	int offset = 0;
+	while (offset < length) {
+
+		struct inotify_event *event = (struct inotify_event *) &buffer[offset];
+
+		if (event->len) {
+			if (event->mask & IN_CREATE) {
+				if (event->mask & IN_ISDIR) {
+					printf("The directory %s was created.\n", event->name);
+				} else {
+					printf("The file %s was created.\n", event->name);
+				}
+			} else if (event->mask & IN_DELETE) {
+				if (event->mask & IN_ISDIR) {
+					printf("The directory %s was deleted.\n", event->name);
+				} else {
+					printf("The file %s was deleted.\n", event->name);
+				}
+			} else if (event->mask & IN_MODIFY) {
+				if (event->mask & IN_ISDIR) {
+					printf("The directory %s was modified.\n", event->name);
+				} else {
+					printf("The file %s was modified.\n", event->name);
+				}
+			}
+		}
+		offset += sizeof(struct inotify_event) + event->len;
+	}
+}
+
+void notify_all_cpus() {
 	int i;
 	log_debug(logger, "notify_all_cpus : quantum_sleep: '%d'", quantum_sleep);
-	for(i=0; i<list_size(cpu_list); i++){
+	for (i = 0; i < list_size(cpu_list); i++) {
 		t_cpu* cpu_elem = list_get(cpu_list, i);
 		//runFunction(cpu_elem->socket, "kernel_update_quantum_sleep", 1, string_itoa(quantum_sleep));
 		send_dynamic_message(cpu_elem->socket, string_itoa(quantum_sleep));
 	}
 }
 
-void thread_continuous_scan_notify(int argc){
-	while(1){
+void thread_continuous_scan_notify(int argc) {
+	while (1) {
 		FD_ZERO(&readfds);
 		FD_SET(fd_inotify, &readfds);
-		if (max_fd < fd_inotify) max_fd = fd_inotify;
+		if (max_fd < fd_inotify)
+			max_fd = fd_inotify;
 		//waiting.tv_sec = 1;
 		//waiting.tv_usec = 5	;
 		select(max_fd + 1, &readfds, NULL, NULL, &waiting);
 
-		if(FD_ISSET(fd_inotify, &readfds)){
+		if (FD_ISSET(fd_inotify, &readfds)) {
 			do_notify(argc);
 			load_config(&config, argc, path_config);
 			print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
