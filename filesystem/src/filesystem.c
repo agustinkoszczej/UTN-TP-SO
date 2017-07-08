@@ -70,7 +70,7 @@ bool add_blocks_if_needed(char* path, int offset, int size) {
 	int file_size = config_get_int_value(config_file, TAMANIO);
 
 	FILE* f = fopen(path_file, "w");
-	fputs(string_from_format("TAMANIO=%d\n", file_size), f); //TODO Fijate si esta bien Seba
+	fputs(string_from_format("TAMANIO=%d\n", file_size), f);
 	fputs(string_from_format("BLOQUES=%s", buffer_blocks_array), f);
 	fclose(f);
 
@@ -159,7 +159,7 @@ bool save_data(char* path, int offset, int size, char* buffer) {
 	config_destroy(config_file);
 	free(path_file);
 
-	update_file_size(path, offset, initial_size); //TODO VER
+	update_file_size(path, offset, initial_size);
 
 	log_debug(logger, "save_data: bool=%d", true);
 	return true;
