@@ -26,15 +26,15 @@ char* differenceBetweenTimePeriod(char* start, char* finish) {
 
 	char* diff = string_new();
 
-	if(diff_hours < 10)
+	if (diff_hours < 10)
 		string_append_with_format(&diff, "0%d:", diff_hours);
 	else
 		string_append_with_format(&diff, "%d:", diff_hours);
-	if(diff_min < 10)
+	if (diff_min < 10)
 		string_append_with_format(&diff, "0%d:", diff_min);
 	else
 		string_append_with_format(&diff, "%d:", diff_min);
-	if(diff_sec < 10)
+	if (diff_sec < 10)
 		string_append_with_format(&diff, "0%d", diff_sec);
 	else
 		string_append_with_format(&diff, "%d", diff_sec);
@@ -71,8 +71,7 @@ t_process* find_process_by_pid(int pid) {
 	t_process* process = list_find(process_list, &find_pid);
 	pthread_mutex_unlock(&process_list_mutex);
 
-	log_debug(logger, "find_process_by_pid: IS NULL = %s",
-			process == NULL ? "true" : "false");
+	log_debug(logger, "find_process_by_pid: IS NULL = %s", process == NULL ? "true" : "false");
 	return process;
 }
 
@@ -80,8 +79,7 @@ void show_message(int i) {
 	log_debug(logger, "show_message: i=%d", i);
 
 	t_message* message = list_get(messages_list, i);
-	printf("[%s] [%d] [%s] %s\n", message->time, message->pid, message->name,
-			message->message);
+	printf("[%s] [%d] [%s] %s\n", message->time, message->pid, message->name, message->message);
 
 	log_debug(logger, "show_message: void");
 }
@@ -145,8 +143,7 @@ void create_function_dictionary() {
 	fns = dictionary_create();
 
 	dictionary_put(fns, "kernel_print_message", &kernel_print_message);
-	dictionary_put(fns, "kernel_response_load_program",
-			&kernel_response_load_program);
+	dictionary_put(fns, "kernel_response_load_program", &kernel_response_load_program);
 	dictionary_put(fns, "kernel_stop_process", &kernel_stop_process);
 
 	log_debug(logger, "create_function_dictionary: void");
@@ -172,10 +169,8 @@ void start_program(char* location) {
 	process->c_message = 0;
 	process->pid = -1;
 
-	if ((process->socket = connectServer(ip, port, fns,
-			&server_connectionClosed, NULL)) == -1) {
-		log_error(logger, "Error at connecting to KERNEL. IP = %s, Port = %d.",
-				ip, port);
+	if ((process->socket = connectServer(ip, port, fns, &server_connectionClosed, NULL)) == -1) {
+		log_error(logger, "Error at connecting to KERNEL. IP = %s, Port = %d.", ip, port);
 		new_message("Error at creating process.", -1);
 		return;
 	}
@@ -217,8 +212,7 @@ void do_disconnect_console(char* sel) {
 			t_process* process = list_get(process_list, i);
 			pthread_mutex_unlock(&process_list_mutex);
 			if (process->pid >= 0) {
-				runFunction(process->socket, "console_abort_program", 1,
-						string_itoa(process->pid));
+				runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
 				abort_program(process, FINALIZADO_CONSOLA);
 			}
 		}
@@ -244,10 +238,8 @@ void do_start_program(char* sel) {
 			perror("scandir");
 		else {
 			while (i < n) {
-				if (strcmp(namelist[i]->d_name, ".")
-						&& strcmp(namelist[i]->d_name, "..")) {
-					printf("%d. %s\n", files->elements_count + 1,
-							namelist[i]->d_name);
+				if (strcmp(namelist[i]->d_name, ".") && strcmp(namelist[i]->d_name, "..")) {
+					printf("%d. %s\n", files->elements_count + 1, namelist[i]->d_name);
 					list_add(files, namelist[i]->d_name);
 				} else
 					free(namelist[i]);
@@ -279,15 +271,11 @@ void abort_program(t_process* process, int exit_code) {
 		pthread_mutex_unlock(&p_counter_mutex);
 	}
 
-	new_message(dictionary_get(message_map, string_itoa(exit_code)),
-			process->pid);
-	char* message = string_from_format(
-			"[Time Started] [Time Finished] [Total Prints] [Total Time]");
+	new_message(dictionary_get(message_map, string_itoa(exit_code)), process->pid);
+	char* message = string_from_format("[Time Started] [Time Finished] [Total Prints] [Total Time]");
 	new_message(message, process->pid);
-	char* diff_time = differenceBetweenTimePeriod(process->time_start,
-			process->time_finish);
-	message = string_from_format("[%s] [%s] [%d] [%s]", process->time_start,
-			process->time_finish, process->c_message, diff_time);
+	char* diff_time = differenceBetweenTimePeriod(process->time_start, process->time_finish);
+	message = string_from_format("[%s] [%s] [%d] [%s]", process->time_start, process->time_finish, process->c_message, diff_time);
 	new_message(message, process->pid);
 
 	process->pid = -1;
@@ -322,8 +310,7 @@ void do_abort_program(char* sel) {
 			pthread_mutex_unlock(&process_list_mutex);
 
 			if (!strcmp(string_itoa(process->pid), pid)) {
-				runFunction(process->socket, "console_abort_program", 1,
-						string_itoa(process->pid));
+				runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
 				abort_program(process, FINALIZADO_CONSOLA);
 				break;
 			}
@@ -350,8 +337,7 @@ void do_clear_messages(char* sel) {
 void config_connection(t_config* config) {
 	log_debug(logger, "config_connection: void");
 
-	if (config_has_property(config, IP_KERNEL)
-			&& config_has_property(config, PUERTO_KERNEL)) {
+	if (config_has_property(config, IP_KERNEL) && config_has_property(config, PUERTO_KERNEL)) {
 		ip = config_get_string_value(config, IP_KERNEL);
 		port = config_get_int_value(config, PUERTO_KERNEL);
 	}
@@ -373,40 +359,26 @@ void init_console() {
 	message_map = dictionary_create();
 
 	dictionary_put(message_map, string_itoa(NO_ERRORES), "Successful exit.");
-	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS),
-			"Can not reserve resources.");
-	dictionary_put(message_map, string_itoa(ERROR_SIN_DEFINIR),
-			"Unknown error.");
-	dictionary_put(message_map, string_itoa(DESCONEXION_CONSOLA),
-			"Console disconnected.");
+	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), "Can not reserve resources.");
+	dictionary_put(message_map, string_itoa(ERROR_SIN_DEFINIR), "Unknown error.");
+	dictionary_put(message_map, string_itoa(DESCONEXION_CONSOLA), "Console disconnected.");
 	dictionary_put(message_map, string_itoa(FINALIZADO_CONSOLA), "Aborted by console.");
 
 	dictionary_put(message_map, string_itoa(FINALIZADO_KERNEL), "Aborted by kernel.");
 
-	dictionary_put(message_map, string_itoa(NO_EXISTE_ARCHIVO),
-			"File does not exist.");
-	dictionary_put(message_map, string_itoa(LEER_SIN_PERMISOS),
-			"File read denied.");
-	dictionary_put(message_map, string_itoa(ESCRIBIR_SIN_PERMISOS),
-			"File write denied.");
-	dictionary_put(message_map, string_itoa(EXCEPCION_MEMORIA),
-			"Memory exception.");
-	dictionary_put(message_map,
-			string_itoa(RESERVAR_MAS_MEMORIA_TAMANIO_PAGINA),
-			"Malloc overflow.");
-	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS),
-			"Pages overflow.");
+	dictionary_put(message_map, string_itoa(NO_EXISTE_ARCHIVO), "File does not exist.");
+	dictionary_put(message_map, string_itoa(LEER_SIN_PERMISOS), "File read denied.");
+	dictionary_put(message_map, string_itoa(ESCRIBIR_SIN_PERMISOS), "File write denied.");
+	dictionary_put(message_map, string_itoa(EXCEPCION_MEMORIA), "Memory exception.");
+	dictionary_put(message_map, string_itoa(RESERVAR_MAS_MEMORIA_TAMANIO_PAGINA), "Malloc overflow.");
+	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS), "Pages overflow.");
 	dictionary_put(message_map, string_itoa(STACK_OVERFLOW), "Stack overflow.");
-	dictionary_put(message_map, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE),
-			"File not opened.");
-	dictionary_put(message_map, string_itoa(ERROR_LEER_ARCHIVO),
-			"Won't read file.");
+	dictionary_put(message_map, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE), "File not opened.");
+	dictionary_put(message_map, string_itoa(ERROR_LEER_ARCHIVO), "Won't read file.");
 
-	dictionary_put(message_map, string_itoa(ERROR_SINTAXIS),
-			"Syntax error in the Script.");
+	dictionary_put(message_map, string_itoa(ERROR_SINTAXIS), "Syntax error in the Script.");
 
-	dictionary_put(message_map, string_itoa(ARCHIVO_ABIERTO_POR_OTROS),
-				"Can't delete file in use.");
+	dictionary_put(message_map, string_itoa(ARCHIVO_ABIERTO_POR_OTROS), "Can't delete file in use.");
 
 	log_debug(logger, "init_console: void");
 }

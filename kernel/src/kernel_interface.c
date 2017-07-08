@@ -8,8 +8,7 @@ void console_load_program(socket_connection* connection, char** args) {
 	char* program = args[0];
 
 	if (process_in_memory + 1 > multiprog) {
-		runFunction(process_struct.socket, "kernel_response_load_program", 2,
-				string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), string_itoa(-1));
+		runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), string_itoa(-1));
 		return;
 	}
 
@@ -55,10 +54,8 @@ void console_load_program(socket_connection* connection, char** args) {
 		if (metadata->etiquetas[i] != '\0') {
 			string_append_with_format(&label, "%c", metadata->etiquetas[i]);
 		} else {
-			t_puntero_instruccion* instruction = malloc(
-					sizeof(t_puntero_instruccion));
-			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas,
-					metadata->etiquetas_size);
+			t_puntero_instruccion* instruction = malloc(sizeof(t_puntero_instruccion));
+			*instruction = metadata_buscar_etiqueta(label, metadata->etiquetas, metadata->etiquetas_size);
 			dictionary_put(new_pcb->i_label, label, instruction);
 			label = string_new();
 		}
@@ -91,8 +88,7 @@ void console_load_program(socket_connection* connection, char** args) {
 	process_struct.socket = connection->socket;
 	process_struct.pid = new_pcb->pid;
 	process_struct.state = new_pcb->state;
-	runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid),
-			program);
+	runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program);
 }
 void console_abort_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -102,6 +98,7 @@ void console_abort_program(socket_connection* connection, char** args) {
 	if (l_pcb->state != EXEC_LIST) {
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
+		move_to_list(l_pcb, EXIT_LIST);
 	}
 }
 
@@ -180,18 +177,14 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 		if (is_locked) {
 			move_to_list(o_pcb, BLOCK_LIST);
 		} else {
-			int pos = find_heap_pages_pos_in_list(process_heap_pages,
-					n_pcb->pid);
-			list_remove_and_destroy_element(process_heap_pages, pos,
-					&free_heap);
+			int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
+			list_remove_and_destroy_element(process_heap_pages, pos, &free_heap);
 			move_to_list(n_pcb, EXIT_LIST);
 			substract_process_in_memory();
-			runFunction(mem_socket, "i_finish_program", 1,
-					string_itoa(n_pcb->pid));
+			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 			if (n_pcb->exit_code != FINALIZADO_CONSOLA) {
 				t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
-				runFunction(socket_pcb->socket, "kernel_stop_process", 2,
-						string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
+				runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
 			}
 		}
 	} else {
@@ -228,8 +221,7 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 
 	bool find_sem(void* s) {
 		t_sem* sem = s;
-		return !strcmp(sem->id, id_sem)
-				;
+		return !strcmp(sem->id, id_sem);
 	}
 
 	t_sem* sem_curr = list_find(sem_ids, &find_sem);
@@ -355,8 +347,7 @@ void cpu_open_file(socket_connection* connection, char** args) {
 		wait_response(&fs_mutex);
 		if (fs_response == 0) {
 			//TODO aca llega cuando create_file = false, que no se que significa del lado de FileSystem xd
-			log_debug(logger,
-					"Error de cpu_open_file que nunca deberia llegar");
+			log_debug(logger, "Error de cpu_open_file que nunca deberia llegar");
 		}
 	}
 
@@ -385,8 +376,7 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 	if (fs_response == 0) {
 		//TODO aca llega cuando delete_file = false, que no se que significa del lado de FileSystem xd
 		log_debug(logger, "Error de cpu_delete_file que nunca deberia llegar");
-		send_dynamic_message(connection->socket,
-				string_itoa(ERROR_SIN_DEFINIR));
+		send_dynamic_message(connection->socket, string_itoa(ERROR_SIN_DEFINIR));
 		return;
 	}
 
@@ -406,8 +396,7 @@ void cpu_close_file(socket_connection* connection, char** args) {
 		return;
 	}
 
-	send_dynamic_message(connection->socket,
-			string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+	send_dynamic_message(connection->socket, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 
 }
@@ -423,8 +412,7 @@ void cpu_seek_file(socket_connection* connection, char** args) {
 		send_dynamic_message(connection->socket, string_itoa(fd));
 		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
 	} else {
-		send_dynamic_message(connection->socket,
-				string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
+		send_dynamic_message(connection->socket, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 	}
 }
@@ -447,9 +435,7 @@ void cpu_write_file(socket_connection* connection, char** args) {
 	//runFunction(connection->socket, "kernel_response", 1, string_itoa(fd));
 	send_dynamic_message(connection->socket, string_itoa(fd));
 
-	log_debug(logger,
-			"runFunction a socket: '%d', Resultado Kernel Escribir '%d'",
-			connection->socket, result);
+	log_debug(logger, "runFunction a socket: '%d', Resultado Kernel Escribir '%d'", connection->socket, result);
 }
 
 void cpu_read_file(socket_connection* connection, char** args) {
@@ -465,11 +451,9 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	int offset = process->pointer;
 
 	if (is_allowed(pid, fd, flags)) {
-		runFunction(fs_socket, "kernel_get_data", 3, path, string_itoa(offset),
-				string_itoa(size));
+		runFunction(fs_socket, "kernel_get_data", 3, path, string_itoa(offset), string_itoa(size));
 		wait_response(&fs_mutex);
-		runFunction(mem_socket, "i_get_page_from_pointer", 1,
-				string_itoa(direccion_variable));
+		runFunction(mem_socket, "i_get_page_from_pointer", 1, string_itoa(direccion_variable));
 		wait_response(&mem_response);
 
 		int n_frame = direccion_variable / mem_page_size;
@@ -478,10 +462,7 @@ void cpu_read_file(socket_connection* connection, char** args) {
 		int n_size = string_length(fs_read_buffer);
 
 		if (string_length(fs_read_buffer) > 0) {
-			runFunction(mem_socket, "i_store_bytes_in_page", 5,
-					string_itoa(pid), string_itoa(n_page),
-					string_itoa(n_offset), string_itoa(n_size),
-					fs_read_buffer);
+			runFunction(mem_socket, "i_store_bytes_in_page", 5, string_itoa(pid), string_itoa(n_page), string_itoa(n_offset), string_itoa(n_size), fs_read_buffer);
 			wait_response(&mem_response);
 		} else
 			fd = ERROR_LEER_ARCHIVO;
@@ -491,8 +472,7 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd));
 	send_dynamic_message(connection->socket, string_itoa(fd));
 
-	log_debug(logger, "cpu_read_file: fd: '%d', fs_read_buffer: '%s", fd,
-			fs_read_buffer);
+	log_debug(logger, "cpu_read_file: fd: '%d', fs_read_buffer: '%s", fd, fs_read_buffer);
 }
 
 /*
@@ -530,8 +510,7 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 		move_to_list(n_pcb, EXIT_LIST);
 	}
 
-	runFunction(process_struct.socket, "kernel_response_load_program", 2,
-			string_itoa(response), string_itoa(p_counter));
+	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
 	pthread_mutex_unlock(&console_mutex);
 }
 void memory_page_size(socket_connection* connection, char** args) {
@@ -548,30 +527,23 @@ void memory_response_heap(socket_connection* connection, char** args) {
 	signal_response(&mem_response);
 }
 
-void memory_response_store_bytes_in_page(socket_connection* connection,
-		char** args) {
+void memory_response_store_bytes_in_page(socket_connection* connection, char** args) {
 	memory_response = atoi(args[0]);
 	mem_offset_abs = atoi(args[1]);
-	log_debug(logger, "memory_response_store_bytes_in_page: mem_offset_abs=%d",
-			mem_offset_abs);
+	log_debug(logger, "memory_response_store_bytes_in_page: mem_offset_abs=%d", mem_offset_abs);
 	signal_response(&mem_response);
 }
 
-void memory_response_read_bytes_from_page(socket_connection* connection,
-		char** args) {
-	log_debug(logger, "memory_response_read_bytes_from_page: buffer=%s",
-			args[0]);
+void memory_response_read_bytes_from_page(socket_connection* connection, char** args) {
+	log_debug(logger, "memory_response_read_bytes_from_page: buffer=%s", args[0]);
 
 	mem_read_buffer = string_new();
 	string_append(&mem_read_buffer, args[0]);
 	signal_response(&mem_response);
 }
 
-void memory_response_get_page_from_pointer(socket_connection* connection,
-		char** args) {
-	log_debug(logger,
-			"memory_response_get_page_from_pointer: page_from_pointer=%s",
-			args[0]);
+void memory_response_get_page_from_pointer(socket_connection* connection, char** args) {
+	log_debug(logger, "memory_response_get_page_from_pointer: page_from_pointer=%s", args[0]);
 
 	page_from_pointer = atoi(args[0]);
 	signal_response(&mem_response);
@@ -600,8 +572,7 @@ void fs_response_get_data(socket_connection* connection, char** args) {
  */
 void server_connectionClosed(socket_connection* connection) {
 	char* client = (connection->socket == fs_socket) ? FILESYSTEM : MEMORY;
-	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n",
-			client, connection->socket, connection->ip, connection->port);
+	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n", client, connection->socket, connection->ip, connection->port);
 	exit(EXIT_FAILURE);
 }
 
@@ -611,8 +582,7 @@ void server_connectionClosed(socket_connection* connection) {
 void newClient(socket_connection* connection) {
 	char* client = (connection->port == port_cpu) ? CPU : CONSOLE;
 
-	log_debug(logger, "%s has connected. Socket = %d, IP = %s, Port = %d.\n",
-			client, connection->socket, connection->ip, connection->port);
+	log_debug(logger, "%s has connected. Socket = %d, IP = %s, Port = %d.\n", client, connection->socket, connection->ip, connection->port);
 
 	if (!strcmp(client, CPU)) {
 		t_cpu* cpu = malloc(sizeof(t_cpu));
@@ -621,23 +591,20 @@ void newClient(socket_connection* connection) {
 		pthread_mutex_lock(&cpu_mutex);
 		list_add(cpu_list, cpu);
 		pthread_mutex_unlock(&cpu_mutex);
-		runFunction(connection->socket, "kernel_page_stack_size", 2,
-				string_itoa(mem_page_size), string_itoa(stack_size));
+		runFunction(connection->socket, "kernel_page_stack_size", 2, string_itoa(mem_page_size), string_itoa(stack_size));
 	}
 }
 void connectionClosed(socket_connection* connection) {
 	char* client = (connection->port == port_cpu) ? CPU : CONSOLE;
 
-	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n",
-			client, connection->socket, connection->ip, connection->port);
+	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n", client, connection->socket, connection->ip, connection->port);
 
 	if (!strcmp(client, CONSOLE)) {
 		pcb* l_pcb = find_pcb_by_socket(connection->socket);
 		if (l_pcb->state != EXIT_LIST) {
 			move_to_list(l_pcb, EXIT_LIST);
 			substract_process_in_memory();
-			runFunction(mem_socket, "i_finish_program", 1,
-					string_itoa(l_pcb->pid));
+			runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 		}
 	} else if (!strcmp(client, CPU)) {
 		t_cpu* cpu = find_cpu_by_socket(connection->socket);
