@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
+#include <signal.h>
 #include <commons/string.h>
 #include <commons/collections/dictionary.h>
 #include <commons/collections/list.h>
@@ -61,6 +62,7 @@ int calculate_page_for_var();
 int calculate_offset_for_var();
 void wait_response(pthread_mutex_t* mutex);
 void signal_response(pthread_mutex_t* mutex);
+void abrupted_finish();
 
 char* get_flag(t_banderas flags);
 

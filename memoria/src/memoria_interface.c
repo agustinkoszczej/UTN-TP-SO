@@ -33,6 +33,7 @@ void i_read_bytes_from_page(socket_connection* connection, char** args) {
 	int page = atoi(args[1]);
 	int offset = atoi(args[2]);
 	int size = atoi(args[3]);
+	log_debug(logger, "i_read_bytes_from_page: socket: '%d', pid: '%d', page: '%d', offset: '%d', size: '%d'", connection->socket, pid, page, offset, size);
 
 	char* buffer = read_bytes(pid, page, offset, size);
 

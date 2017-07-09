@@ -96,10 +96,12 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	while ((planning_alg == FIFO || quantum-- >= 0) && !finished) {
 		runFunction(kernel_socket, "cpu_has_aborted", 1, string_itoa(pcb_actual->pid));
 		aborted_status = atoi(receive_dynamic_message(kernel_socket));
-
+		signal(SIGINT, abrupted_finish);
 		if (aborted_status < 0) {
-			if (aborted_status == FINALIZADO_CONSOLA)
+			if (aborted_status == FINALIZADO_CONSOLA || CPU_DESCONECTADO){
+				//log_debug(logger, "aborted");
 				break;
+			}
 		}
 
 		t_intructions* i_code = list_get(pcb_actual->i_code, pcb_actual->pc);
@@ -132,6 +134,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	}
 
 	if (aborted_status < 0) {
+		log_debug(logger, "aborted: '%d'");
 		pcb_actual->exit_code = aborted_status;
 		finished = true;
 	}
@@ -139,6 +142,9 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	printf("Finished executing.\n\n");
 	log_debug(logger, "cpu_task_finished");
 	runFunction(kernel_socket, "cpu_task_finished", 3, pcb_to_string(pcb_actual), string_itoa(finished), string_itoa(is_locked));
+	if (aborted_status == CPU_DESCONECTADO) {
+		exit(EXIT_SUCCESS);
+	}
 }
 void kernel_response_malloc_pointer(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_malloc_pointer: malloc_pointer=%s", args[0]);

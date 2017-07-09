@@ -39,6 +39,7 @@ t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
 	int relative_page = occupied_bytes / frame_size;
 
 	if (relative_page > stack_size) {
+		log_debug(logger, "Violación de segmento ('core' generado)");
 		pcb_actual->exit_code = STACK_OVERFLOW;
 		cpu_finalizar();
 		return -1;
@@ -161,7 +162,7 @@ void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
 	char* pid = string_itoa(pcb_actual->pid);
 	char* page = string_itoa(n_page);
 	char* offset = string_itoa(n_offset);
-	char* size = string_itoa(sizeof(int)); //TODO toco size
+	char* size = string_itoa(sizeof(int));
 	char* buffer = intToChar4(valor);
 	int i;
 	for(i=0; i< sizeof(int); i++){
@@ -173,7 +174,7 @@ void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
 
 	runFunction(mem_socket, "i_store_bytes_in_page", 5, pid, page, offset, size, buffer);
 	wait_response(&planning_mutex);
-	log_debug(logger, "|PRIMITIVA| Asignar '%d' en offset_abs: '%d', offset_rel: '%s'", char4ToInt(buffer), direccion_variable, offset);
+	log_debug(logger, "|PRIMITIVA| Asignar '%d' en offset_abs: '%d', offset_rel: '%s'", valor, direccion_variable, offset);
 }
 
 /*

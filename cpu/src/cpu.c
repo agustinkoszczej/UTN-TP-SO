@@ -2,6 +2,13 @@
 
 const char* CONFIG_FIELDS[] = { IP_KERNEL, PUERTO_KERNEL, IP_MEMORIA, PUERTO_MEMORIA };
 
+void abrupted_finish(){
+	cpu_finalizar();
+	pcb_actual->exit_code = CPU_DESCONECTADO;
+	aborted_status = CPU_DESCONECTADO;
+	log_debug(logger, "abrupted_finish");
+}
+
 int calculate_offset_for_var() {
 	log_debug(logger, "calculate_offset_for_var: void");
 

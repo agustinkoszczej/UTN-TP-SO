@@ -1364,8 +1364,8 @@ void thread_continuous_scan_notify(int argc) {
 		FD_SET(fd_inotify, &readfds);
 		if (max_fd < fd_inotify)
 			max_fd = fd_inotify;
-		//waiting.tv_sec = 1;
-		//waiting.tv_usec = 5	;
+		waiting.tv_sec = 1;
+		waiting.tv_usec = 5	;
 		select(max_fd + 1, &readfds, NULL, NULL, &waiting);
 
 		if (FD_ISSET(fd_inotify, &readfds)) {

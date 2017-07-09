@@ -201,21 +201,24 @@ void ask_option(char *sel) {
 
 	log_debug(logger, "ask_option: void");
 }
-
+void disconnect_console(){
+	int i;
+	for (i = 0; i < list_size(process_list); i++) {
+	pthread_mutex_lock(&process_list_mutex);
+	t_process* process = list_get(process_list, i);
+	pthread_mutex_unlock(&process_list_mutex);
+	if (process->pid >= 0) {
+			runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
+			abort_program(process, FINALIZADO_CONSOLA);
+		}
+	}
+	exit(EXIT_SUCCESS);
+}
 void do_disconnect_console(char* sel) {
 	log_debug(logger, "do_disconnect_console: sel=%s", sel);
 
 	if (!strcmp(sel, "D")) {
-		int i;
-		for (i = 0; i < list_size(process_list); i++) {
-			pthread_mutex_lock(&process_list_mutex);
-			t_process* process = list_get(process_list, i);
-			pthread_mutex_unlock(&process_list_mutex);
-			if (process->pid >= 0) {
-				runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
-				abort_program(process, FINALIZADO_CONSOLA);
-			}
-		}
+		disconnect_console();
 	}
 
 	log_debug(logger, "do_disconnect_console: void");
@@ -380,6 +383,8 @@ void init_console() {
 
 	dictionary_put(message_map, string_itoa(ARCHIVO_ABIERTO_POR_OTROS), "Can't delete file in use.");
 
+	dictionary_put(message_map, string_itoa(CPU_DESCONECTADO), "CPU disconnected.");
+
 	log_debug(logger, "init_console: void");
 }
 
@@ -408,6 +413,7 @@ int main(int argc, char *argv[]) {
 		do_abort_program(sel);
 		do_disconnect_console(sel);
 		do_clear_messages(sel);
+		signal(SIGINT, disconnect_console);
 	} while (true);
 
 	return EXIT_SUCCESS;

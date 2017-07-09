@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <dirent.h>
+#include<signal.h>
 #include <commons/string.h>
 #include <commons/collections/dictionary.h>
 #include <commons/collections/list.h>

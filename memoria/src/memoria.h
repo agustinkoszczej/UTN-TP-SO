@@ -59,6 +59,8 @@ int pages_reserved_for_admin;
 int bytes_reserved_for_page_table;
 int bytes_reserved_for_cache;
 
+t_list** overflow;
+
 void start_program();
 char* read_bytes(int pid, int page, int offset, int size);
 int store_bytes(int pid, int page, int offset, int size, char* buffer);
