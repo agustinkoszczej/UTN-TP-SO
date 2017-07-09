@@ -44,7 +44,7 @@ inventado y diseñado por la cátedra para fines didácticos.
   * ~~Fecha: 24/06/2017~~
   
 * Entrega Final
-  * Fecha: 08/07/2017
+  * ~~Fecha: 08/07/2017~~
     * Fecha de primer recuperatorio: 15/07/2017
     
     * Fecha de segundo recuperatorio: 29/07/2017
