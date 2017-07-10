@@ -55,7 +55,8 @@ t_process* find_process_by_socket(int socket) {
 	t_process* process = list_find(process_list, &find);
 	pthread_mutex_unlock(&process_list_mutex);
 
-	log_debug(logger, "find_process_by_socket: t_process*");
+	log_debug(logger, "valor de process es nulo? %s", process == NULL ? "true" : "false");
+	log_debug(logger, "fin find_process_by_socket");
 	return process;
 }
 
@@ -72,6 +73,7 @@ t_process* find_process_by_pid(int pid) {
 	pthread_mutex_unlock(&process_list_mutex);
 
 	log_debug(logger, "find_process_by_pid: IS NULL = %s", process == NULL ? "true" : "false");
+	log_debug(logger, "fin find_process_by_pid");
 	return process;
 }
 
@@ -79,9 +81,10 @@ void show_message(int i) {
 	log_debug(logger, "show_message: i=%d", i);
 
 	t_message* message = list_get(messages_list, i);
-	printf("[%s] [%d] [%s] %s\n", message->time, message->pid, message->name, message->message);
+	if(message != NULL)
+		printf("[%s] [%d] [%s] %s\n", message->time, message->pid, message->name, message->message);
 
-	log_debug(logger, "show_message: void");
+	log_debug(logger, "fin show_message");
 }
 
 void print_menu() {
@@ -115,6 +118,7 @@ void print_menu() {
 void new_message(char* text, int pid) {
 	log_debug(logger, "new_message: text=%s, pid=%d", text, pid);
 
+	pthread_mutex_lock(&messages_list_mutex);
 	t_message* message = malloc(sizeof(t_message));
 	message->name = string_new();
 	message->pid = pid;
@@ -122,11 +126,10 @@ void new_message(char* text, int pid) {
 	message->time = temporal_get_string_time();
 
 	t_process* process = find_process_by_pid(pid);
-	if (process != NULL) {
+	if (process != NULL && process->name != NULL) {
 		string_append(&message->name, process->name);
 	}
 
-	pthread_mutex_lock(&messages_list_mutex);
 	list_add(messages_list, message);
 	if (list_size(messages_list) > 10)
 		list_remove(messages_list, 0);
@@ -212,7 +215,7 @@ void disconnect_console(){
 			abort_program(process, FINALIZADO_CONSOLA);
 		}
 	}
-	exit(EXIT_SUCCESS);
+	//exit(EXIT_SUCCESS);
 }
 void do_disconnect_console(char* sel) {
 	log_debug(logger, "do_disconnect_console: sel=%s", sel);
@@ -263,23 +266,28 @@ void do_start_program(char* sel) {
 
 void abort_program(t_process* process, int exit_code) {
 	log_debug(logger, "abort_program: exit_code=%d", exit_code);
+	log_debug(logger, "  process es nulo? %s", process == NULL ? "true" : "false");
+
+	if (process == NULL)
+		return;
 
 	char* time_finish = temporal_get_string_time();
 	process->time_finish = malloc(string_length(time_finish));
 	process->time_finish = time_finish;
 
+	new_message(dictionary_get(message_map, string_itoa(exit_code)), process->pid);
+
 	if (process->pid > 0) {
 		pthread_mutex_lock(&p_counter_mutex);
 		p_counter--;
 		pthread_mutex_unlock(&p_counter_mutex);
-	}
 
-	new_message(dictionary_get(message_map, string_itoa(exit_code)), process->pid);
-	char* message = string_from_format("[Time Started] [Time Finished] [Total Prints] [Total Time]");
-	new_message(message, process->pid);
-	char* diff_time = differenceBetweenTimePeriod(process->time_start, process->time_finish);
-	message = string_from_format("[%s] [%s] [%d] [%s]", process->time_start, process->time_finish, process->c_message, diff_time);
-	new_message(message, process->pid);
+		char* message = string_from_format("[Time Started] [Time Finished] [Total Prints] [Total Time]");
+		new_message(message, process->pid);
+		char* diff_time = differenceBetweenTimePeriod(process->time_start, process->time_finish);
+		message = string_from_format("[%s] [%s] [%d] [%s]", process->time_start, process->time_finish, process->c_message, diff_time);
+		new_message(message, process->pid);
+	}
 
 	process->pid = -1;
 	process->socket = -1;

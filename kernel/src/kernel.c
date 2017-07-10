@@ -51,6 +51,10 @@ void short_planning() {
 		quantum_sleep = config_get_int_value(config, QUANTUM_SLEEP);
 
 		runFunction(free_cpu->socket, "kernel_receive_pcb", 4, string_itoa(planning_alg), string_itoa(quantum), pcb_string, string_itoa(quantum_sleep));
+
+		pthread_mutex_unlock(&planning_mutex);
+		short_planning();
+		return;
 	}
 	pthread_mutex_unlock(&planning_mutex);
 }
@@ -1275,14 +1279,19 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 	return n_socket_pcb;
 }
 
-void stop_process(int pid) { //TODO esto no anda ¯\_(ツ)_/¯ (es lo de SIGUSR1)
+void stop_process(int pid) {
 	log_debug(logger, "stop_process");
 	pcb* l_pcb = find_pcb_by_pid(pid);
+
+	if(l_pcb == NULL)
+		return;
+
 	l_pcb->exit_code = FINALIZADO_KERNEL;
 
 	if (l_pcb->state != EXEC_LIST) {
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
+		move_to_list(l_pcb, EXIT_LIST);
 	}
 }
 
@@ -1393,9 +1402,11 @@ int main(int argc, char *argv[]) {
 	init_kernel(config);
 	quantum_sleep = config_get_int_value(config, QUANTUM_SLEEP);
 
+	/*
 	init_notify(path_config);
 	pthread_t notify_thread;
 	pthread_create(&notify_thread, NULL, thread_continuous_scan_notify, argc);
+	*/
 
 	wait_any_key();
 

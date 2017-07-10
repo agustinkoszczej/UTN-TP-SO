@@ -43,6 +43,7 @@ t_dictionary* fns;
 
 pthread_mutex_t frames_mutex;
 pthread_mutex_t frames_cache_mutex;
+pthread_mutex_t mem_mutex;
 
 t_log* logger;
 

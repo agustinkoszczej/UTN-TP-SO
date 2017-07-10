@@ -22,14 +22,14 @@ void create_function_dictionary() {
 	dictionary_put(fns, "kernel_stack_size", &kernel_stack_size);
 }
 
-/*unsigned int hash(int pid, int page) {
- char* str = malloc(strlen(string_itoa(pid)));
- strcpy(str, string_itoa(pid));
- strcat(str, string_itoa(page));
- unsigned int indice = atoi(str) % frames_count;
- free(str);
- return indice;
- }*/
+unsigned int hash(int pid, int page) {
+	char* str = malloc(strlen(string_itoa(pid)));
+	strcpy(str, string_itoa(pid));
+	strcat(str, string_itoa(page));
+	unsigned int indice = atoi(str) % frames_count;
+	free(str);
+	return indice;
+}
 
 void mem_allocate_fullspace() {
 	int mem_size = frames_count * frame_size;
@@ -82,7 +82,25 @@ void start_program(int pid, int n_frames) {
 	pthread_mutex_lock(&frames_mutex);
 	int page_c = n_frames;
 	int i;
-	for (i = 0; i < list_size(adm_list); i++) {
+
+	// HASH
+	while (page_c > 0) {
+		int frame_pos = hash(pid, n_frames - page_c);
+		t_adm_table* adm_table = list_get(adm_list, frame_pos);
+		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, n_frames - page_c, adm_table->pid, adm_table->pag);
+		if (adm_table->pid < 0) {
+			adm_table->pid = pid;
+			adm_table->frame = frame_pos;
+			adm_table->pag = n_frames - page_c;
+			update_administrative_register_adm_table(adm_table);
+			if (--page_c <= 0)
+				break;
+		} else
+			break;
+	}
+	// HASH
+
+	for (i = 0; i < list_size(adm_list) && page_c > 0; i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
@@ -106,6 +124,9 @@ void finish_program(int pid) {
 
 	t_list* adm_tables = list_filter(adm_list, &find);
 
+	if(adm_tables == NULL)
+		return;
+
 	int i;
 	for (i = 0; i < list_size(adm_tables); i++) {
 		t_adm_table* adm_table = list_get(adm_tables, i);
@@ -117,14 +138,26 @@ void finish_program(int pid) {
 	pthread_mutex_unlock(&frames_mutex);
 
 	pthread_mutex_lock(&frames_cache_mutex);
-	for (i = 0; i < list_size(cache_list); i++) {
-		t_cache* cache = list_get(cache_list, i);
+	bool find_cache(void* element) {
+		t_cache* cache = element;
+		return cache->adm_table->pid == pid;
+	}
+
+	t_list* cache_tables = list_filter(cache_list, &find_cache);
+
+	if(cache_tables == NULL)
+		return;
+
+	for (i = 0; i < list_size(cache_tables); i++) {
+		t_cache* cache = list_get(cache_tables, i);
 		cache->adm_table->pid = -1;
 		update_administrative_register_cache(cache, i);
 	}
 	pthread_mutex_unlock(&frames_cache_mutex);
+
 	log_debug(logger, "finish_program, pid = %d\n", pid);
 	list_destroy(adm_tables);
+	list_destroy(cache_tables);
 }
 
 void add_pages(int pid, int n_frames) {
@@ -133,10 +166,29 @@ void add_pages(int pid, int n_frames) {
 		t_adm_table* adm_table = element;
 		return adm_table->pid == pid;
 	}
+
 	int i;
+
 	t_list* know_pages_list = list_filter(adm_list, &find);
 	int known_pages = list_size(know_pages_list);
 	list_destroy(know_pages_list);
+
+	// HASH
+	while (n_frames > 0) {
+		int frame_pos = hash(pid, known_pages);
+		t_adm_table* adm_table = list_get(adm_list, frame_pos);
+		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, known_pages, adm_table->pid, adm_table->pag);
+		if (adm_table->pid < 0) {
+			adm_table->pid = pid;
+			adm_table->frame = frame_pos;
+			adm_table->pag = known_pages++;
+			update_administrative_register_adm_table(adm_table);
+			if (--n_frames <= 0)
+				break;
+		} else
+			break;
+	}
+	// HASH
 
 	for (i = 0; i < list_size(adm_list); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
@@ -220,7 +272,7 @@ void store_in_cache(t_adm_table* n_adm_table) {
 		t_adm_table* adm_table = element;
 		return adm_table->pid == n_adm_table->pid;
 	}
-	t_list* cache_proc_size_list = list_filter(adm_list, find);
+	t_list* cache_proc_size_list = list_filter(cache_list, &find);
 	int cache_proc_size = list_size(cache_proc_size_list);
 	list_destroy(cache_proc_size_list);
 	if (cache_proc_size < 3) {
@@ -230,6 +282,7 @@ void store_in_cache(t_adm_table* n_adm_table) {
 		}
 
 		t_cache* n_cache = list_get(cache_list, free_pos);
+		n_cache->adm_table->frame = n_adm_table->frame;
 		n_cache->adm_table->pag = n_adm_table->pag;
 		n_cache->adm_table->pid = n_adm_table->pid;
 		n_cache->lru = -1;
@@ -279,10 +332,20 @@ char* read_bytes(int pid, int page, int offset, int size) {
 	}
 
 	t_adm_table* adm_table;
-	if (exists_in_cache(pid, page)) {
+	bool is_cache = exists_in_cache(pid, page);
+
+	if (is_cache) {
 		adm_table = get_from_cache(pid, page);
 	} else {
-		adm_table = list_find(adm_list, find);
+		// HASH
+		int frame_pos = hash(pid, page);
+		adm_table = list_get(adm_list, frame_pos);
+		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
+		log_debug(logger, "%s", (adm_table->pid == pid && adm_table->pag == page) ? "EUREKA!" : "SIGA PARTICIPANDO.");
+		if (adm_table->pid != pid || adm_table->pag != page) {
+		// HASH
+			adm_table = list_find(adm_list, &find);
+		}
 		sleep(mem_delay / 1000);
 	}
 
@@ -290,7 +353,10 @@ char* read_bytes(int pid, int page, int offset, int size) {
 	char* buffer = string_substring(frames, start, size);
 
 	pthread_mutex_unlock(&frames_mutex);
-	store_in_cache(adm_table);
+	if (!is_cache) {
+		store_in_cache(adm_table);
+		//store_bytes_cache(pid, page, offset, size, buffer);
+	}
 	return buffer;
 }
 
@@ -307,9 +373,18 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 	if (is_cache) {
 		adm_table = get_from_cache(pid, page);
 	} else {
-		adm_table = list_find(adm_list, find);
+		// HASH
+		int frame_pos = hash(pid, page);
+		adm_table = list_get(adm_list, frame_pos);
+		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
+		log_debug(logger, "%s", (adm_table->pid == pid && adm_table->pag == page) ? "EUREKA!" : "SIGA PARTICIPANDO.");
+		if (adm_table->pid != pid || adm_table->pag != page) {
+		// HASH
+			adm_table = list_find(adm_list, &find);
+		}
 		sleep(mem_delay / 1000);
 	}
+
 	int start, end;
 	if (adm_table != NULL) {
 		start = frame_size * adm_table->frame + offset;
@@ -317,15 +392,17 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 
 		int i, b = 0;
 		for (i = start; i < end; i++) {
-			if (is_cache)
-				frames_cache[i] = buffer[b];
-			else
+			//if (is_cache)
+			//	frames_cache[i] = buffer[b];
+			//else
 				frames[i] = buffer[b];
 			b++;
 		}
 		pthread_mutex_unlock(&frames_mutex);
-		if (!is_cache)
+		if (!is_cache) {
 			store_in_cache(adm_table);
+			//store_bytes_cache(pid, page, offset, size, buffer);
+		}
 	}
 	return start;
 }
@@ -532,6 +609,7 @@ void init_memory(t_config *config) {
 	pthread_mutex_init(&frames_mutex, NULL);
 	pthread_mutex_init(&frames_cache_mutex, NULL);
 	pthread_mutex_init(&cpu_sockets_mutex, NULL);
+	pthread_mutex_init(&mem_mutex, NULL);
 
 	frames_count = config_get_int_value(config, MARCOS);
 	frame_size = config_get_int_value(config, MARCO_SIZE);
@@ -591,14 +669,13 @@ void free_page(int pid, int page) {
 	int i;
 
 	pthread_mutex_lock(&frames_mutex);
-	/*int frame_pos = hash(pid, page);
+	// HASH
+	int frame_pos = hash(pid, page);
 	t_adm_table* adm_table = list_get(adm_list, frame_pos);
-	log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page,
-			frame_pos, adm_table->pid, adm_table->pag);
-	log_debug(logger, "%s",
-			(adm_table->pid == pid && adm_table->pag == page) ?
-					"EUREKA!" : "SIGA PARTICIPANDO.");*/
-	//if (adm_table->pid != pid || adm_table->pag != page) {
+	log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
+	log_debug(logger, "%s", (adm_table->pid == pid && adm_table->pag == page) ? "EUREKA!" : "SIGA PARTICIPANDO.");
+	if (adm_table->pid != pid || adm_table->pag != page) {
+	// HASH
 		for (i = 0; list_size(adm_list); i++) {
 			t_adm_table* adm_table = list_get(adm_list, i);
 			if (adm_table->pid == pid && adm_table->pag == page) {
@@ -609,14 +686,21 @@ void free_page(int pid, int page) {
 				break;
 			}
 		}
-	//}
+	} else {
+		adm_table->pid = -1;
+		adm_table->pag = 0;
+		update_administrative_register_adm_table(adm_table);
+		clean_frame(adm_table->frame);
+	}
 	pthread_mutex_unlock(&frames_mutex);
 
 	pthread_mutex_lock(&frames_cache_mutex);
 	for (i = 0; i < list_size(cache_list); i++) {
 		t_cache* cache = list_get(cache_list, i);
-		if (cache->adm_table->pid == pid)
+		if (cache->adm_table->pid == pid && cache->adm_table->pag == page) {
 			cache->adm_table->pid = -1;
+			break;
+		}
 	}
 	pthread_mutex_unlock(&frames_cache_mutex);
 }
@@ -734,14 +818,16 @@ void do_retard(char* sel) {
 
 void do_flush(char* sel) {
 	if (!strcmp(sel, "F")) {
+		pthread_mutex_lock(&frames_cache_mutex);
 		int i;
 		for (i = 0; i < list_size(cache_list); i++) {
 			t_cache* cache = list_get(cache_list, i);
-			save_victim(cache->adm_table);
+			//save_victim(cache->adm_table);
 			cache->adm_table->pid = -1;
 			cache->lru = -1;
 			update_administrative_register_cache(cache, i);
 		}
+		pthread_mutex_unlock(&frames_cache_mutex);
 	}
 }
 

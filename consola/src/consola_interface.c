@@ -22,12 +22,13 @@ void kernel_print_message(socket_connection* connection, char** args) {
 	strcpy(message, args[0]);
 	int pid = atoi(args[1]);
 
-	t_process* process = find_process_by_pid(pid);
-	process->c_message++;
-
 	log_debug(logger, "kernel_print_message: message=%s, pid=%d", message, pid);
 
-	new_message(message, pid);
+	t_process* process = find_process_by_pid(pid);
+	if(process != NULL) {
+		process->c_message++;
+		new_message(message, pid);
+	}
 }
 
 void kernel_response_load_program(socket_connection* connection, char** args) {

@@ -126,8 +126,10 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		pcb_actual->pc++;
 		pcb_actual->statistics.cycles++;
 
+		/*
 		runFunction(kernel_socket, "cpu_has_quantum_changed", 0);
 		quantum_sleep = atoi(receive_dynamic_message(kernel_socket));
+		*/
 
 		sleep(quantum_sleep / 1000);
 		free(mem_buffer);
@@ -141,6 +143,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 
 	printf("Finished executing.\n\n");
 	log_debug(logger, "cpu_task_finished");
+
 	runFunction(kernel_socket, "cpu_task_finished", 3, pcb_to_string(pcb_actual), string_itoa(finished), string_itoa(is_locked));
 	if (aborted_status == CPU_DESCONECTADO) {
 		exit(EXIT_SUCCESS);

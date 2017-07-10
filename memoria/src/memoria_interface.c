@@ -4,6 +4,7 @@
  * INTERFACE
  */
 void i_start_program(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&mem_mutex);
 	int pid = atoi(args[0]);
 	char* buffer = args[1];
 
@@ -27,8 +28,10 @@ void i_start_program(socket_connection* connection, char** args) {
 		runFunction(m_sockets.k_socket, "memory_response_start_program", 1, response);
 		free(response);
 	}
+	pthread_mutex_unlock(&mem_mutex);
 }
 void i_read_bytes_from_page(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&mem_mutex);
 	int pid = atoi(args[0]);
 	int page = atoi(args[1]);
 	int offset = atoi(args[2]);
@@ -39,8 +42,10 @@ void i_read_bytes_from_page(socket_connection* connection, char** args) {
 
 	runFunction(connection->socket, "memory_response_read_bytes_from_page", 1, buffer);
 	log_debug(logger, "memory_response_read_bytes_from_page: socket: '%d', pid: '%d', page: '%d', offset_rel: '%d', size: '%d', buffer: '%s'", connection->socket, pid, page, offset, size, buffer);
+	pthread_mutex_unlock(&mem_mutex);
 }
 void i_store_bytes_in_page(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&mem_mutex);
 	int pid = atoi(args[0]);
 	int page = atoi(args[1]);
 	int offset = atoi(args[2]);
@@ -54,8 +59,10 @@ void i_store_bytes_in_page(socket_connection* connection, char** args) {
 	log_debug(logger, "i_store_bytes_in_page: socket: '%d', pid: '%d', page: '%d', offset_rel: '%d', offset_abs: '%d', size: '%d'\nbuffer: '%s'", connection->socket, pid, page, offset, offset_abs, size, buffer);
 	free(response1);
 	free(response2);
+	pthread_mutex_unlock(&mem_mutex);
 }
 void i_add_pages_to_program(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&mem_mutex);
 	int pid = atoi(args[0]);
 	int n_page = atoi(args[1]);
 
@@ -84,13 +91,17 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 		runFunction(connection->socket, "memory_response_heap", 1, response);
 		free(response);
 	}
+	pthread_mutex_unlock(&mem_mutex);
 }
 void i_finish_program(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&mem_mutex);
 	int pid = atoi(args[0]);
 	finish_program(pid);
+	pthread_mutex_unlock(&mem_mutex);
 }
 
 void i_free_page(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&mem_mutex);
 	int pid = atoi(args[0]);
 	int page = atoi(args[1]);
 	//TODO habria que ver de limpiar la cache tambien
@@ -98,15 +109,19 @@ void i_free_page(socket_connection* connection, char** args) {
 	char* response = string_itoa(NO_ERRORES);
 	runFunction(connection->socket, "memory_response_heap", 1, response);
 	free(response);
+	pthread_mutex_unlock(&mem_mutex);
 }
 
 void kernel_stack_size(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&mem_mutex);
 	int stack_s = atoi(args[0]);
 
 	stack_size = stack_s;
+	pthread_mutex_unlock(&mem_mutex);
 }
 
 void i_get_page_from_pointer(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&mem_mutex);
 	int pointer = atoi(args[0]);
 
 	int page = get_page_from_pointer(pointer);
@@ -114,9 +129,11 @@ void i_get_page_from_pointer(socket_connection* connection, char** args) {
 	char* response = string_itoa(page);
 	runFunction(connection->socket, "memory_response_get_page_from_pointer", 1, response);
 	free(response);
+	pthread_mutex_unlock(&mem_mutex);
 }
 
 void i_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&mem_mutex);
 
 	int pid = atoi(args[0]);
 	int page = atoi(args[1]);
@@ -136,12 +153,14 @@ void i_get_frame_from_pid_and_page(socket_connection* connection, char** args) {
 	runFunction(connection->socket, "memory_response_get_frame_from_pid_and_page", 1, response);
 	log_debug(logger, "i_get_frame_from_pid_and_page: '%d'", frame);
 	free(response);
+	pthread_mutex_unlock(&mem_mutex);
 }
 
 /*
  * SERVER
  */
 void client_identify(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&mem_mutex);
 	char* sender = args[0];
 
 	log_debug(logger, "%s has connected. Socket = %d, IP = %s, Port = %d.\n", args[0], connection->socket, connection->ip, connection->port);
@@ -159,15 +178,19 @@ void client_identify(socket_connection* connection, char** args) {
 		runFunction(connection->socket, "memory_page_size", 1, response);
 		free(response);
 	}
+	pthread_mutex_unlock(&mem_mutex);
 }
 
 /*
  * CLIENT
  */
 void newClient(socket_connection* connection) {
+	pthread_mutex_lock(&mem_mutex);
 	runFunction(connection->socket, "memory_identify", 0);
+	pthread_mutex_unlock(&mem_mutex);
 }
 void connectionClosed(socket_connection* connection) {
+	pthread_mutex_lock(&mem_mutex);
 	char* client = (connection->socket == m_sockets.k_socket) ? KERNEL : CPU;
 	log_debug(logger, "%s has disconnected. Socket = %d, IP = %s, Port = %d.\n", client, connection->socket, connection->ip, connection->port);
 
@@ -181,5 +204,6 @@ void connectionClosed(socket_connection* connection) {
 		}
 		pthread_mutex_unlock(&cpu_sockets_mutex);
 	}
+	pthread_mutex_unlock(&mem_mutex);
 }
 

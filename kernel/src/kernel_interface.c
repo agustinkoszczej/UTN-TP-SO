@@ -8,7 +8,7 @@ void console_load_program(socket_connection* connection, char** args) {
 	char* program = args[0];
 
 	if (process_in_memory + 1 > multiprog) {
-		runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), string_itoa(-1));
+		runFunction(connection->socket, "kernel_response_load_program", 2, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), string_itoa(-1));
 		return;
 	}
 
@@ -106,8 +106,10 @@ void console_abort_program(socket_connection* connection, char** args) {
  * CPU
  */
 void cpu_has_quantum_changed(socket_connection* connection, char** args) {
+	/*
 	send_dynamic_message(connection->socket, string_itoa(quantum_sleep));
 	log_debug(logger, "cpu_has_quantum_changed: '%d'", quantum_sleep);
+	*/
 }
 void cpu_has_aborted(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -124,34 +126,37 @@ void cpu_get_shared_var(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_get_shared_var");
 	char* var_name = args[0];
 	pthread_mutex_lock(&shared_vars_mutex);
-	bool find_var(void* s) {
+	bool find_var_get(void* s) {
 		t_shared_var* shared = s;
 		return !strcmp(shared->var, var_name);
 	}
 
-	t_shared_var* shared = list_find(shared_vars, &find_var);
+	log_debug(logger, "cpu_get_shared_var: var_name=%s", var_name);
+	t_shared_var* shared = list_find(shared_vars, &find_var_get);
+	log_debug(logger, "cpu_get_shared_var: shared is null? %s", shared == NULL ? "true" : "false");
 	send_dynamic_message(connection->socket, string_itoa(shared->value));
 	pthread_mutex_unlock(&shared_vars_mutex);
+	log_debug(logger, "fin cpu_get_shared_var");
 }
 void cpu_set_shared_var(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_set_shared_var");
-	void free_var(void* v) {
-		int* val = v;
-		free(val);
-	}
 
 	char* var_name = args[0];
 	int var_value = atoi(args[1]);
 	pthread_mutex_lock(&shared_vars_mutex);
-	bool find_var(void* s) {
+	bool find_var_set(void* s) {
 		t_shared_var* shared = s;
 		return !strcmp(shared->var, var_name);
 	}
 
-	t_shared_var* shared = list_find(shared_vars, &find_var);
+	log_debug(logger, "cpu_set_shared_var: var_name=%s, var_value=%d", var_name, var_value);
+	t_shared_var* shared = list_find(shared_vars, &find_var_set);
+	log_debug(logger, "cpu_set_shared_var: shared is null? %s", shared == NULL ? "true" : "false");
 	shared->value = var_value;
+	log_debug(logger, "cpu_set_shared_var: var_value=%d", var_value);
 	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
 	pthread_mutex_unlock(&shared_vars_mutex);
+	log_debug(logger, "fin cpu_set_shared_var");
 }
 void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 	*o_pcb = n_pcb;
@@ -167,19 +172,22 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	printf("");
 	pcb* o_pcb = find_pcb_by_pid(n_pcb->pid);
 	printf("");
+	if(o_pcb->exit_code == FINALIZADO_CONSOLA)
+		n_pcb->exit_code = o_pcb->exit_code;
 	set_new_pcb(&o_pcb, n_pcb);
 
 	t_cpu* n_cpu = find_cpu_by_socket(connection->socket);
 	printf("");
 	n_cpu->busy = false;
 
+	void free_heap(void* element) {
+		t_heap_manage* heap = element;
+		printf("");
+		free(heap);
+		printf("");
+	}
+
 	if (finished) {
-		void free_heap(void* element) {
-			t_heap_manage* heap = element;
-			printf("");
-			free(heap);
-			printf("");
-		}
 		printf("");
 
 		if (is_locked) {
@@ -196,8 +204,15 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			}
 		}
 	} else {
-
-		move_to_list(o_pcb, READY_LIST);
+		if (n_pcb->exit_code != FINALIZADO_CONSOLA) {
+			move_to_list(o_pcb, READY_LIST);
+		} else {
+			int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
+			list_remove_and_destroy_element(process_heap_pages, pos, &free_heap);
+			move_to_list(o_pcb, EXIT_LIST);
+			substract_process_in_memory();
+			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
+		}
 	}
 
 	printf("");
@@ -227,6 +242,7 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 	char* id_sem = args[0];
 	string_trim(&id_sem);
 	t_cpu* _cpu = find_cpu_by_socket(connection->socket);
+	log_debug(logger, "cpu_wait_sem: _cpu is null? %s", _cpu == NULL ? "true" : "false");
 	int process_pid = _cpu->xpid;
 
 	bool find_sem(void* s) {
@@ -235,6 +251,7 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 	}
 
 	t_sem* sem_curr = list_find(sem_ids, &find_sem);
+	log_debug(logger, "cpu_wait_sem: sem_curr is null? %s", sem_curr == NULL ? "true" : "false");
 	sem_curr->value--;
 
 	bool is_locked = false;
@@ -296,6 +313,7 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 	}
 
 	t_sem* sem_curr = list_find(sem_ids, &find_sem);
+	log_debug(logger, "cpu_signal_sem: sem_curr is null? %s", sem_curr == NULL ? "true" : "false");
 
 	sem_curr->value++;
 
@@ -306,6 +324,7 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 		string_append(&sem_curr->blocked_pids, temp);
 		if (process >= 0) {
 			pcb* _pcb = find_pcb_by_pid(process);
+			log_debug(logger, "cpu_signal_sem: _pcb is null? %s", _pcb == NULL ? "true" : "false");
 			move_to_list(_pcb, READY_LIST);
 		}
 	}
@@ -611,7 +630,7 @@ void connectionClosed(socket_connection* connection) {
 
 	if (!strcmp(client, CONSOLE)) {
 		pcb* l_pcb = find_pcb_by_socket(connection->socket);
-		if (l_pcb->state != EXIT_LIST) {
+		if (l_pcb != NULL && l_pcb->state != EXIT_LIST) {
 			move_to_list(l_pcb, EXIT_LIST);
 			substract_process_in_memory();
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));

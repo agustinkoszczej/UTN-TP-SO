@@ -38,7 +38,7 @@ t_puntero cpu_definirVariable(t_nombre_variable identificador_variable) {
 	int occupied_bytes = vars_c * sizeof(int);
 	int relative_page = occupied_bytes / frame_size;
 
-	if (relative_page > stack_size) {
+	if (relative_page >= stack_size) {
 		log_debug(logger, "Violación de segmento ('core' generado)");
 		pcb_actual->exit_code = STACK_OVERFLOW;
 		cpu_finalizar();
@@ -88,7 +88,7 @@ t_puntero cpu_obtenerPosicionVariable(t_nombre_variable identificador_variable) 
 		for (j = 0; j < list_size(vars_args_list); j++) {
 			t_arg_var* var = list_get(vars_args_list, j);
 
-			if (var->id == identificador_variable) {
+			if (var->id == identificador_variable && i == list_size(pcb_actual->i_stack) - 1) {
 				int relative_page = space_occupied / frame_size;
 				int n_offset = space_occupied - relative_page * frame_size;
 				int n_page = pcb_actual->page_c + relative_page;
@@ -369,6 +369,8 @@ void kernel_wait(t_nombre_semaforo identificador_semaforo) {
 			" Semaforo \"%s\"", identificador_semaforo);
 	runFunction(kernel_socket, "cpu_wait_sem", 1, identificador_semaforo);
 	is_locked = atoi(receive_dynamic_message(kernel_socket));
+
+	log_debug(logger, "|PRIMITIVA| Wait: IS_LOCKED %s", is_locked ? "true" : "false");
 
 	if (is_locked)
 		cpu_finalizar();
