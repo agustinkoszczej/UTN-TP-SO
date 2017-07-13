@@ -119,6 +119,7 @@ void cpu_has_aborted(socket_connection* connection, char** args) {
 
 	send_dynamic_message(connection->socket, string_itoa(result));
 	pthread_mutex_unlock(&abort_console_mutex);
+	if(result < 0) log_debug("cpu_has_aborted: '%d'", result);
 }
 void cpu_received_page_stack_size(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_received_page_stack_size");
@@ -127,7 +128,8 @@ void cpu_received_page_stack_size(socket_connection* connection, char** args) {
 void cpu_get_shared_var(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_get_shared_var");
 
-	char* var_name = args[0];
+	char* var_name = string_new();
+	string_append(&var_name, args[0]);
 
 	pthread_mutex_lock(&shared_vars_mutex);
 	bool find_var_get(void* s) {
@@ -141,12 +143,13 @@ void cpu_get_shared_var(socket_connection* connection, char** args) {
 	send_dynamic_message(connection->socket, string_itoa(shared->value));
 	pthread_mutex_unlock(&shared_vars_mutex);
 	log_debug(logger, "fin cpu_get_shared_var");
-	//free(var_name);
+	free(var_name);
 }
 void cpu_set_shared_var(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_set_shared_var");
 
-	char* var_name = args[0];
+	char* var_name = string_new();
+	string_append(&var_name, args[0]);
 
 	int var_value = atoi(args[1]);
 	pthread_mutex_lock(&shared_vars_mutex);
@@ -163,7 +166,7 @@ void cpu_set_shared_var(socket_connection* connection, char** args) {
 	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
 	pthread_mutex_unlock(&shared_vars_mutex);
 	log_debug(logger, "fin cpu_set_shared_var");
-	//free(var_name);
+	free(var_name);
 }
 void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 	*o_pcb = n_pcb;
@@ -249,7 +252,9 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 		free(sem);
 	}
 
-	char* id_sem = args[0];
+	char* id_sem = string_new();
+	string_append(&id_sem, args[0]);
+
 	string_trim(&id_sem);
 	t_cpu* _cpu = find_cpu_by_socket(connection->socket);
 	log_debug(logger, "cpu_wait_sem: _cpu is null? %s", _cpu == NULL ? "true" : "false");
@@ -275,6 +280,7 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 	send_dynamic_message(connection->socket, string_itoa(is_locked));
 	log_debug(logger, "cpu_wait_sem: exit");
 	pthread_mutex_unlock(&sems_mutex);
+	free(id_sem);
 }
 
 int get_last(char* blocked_pids) {
@@ -314,7 +320,9 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 		free(sem);
 	}
 
-	char* id_sem = args[0];
+	char* id_sem = string_new();
+	string_append(&id_sem, args[0]);
+
 	string_trim(&id_sem);
 
 	bool find_sem(void* s) {
@@ -341,6 +349,7 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 
 	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
 	pthread_mutex_unlock(&sems_mutex);
+	free(id_sem);
 }
 
 void cpu_malloc(socket_connection* connection, char** args) {

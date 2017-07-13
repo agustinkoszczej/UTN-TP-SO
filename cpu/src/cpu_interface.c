@@ -99,7 +99,6 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		aborted_status = atoi(receive_dynamic_message(kernel_socket));
 		signal(SIGINT, abrupted_finish);
 			if (aborted_status == FINALIZADO_CONSOLA){
-				log_debug(logger, "aborted by console");
 				break;
 			}
 
@@ -133,6 +132,7 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 	}
 
 	if (aborted_status < 0) {
+		log_debug(logger, "aborted_status: '%d'", aborted_status);
 		pcb_actual->exit_code = aborted_status;
 		finished = true;
 	}
