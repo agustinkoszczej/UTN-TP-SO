@@ -983,6 +983,7 @@ void connect_to_server(t_config* config, char* name) {
 void init_kernel(t_config* config) {
 	log_debug(logger, "init_kernel");
 
+	pthread_mutex_init(&abort_console_mutex, NULL);
 	pthread_mutex_init(&cpu_mutex, NULL);
 	pthread_mutex_init(&p_counter_mutex, NULL);
 	pthread_mutex_init(&socket_pcb_mutex, NULL);

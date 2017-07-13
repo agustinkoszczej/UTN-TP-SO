@@ -92,6 +92,7 @@ void console_load_program(socket_connection* connection, char** args) {
 }
 void console_abort_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
+	pthread_mutex_lock(&abort_console_mutex);
 	pcb* l_pcb = find_pcb_by_pid(pid);
 	l_pcb->exit_code = FINALIZADO_CONSOLA;
 
@@ -100,6 +101,7 @@ void console_abort_program(socket_connection* connection, char** args) {
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 		move_to_list(l_pcb, EXIT_LIST);
 	}
+	pthread_mutex_unlock(&abort_console_mutex);
 }
 
 /*
@@ -111,10 +113,12 @@ void cpu_has_quantum_changed(socket_connection* connection, char** args) {
 }
 void cpu_has_aborted(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
+	pthread_mutex_lock(&abort_console_mutex);
 	pcb* l_pcb = find_pcb_by_pid(pid);
 	int result = l_pcb->exit_code;
 
 	send_dynamic_message(connection->socket, string_itoa(result));
+	pthread_mutex_unlock(&abort_console_mutex);
 }
 void cpu_received_page_stack_size(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_received_page_stack_size");

@@ -404,8 +404,6 @@ void init_console() {
 
 	dictionary_put(message_map, string_itoa(ARCHIVO_ABIERTO_POR_OTROS), "Can't delete file in use.");
 
-	dictionary_put(message_map, string_itoa(CPU_DESCONECTADO), "CPU disconnected.");
-
 	log_debug(logger, "init_console: void");
 }
 
