@@ -217,6 +217,19 @@ void disconnect_console(){
 	}
 	//exit(EXIT_SUCCESS);
 }
+void exit_console(){
+	int i;
+	for (i = 0; i < list_size(process_list); i++) {
+	pthread_mutex_lock(&process_list_mutex);
+	t_process* process = list_get(process_list, i);
+	pthread_mutex_unlock(&process_list_mutex);
+	if (process->pid >= 0) {
+			runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
+			abort_program(process, FINALIZADO_CONSOLA);
+		}
+	}
+	exit(EXIT_SUCCESS);
+}
 void do_disconnect_console(char* sel) {
 	log_debug(logger, "do_disconnect_console: sel=%s", sel);
 
@@ -421,7 +434,7 @@ int main(int argc, char *argv[]) {
 		do_abort_program(sel);
 		do_disconnect_console(sel);
 		do_clear_messages(sel);
-		signal(SIGINT, disconnect_console);
+		signal(SIGINT, exit_console);
 	} while (true);
 
 	return EXIT_SUCCESS;

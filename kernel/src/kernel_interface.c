@@ -114,7 +114,7 @@ void cpu_has_quantum_changed(socket_connection* connection, char** args) {
 void cpu_has_aborted(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
 	pcb* l_pcb = find_pcb_by_pid(pid);
-	int result = l_pcb->exit_code; //TODO FINALIZADO_KERNEL
+	int result = l_pcb->exit_code;
 
 	send_dynamic_message(connection->socket, string_itoa(result));
 }
@@ -167,6 +167,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	pcb* n_pcb = string_to_pcb(args[0]);
 	bool finished = atoi(args[1]);
 	bool is_locked = atoi(args[2]);
+	bool is_abrupted = atoi(args[3]);
 
 	printf("");
 	printf("");
@@ -178,7 +179,9 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 
 	t_cpu* n_cpu = find_cpu_by_socket(connection->socket);
 	printf("");
-	n_cpu->busy = false;
+	if (!is_abrupted){
+		n_cpu->busy = false;
+	}
 
 	void free_heap(void* element) {
 		t_heap_manage* heap = element;

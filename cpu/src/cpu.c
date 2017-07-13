@@ -3,10 +3,12 @@
 const char* CONFIG_FIELDS[] = { IP_KERNEL, PUERTO_KERNEL, IP_MEMORIA, PUERTO_MEMORIA };
 
 void abrupted_finish(){
-	cpu_finalizar();
-	pcb_actual->exit_code = CPU_DESCONECTADO;
-	aborted_status = CPU_DESCONECTADO;
-	log_debug(logger, "abrupted_finish");
+	pthread_mutex_lock(&planning_mutex);
+	is_abrupted = true;
+	runFunction(kernel_socket, "cpu_task_finished", 4, pcb_to_string(pcb_actual), string_itoa(finished), string_itoa(is_locked), string_itoa(is_abrupted));
+	log_debug(logger, "abrupted_finish: finish: '%d', is_locked: '%d', is_abrupted: '%d'", finished, is_locked, is_abrupted);
+	pthread_mutex_unlock(&planning_mutex);
+	exit(EXIT_SUCCESS);
 }
 
 int calculate_offset_for_var() {
@@ -172,7 +174,6 @@ void init_cpu(t_config* config) {
 	kernel_functions.AnSISOP_moverCursor = kernel_moverCursor;
 	kernel_functions.AnSISOP_escribir = kernel_escribir;
 	kernel_functions.AnSISOP_leer = kernel_leer;
-
 
 	pthread_mutex_lock(&planning_mutex);
 	pthread_mutex_lock(&mx_main);

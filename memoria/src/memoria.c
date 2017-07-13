@@ -353,7 +353,7 @@ char* read_bytes(int pid, int page, int offset, int size) {
 	char* buffer = string_substring(frames, start, size);
 
 	pthread_mutex_unlock(&frames_mutex);
-	if (!is_cache) {
+	if (!is_cache && cache_size != 0) {
 		store_in_cache(adm_table);
 		//store_bytes_cache(pid, page, offset, size, buffer);
 	}
@@ -399,7 +399,7 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 			b++;
 		}
 		pthread_mutex_unlock(&frames_mutex);
-		if (!is_cache) {
+		if (!is_cache && cache_size != 0) {
 			store_in_cache(adm_table);
 			//store_bytes_cache(pid, page, offset, size, buffer);
 		}

@@ -1,7 +1,0 @@
-begin
-  variables a, b
-  alocar a 100
-    b = a+4
-    *b = 1095520072
-    prints s a
-end

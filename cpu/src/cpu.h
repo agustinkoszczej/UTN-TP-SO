@@ -49,6 +49,7 @@ int mem_delay;
 int kernel_shared_var;
 char* read_info;
 bool is_locked;
+bool is_abrupted;
 
 pcb* pcb_actual;
 
