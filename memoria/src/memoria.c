@@ -708,9 +708,18 @@ void free_page(int pid, int page) {
 	}
 	pthread_mutex_unlock(&frames_cache_mutex);
 }
+bool exists_pid(int pid){
+	int i;
+	for(i=0; i<list_size(adm_list);i++){
+		t_adm_table* adm_table = list_get(adm_list, i);
+		if (adm_table->pid == pid) return true;
+	}
+	return false;
+}
 
 void dump(int pid) {
 	int i;
+	if(!exists_pid(pid)) return;
 
 	pthread_mutex_lock(&frames_cache_mutex);
 	char* dump_cache = string_new();

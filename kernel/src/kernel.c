@@ -611,10 +611,10 @@ void show_process_file_table(int pid) {
 		printf("FILES OPEN: 0\n");
 	else {
 		int i;
-		printf("FILES OPEN: %d\n", list_size(files_process->open_files));
+		printf("FILES OPEN: %d\n", list_size(files_process->open_files) -3);
 		for (i = 3; i < list_size(files_process->open_files); i++) {
 			t_open_file* file = list_get(files_process->open_files, i);
-			printf("	> FD: %d\t> GLOBAL_FD: %d\t> FLAGS: %s\t>POINTER: %d\n", file->fd, file->gfd, file->flag, file->pointer);
+			printf("	> FD: %d\t> GLOBAL_FD: %d\t> FLAGS: %s\t> POINTER: %d\n", file->fd, file->gfd, file->flag, file->pointer);
 		}
 	}
 }
