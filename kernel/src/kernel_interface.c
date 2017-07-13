@@ -173,35 +173,35 @@ void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 }
 void cpu_task_finished(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_task_finished");
-	printf("");
+	//printf("");
 	pcb* n_pcb = string_to_pcb(args[0]);
 	bool finished = atoi(args[1]);
 	bool is_locked = atoi(args[2]);
 	bool is_abrupted = atoi(args[3]);
 
-	printf("");
-	printf("");
+	//printf("");
+	//printf("");
 	pcb* o_pcb = find_pcb_by_pid(n_pcb->pid);
-	printf("");
+	//printf("");
 	if(o_pcb->exit_code == FINALIZADO_CONSOLA)
 		n_pcb->exit_code = o_pcb->exit_code;
 	set_new_pcb(&o_pcb, n_pcb);
 
 	t_cpu* n_cpu = find_cpu_by_socket(connection->socket);
-	printf("");
+	//printf("");
 	if (!is_abrupted){
 		n_cpu->busy = false;
 	}
 
 	void free_heap(void* element) {
 		t_heap_manage* heap = element;
-		printf("");
+		//printf("");
 		free(heap);
-		printf("");
+		//printf("");
 	}
 
 	if (finished) {
-		printf("");
+		//printf("");
 
 		if (is_locked) {
 			move_to_list(o_pcb, BLOCK_LIST);
@@ -228,7 +228,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 		}
 	}
 
-	printf("");
+	//printf("");
 	short_planning();
 }
 
