@@ -142,6 +142,9 @@ void finish_program(int pid) {
 	for (i = 0; i < list_size(cache_tables); i++) {
 		t_cache* cache = list_get(cache_tables, i);
 		cache->adm_table->pid = -1;
+		cache->adm_table->pag = 0;
+		cache->adm_table->frame = 0;
+		cache->lru = -1;
 		update_administrative_register_cache(cache, i);
 	}
 	pthread_mutex_unlock(&frames_cache_mutex);
@@ -281,7 +284,7 @@ void store_in_cache(t_adm_table* n_adm_table) {
 		update_administrative_register_cache(n_cache, free_pos);
 	}
 	pthread_mutex_unlock(&frames_cache_mutex);
-	increase_cache_lru();
+	increase_cache_lru(); //TODO esto no deberia mandarle el pid y pagina ?
 }
 
 char* read_bytes_cache(int pid, int page, int offset, int size) {
@@ -629,7 +632,7 @@ void init_memory(t_config *config) {
 	for (i = 0; i < cache_size; i++) {
 		t_cache* cache = malloc(sizeof(t_cache));
 		t_adm_table* adm_table = malloc(sizeof(t_adm_table));
-		adm_table->frame = i;
+		adm_table->frame = 0;
 		adm_table->pag = 0;
 		adm_table->pid = -1;
 
