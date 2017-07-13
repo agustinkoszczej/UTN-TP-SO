@@ -10,7 +10,7 @@ void i_start_program(socket_connection* connection, char** args) {
 
 	int size_buffer = string_length(buffer);
 	int n_frames = ceil((float) size_buffer / frame_size);
-
+	log_debug(logger, "i_start_program: pid: '%d', tot_frames: '%d'",pid, n_frames + stack_size);
 	if (has_available_frames(n_frames + stack_size)) {
 		start_program(pid, n_frames);
 		int i;

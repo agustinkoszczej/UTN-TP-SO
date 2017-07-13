@@ -82,12 +82,14 @@ void start_program(int pid, int n_frames) {
 	pthread_mutex_lock(&frames_mutex);
 	int page_c = n_frames;
 	int i;
-
+	if(pid == 3){
+		printf("HOLA");
+	}
 	// HASH
 	while (page_c > 0) {
 		int frame_pos = hash(pid, n_frames - page_c);
 		t_adm_table* adm_table = list_get(adm_list, frame_pos);
-		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, n_frames - page_c, adm_table->pid, adm_table->pag);
+		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, n_frames - page_c, frame_pos, adm_table->pid, adm_table->pag);
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
 			adm_table->frame = frame_pos;
@@ -103,6 +105,7 @@ void start_program(int pid, int n_frames) {
 	for (i = 0; i < list_size(adm_list) && page_c > 0; i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid < 0) {
+			log_debug(logger, "start_program in frame: '%d'", adm_table->frame);
 			adm_table->pid = pid;
 			adm_table->frame = i;
 			adm_table->pag = n_frames - page_c;
@@ -161,6 +164,7 @@ void finish_program(int pid) {
 }
 
 void add_pages(int pid, int n_frames) {
+	log_debug(logger, "add_pages, pid = '%d', n_frames = '%d'\n", pid, n_frames);
 	pthread_mutex_lock(&frames_mutex);
 	bool find(void* element) {
 		t_adm_table* adm_table = element;
@@ -190,7 +194,7 @@ void add_pages(int pid, int n_frames) {
 	}
 	// HASH
 
-	for (i = 0; i < list_size(adm_list); i++) {
+	for (i = 0; i < list_size(adm_list)&&(n_frames>0); i++) {
 		t_adm_table* adm_table = list_get(adm_list, i);
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
