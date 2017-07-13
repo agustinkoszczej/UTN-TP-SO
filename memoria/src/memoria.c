@@ -39,7 +39,7 @@ void mem_allocate_fullspace() {
 	frames = malloc(mem_size);
 	frames_cache = malloc(cache_size * frame_size);
 
-	memset(frames, '#', mem_size); //TODO ver si lo saco momentaneamente por los satrapas de SO
+	memset(frames, '#', mem_size);
 
 	pthread_mutex_unlock(&frames_mutex);
 }
@@ -68,23 +68,11 @@ bool has_available_frames(int n_frames) {
 	return available_pages >= n_frames;
 }
 
-int search_frame_free() {
-	int i;
-	for (i = 0; i < list_size(adm_list); i++) {
-		t_adm_table* adm_table = list_get(adm_list, i);
-		if (adm_table->pid < 0)
-			return i;
-	}
-	return -1;
-}
-
 void start_program(int pid, int n_frames) {
 	pthread_mutex_lock(&frames_mutex);
 	int page_c = n_frames;
 	int i;
-	if(pid == 3){
-		printf("HOLA");
-	}
+
 	// HASH
 	while (page_c > 0) {
 		int frame_pos = hash(pid, n_frames - page_c);
@@ -279,7 +267,7 @@ void store_in_cache(t_adm_table* n_adm_table) {
 	t_list* cache_proc_size_list = list_filter(cache_list, &find);
 	int cache_proc_size = list_size(cache_proc_size_list);
 	list_destroy(cache_proc_size_list);
-	if (cache_proc_size < 3) {
+	if (cache_proc_size < cache_x_proc) { //TODO ver
 		int free_pos = find_free_pos_cache();
 		if (free_pos < 0) {
 			free_pos = find_cache_victim();
@@ -337,9 +325,10 @@ char* read_bytes(int pid, int page, int offset, int size) {
 
 	t_adm_table* adm_table;
 	bool is_cache = exists_in_cache(pid, page);
-
+	log_debug(logger, "Page: '%d' is_cache: %s", page,  is_cache ? "YES" : "NO");
 	if (is_cache) {
 		adm_table = get_from_cache(pid, page);
+		//TODO incrementar lru?
 	} else {
 		// HASH
 		int frame_pos = hash(pid, page);
@@ -376,6 +365,7 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 
 	if (is_cache) {
 		adm_table = get_from_cache(pid, page);
+		//TODO incrementar lru?
 	} else {
 		// HASH
 		int frame_pos = hash(pid, page);
@@ -665,7 +655,7 @@ void clean_frame(int frame) {
 	int end = start + frame_size;
 	int i;
 	for (i = start; i < end; i++) {
-		frames[i] = '#'; //TODO ver si setteo en \0 o #
+		frames[i] = '#';
 	}
 }
 
@@ -728,7 +718,7 @@ void dump(int pid) {
 
 	for (i = 0; i < list_size(cache_list); i++) {
 		t_cache* cache = list_get(cache_list, i);
-		if (cache->adm_table->pid == pid) {
+		if (cache->adm_table->pid == pid || pid == -1) {
 			string_append_with_format(&dump_cache_struct,
 					"PID: %d | PAGE: %d | LRU COUNTER: %d\n",
 					cache->adm_table->pid, cache->adm_table->pag, cache->lru);
@@ -773,7 +763,7 @@ void dump(int pid) {
 	}
 
 	char* dump_total = string_new();
-	string_append_with_format(&dump_total, "CACHE:\n%s\n", dump_cache);
+	if(cache_size != 0)string_append_with_format(&dump_total, "CACHE:\n%s\n", dump_cache);
 	string_append_with_format(&dump_total, "TABLA DE PAGINAS:\n%s\n",
 			dump_mem_struct);
 	string_append_with_format(&dump_total, "LISTADO DE PROCESOS ACTIVOS:\n%s\n",
