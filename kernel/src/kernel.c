@@ -51,7 +51,7 @@ void short_planning() {
 		quantum_sleep = config_get_int_value(config, QUANTUM_SLEEP);
 
 		runFunction(free_cpu->socket, "kernel_receive_pcb", 4, string_itoa(planning_alg), string_itoa(quantum), pcb_string, string_itoa(quantum_sleep));
-
+		free(pcb_string);
 		pthread_mutex_unlock(&planning_mutex);
 		short_planning();
 		return;
@@ -1357,16 +1357,6 @@ void do_notify(int argc) {
 	}
 }
 
-void notify_all_cpus() {
-	int i;
-	log_debug(logger, "notify_all_cpus : quantum_sleep: '%d'", quantum_sleep);
-	for (i = 0; i < list_size(cpu_list); i++) {
-		t_cpu* cpu_elem = list_get(cpu_list, i);
-		//runFunction(cpu_elem->socket, "kernel_update_quantum_sleep", 1, string_itoa(quantum_sleep));
-		send_dynamic_message(cpu_elem->socket, string_itoa(quantum_sleep));
-	}
-}
-
 void thread_continuous_scan_notify(int argc) {
 	while (1) {
 		FD_ZERO(&readfds);
@@ -1402,11 +1392,9 @@ int main(int argc, char *argv[]) {
 	init_kernel(config);
 	quantum_sleep = config_get_int_value(config, QUANTUM_SLEEP);
 
-	/*
-	init_notify(path_config);
+	/*init_notify(path_config);
 	pthread_t notify_thread;
-	pthread_create(&notify_thread, NULL, thread_continuous_scan_notify, argc);
-	*/
+	pthread_create(&notify_thread, NULL, thread_continuous_scan_notify, argc);*/
 
 	wait_any_key();
 

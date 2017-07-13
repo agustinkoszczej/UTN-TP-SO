@@ -106,10 +106,8 @@ void console_abort_program(socket_connection* connection, char** args) {
  * CPU
  */
 void cpu_has_quantum_changed(socket_connection* connection, char** args) {
-	/*
-	send_dynamic_message(connection->socket, string_itoa(quantum_sleep));
-	log_debug(logger, "cpu_has_quantum_changed: '%d'", quantum_sleep);
-	*/
+	/*send_dynamic_message(connection->socket, string_itoa(quantum_sleep));
+	log_debug(logger, "cpu_has_quantum_changed: '%d'", quantum_sleep);*/
 }
 void cpu_has_aborted(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -124,7 +122,9 @@ void cpu_received_page_stack_size(socket_connection* connection, char** args) {
 }
 void cpu_get_shared_var(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_get_shared_var");
+
 	char* var_name = args[0];
+
 	pthread_mutex_lock(&shared_vars_mutex);
 	bool find_var_get(void* s) {
 		t_shared_var* shared = s;
@@ -137,11 +137,13 @@ void cpu_get_shared_var(socket_connection* connection, char** args) {
 	send_dynamic_message(connection->socket, string_itoa(shared->value));
 	pthread_mutex_unlock(&shared_vars_mutex);
 	log_debug(logger, "fin cpu_get_shared_var");
+	//free(var_name);
 }
 void cpu_set_shared_var(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_set_shared_var");
 
 	char* var_name = args[0];
+
 	int var_value = atoi(args[1]);
 	pthread_mutex_lock(&shared_vars_mutex);
 	bool find_var_set(void* s) {
@@ -157,6 +159,7 @@ void cpu_set_shared_var(socket_connection* connection, char** args) {
 	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
 	pthread_mutex_unlock(&shared_vars_mutex);
 	log_debug(logger, "fin cpu_set_shared_var");
+	//free(var_name);
 }
 void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 	*o_pcb = n_pcb;

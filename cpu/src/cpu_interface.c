@@ -125,10 +125,8 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		pcb_actual->pc++;
 		pcb_actual->statistics.cycles++;
 
-		/*
-		runFunction(kernel_socket, "cpu_has_quantum_changed", 0);
-		quantum_sleep = atoi(receive_dynamic_message(kernel_socket));
-		*/
+		/*runFunction(kernel_socket, "cpu_has_quantum_changed", 0);
+		quantum_sleep = atoi(receive_dynamic_message(kernel_socket));*/
 
 		sleep(quantum_sleep / 1000);
 		free(mem_buffer);
