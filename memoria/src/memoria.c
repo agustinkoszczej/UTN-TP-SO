@@ -77,7 +77,8 @@ void start_program(int pid, int n_frames) {
 	while (page_c > 0) {
 		int frame_pos = hash(pid, n_frames - page_c);
 		t_adm_table* adm_table = list_get(adm_list, frame_pos);
-		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, n_frames - page_c, frame_pos, adm_table->pid, adm_table->pag);
+		log_debug(logger, "HASH START(%d, %d) = %d | PID = %d, PAG = %d", pid, n_frames - page_c, frame_pos, adm_table->pid, adm_table->pag);
+		log_debug(logger, "%s", (adm_table->pid < 0) ? "EUREKA!" : "SIGA PARTICIPANDO.");
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
 			adm_table->frame = frame_pos;
@@ -172,7 +173,8 @@ void add_pages(int pid, int n_frames) {
 	while (n_frames > 0) {
 		int frame_pos = hash(pid, known_pages);
 		t_adm_table* adm_table = list_get(adm_list, frame_pos);
-		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, known_pages, adm_table->pid, adm_table->pag);
+		log_debug(logger, "HASH ADD(%d, %d) = %d | PID = %d, PAG = %d", pid, known_pages, frame_pos,  adm_table->pid, adm_table->pag);
+		log_debug(logger, "%s", (adm_table->pid < 0) ? "EUREKA!" : "SIGA PARTICIPANDO.");
 		if (adm_table->pid < 0) {
 			adm_table->pid = pid;
 			adm_table->frame = frame_pos;
@@ -336,7 +338,7 @@ char* read_bytes(int pid, int page, int offset, int size) {
 		// HASH
 		int frame_pos = hash(pid, page);
 		adm_table = list_get(adm_list, frame_pos);
-		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
+		log_debug(logger, "HASH READ(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
 		log_debug(logger, "%s", (adm_table->pid == pid && adm_table->pag == page) ? "EUREKA!" : "SIGA PARTICIPANDO.");
 		if (adm_table->pid != pid || adm_table->pag != page) {
 		// HASH
@@ -373,7 +375,7 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 		// HASH
 		int frame_pos = hash(pid, page);
 		adm_table = list_get(adm_list, frame_pos);
-		log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
+		log_debug(logger, "HASH STORE(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
 		log_debug(logger, "%s", (adm_table->pid == pid && adm_table->pag == page) ? "EUREKA!" : "SIGA PARTICIPANDO.");
 		if (adm_table->pid != pid || adm_table->pag != page) {
 		// HASH
@@ -669,7 +671,7 @@ void free_page(int pid, int page) {
 	// HASH
 	int frame_pos = hash(pid, page);
 	t_adm_table* adm_table = list_get(adm_list, frame_pos);
-	log_debug(logger, "HASH(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
+	log_debug(logger, "HASH FREE(%d, %d) = %d | PID = %d, PAG = %d", pid, page, frame_pos, adm_table->pid, adm_table->pag);
 	log_debug(logger, "%s", (adm_table->pid == pid && adm_table->pag == page) ? "EUREKA!" : "SIGA PARTICIPANDO.");
 	if (adm_table->pid != pid || adm_table->pag != page) {
 	// HASH
@@ -696,6 +698,9 @@ void free_page(int pid, int page) {
 		t_cache* cache = list_get(cache_list, i);
 		if (cache->adm_table->pid == pid && cache->adm_table->pag == page) {
 			cache->adm_table->pid = -1;
+			cache->adm_table->frame = 0;
+			cache->adm_table->pag = 0;
+			cache->lru = -1;
 			break;
 		}
 	}

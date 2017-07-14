@@ -67,7 +67,39 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 	int n_page = atoi(args[1]);
 
 	if (has_available_frames(1)) {
+		int n_frames = 1;
 		pthread_mutex_lock(&frames_mutex);
+			int i;
+			// HASH
+			while (n_frames > 0) {
+				int frame_pos = hash(pid, n_page);
+				t_adm_table* adm_table = list_get(adm_list, frame_pos);
+				log_debug(logger, "HASH HEAP(%d, %d) = %d | PID = %d, PAG = %d", pid, n_page, frame_pos, adm_table->pid, adm_table->pag);
+				log_debug(logger, "%s", (adm_table->pid < 0) ? "EUREKA!" : "SIGA PARTICIPANDO.");
+				if (adm_table->pid < 0) {
+					adm_table->pid = pid;
+					adm_table->frame = frame_pos;
+					adm_table->pag = n_page;
+					update_administrative_register_adm_table(adm_table);
+					if (--n_frames <= 0)
+						break;
+				} else
+					break;
+			}
+			// HASH
+
+			for (i = 0; i < list_size(adm_list)&&(n_frames>0); i++) {
+				t_adm_table* adm_table = list_get(adm_list, i);
+				if (adm_table->pid < 0) {
+					adm_table->pid = pid;
+					adm_table->pag = n_page;
+					update_administrative_register_adm_table(adm_table);
+					if (--n_frames <= 0)
+						break;
+				}
+			}
+			pthread_mutex_unlock(&frames_mutex);
+		/*pthread_mutex_lock(&frames_mutex);
 		bool find(void* element) {
 			t_adm_table* adm_table = element;
 			return adm_table->pid == pid && adm_table->pag == n_page;
@@ -79,10 +111,15 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 				adm_table->pid = pid;
 				adm_table->pag = n_page;
 				update_administrative_register_adm_table(adm_table);
+				if (cache_size != 0) {
+					//store_in_cache(adm_table); //TODO pincha con llenandoMemoria si lo pongo
+				}
 				break;
 			}
 		}
 		pthread_mutex_unlock(&frames_mutex);
+		*/
+
 		char* response = string_itoa(NO_ERRORES);
 		runFunction(connection->socket, "memory_response_heap", 1, response);
 		free(response);
@@ -104,7 +141,7 @@ void i_free_page(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&mem_mutex);
 	int pid = atoi(args[0]);
 	int page = atoi(args[1]);
-	//TODO habria que ver de limpiar la cache tambien
+
 	free_page(pid, page);
 	char* response = string_itoa(NO_ERRORES);
 	runFunction(connection->socket, "memory_response_heap", 1, response);
