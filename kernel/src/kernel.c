@@ -1364,16 +1364,18 @@ void thread_continuous_scan_notify(int argc) {
 		FD_SET(fd_inotify, &readfds);
 		if (max_fd < fd_inotify)
 			max_fd = fd_inotify;
-		waiting.tv_sec = 1;
-		waiting.tv_usec = 5	;
+		waiting.tv_sec = 0;
+		waiting.tv_usec = 10;
 		select(max_fd + 1, &readfds, NULL, NULL, &waiting);
-
+		log_debug(logger, "thread_continuous_scan_notify");
 		if (FD_ISSET(fd_inotify, &readfds)) {
+			log_debug(logger, "file config modified: QUANTUM_SLEEP: '%d'", quantum_sleep);
 			do_notify(argc);
+			config_destroy(config);
+			config = malloc(sizeof(t_config));
 			load_config(&config, argc, path_config);
 			print_config(config, CONFIG_FIELDS, CONFIG_FIELDS_N);
 			quantum_sleep = config_get_int_value(config, "QUANTUM_SLEEP");
-			log_debug(logger, "file config modified: QUANTUM_SLEEP: '%d'", quantum_sleep);
 		}
 	}
 }
@@ -1393,9 +1395,9 @@ int main(int argc, char *argv[]) {
 	init_kernel(config);
 	quantum_sleep = config_get_int_value(config, QUANTUM_SLEEP);
 
-	/*init_notify(path_config);
+	init_notify(path_config);
 	pthread_t notify_thread;
-	pthread_create(&notify_thread, NULL, thread_continuous_scan_notify, argc);*/
+	pthread_create(&notify_thread, NULL, thread_continuous_scan_notify, argc);
 
 	wait_any_key();
 

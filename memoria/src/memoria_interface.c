@@ -65,7 +65,7 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&mem_mutex);
 	int pid = atoi(args[0]);
 	int n_page = atoi(args[1]);
-
+	//TODO Habria que ver de agregarla a la cache
 	if (has_available_frames(1)) {
 		int n_frames = 1;
 		pthread_mutex_lock(&frames_mutex);
@@ -112,7 +112,7 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 				adm_table->pag = n_page;
 				update_administrative_register_adm_table(adm_table);
 				if (cache_size != 0) {
-					//store_in_cache(adm_table); //TODO pincha con llenandoMemoria si lo pongo
+					//store_in_cache(adm_table);
 				}
 				break;
 			}
