@@ -1367,7 +1367,7 @@ void thread_continuous_scan_notify(int argc) {
 		waiting.tv_sec = 0;
 		waiting.tv_usec = 10;
 		select(max_fd + 1, &readfds, NULL, NULL, &waiting);
-		log_debug(logger, "thread_continuous_scan_notify");
+		//log_debug(logger, "thread_continuous_scan_notify");
 		if (FD_ISSET(fd_inotify, &readfds)) {
 			log_debug(logger, "file config modified: QUANTUM_SLEEP: '%d'", quantum_sleep);
 			do_notify(argc);
