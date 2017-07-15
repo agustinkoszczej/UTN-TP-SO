@@ -352,7 +352,9 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 	free(id_sem);
 }
 
+pthread_mutex_t malloc_mutex = PTHREAD_MUTEX_INITIALIZER;
 void cpu_malloc(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&malloc_mutex);
 	log_debug(logger, "cpu_malloc");
 	int space = atoi(args[0]);
 	int pid = atoi(args[1]);
@@ -363,15 +365,18 @@ void cpu_malloc(socket_connection* connection, char** args) {
 	//runFunction(connection->socket, "kernel_response_malloc_pointer", 1, string_itoa(pos));
 	send_dynamic_message(connection->socket, string_itoa(pos));
 	log_debug(logger, "cpu_malloc: send");
+	pthread_mutex_unlock(&malloc_mutex);
 }
 
 void cpu_free(socket_connection* connection, char** args) {
+	pthread_mutex_lock(&malloc_mutex);
 	log_debug(logger, "cpu_free");
 	int pointer = atoi(args[0]);
 	int pid = atoi(args[1]);
 	free_memory(pid, pointer);
 	//runFunction(connection->socket, "kernel_response", 0);
 	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
+	pthread_mutex_unlock(&malloc_mutex);
 }
 
 void cpu_validate_file(socket_connection* connection, char** args) {

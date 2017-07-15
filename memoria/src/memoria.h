@@ -72,6 +72,7 @@ void clean_frame(int frame);
 void update_administrative_register_adm_table(t_adm_table* adm_table);
 void update_administrative_register_cache(t_cache* cache, int pos_list);
 int get_page_from_pointer(int pointer);
+void dump(int pid);
 
 bool has_available_frames(int n_frames);
 

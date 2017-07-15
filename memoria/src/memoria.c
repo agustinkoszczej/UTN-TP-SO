@@ -229,25 +229,18 @@ bool exists_in_cache(int pid, int page) {
 
 	return list_any_satisfy(cache_list, find);
 }
-//TODO que mierda hace esto? xdxd
-void save_victim(t_adm_table* adm_table) {
-	char* buffer_cache = read_bytes(adm_table->pid, adm_table->pag, 0,
-			frame_size);
-	store_bytes(adm_table->pid, adm_table->pag, 0, frame_size, buffer_cache);
-}
 
-int find_cache_victim(int pid) {//TODO le agregue el PID, porque la victima tiene que ser para un mismo proceso (cache_x_proc)
+int find_cache_victim(int pid) {
 	int i, lru_max = -1, pos;
 	t_cache* cache;
 	for (i = 0; i < list_size(cache_list); i++) {
 		cache = list_get(cache_list, i);
-		if (cache->lru > lru_max && cache->adm_table->pid == pid) {
+		if (cache->lru > lru_max) {
 			lru_max = cache->lru;
 			pos = i;
 		}
 	}
 
-	save_victim(cache->adm_table);
 	return pos;
 }
 
@@ -266,68 +259,30 @@ void store_in_cache(t_adm_table* n_adm_table) {
 			n_adm_table->pid, n_adm_table->pag, n_adm_table->frame);
 	pthread_mutex_lock(&frames_cache_mutex);
 	bool find(void* element) {
-		t_adm_table* adm_table = element;
-		return adm_table->pid == n_adm_table->pid;
+		t_cache* adm_table = element;
+		return adm_table->adm_table->pid == n_adm_table->pid;
 	}
-	t_list* cache_proc_size_list = list_filter(cache_list, find);
+	t_list* cache_proc_size_list = list_filter(cache_list, &find);
 	int cache_proc_size = list_size(cache_proc_size_list);
 	list_destroy(cache_proc_size_list);
 	log_debug(logger, "store_in_cache: cache_proc_size: '%d', cache_x_proc: '%d'", cache_proc_size, cache_x_proc);
-	if (cache_proc_size < cache_x_proc) { //TODO ver <- Here
+	if (cache_proc_size < cache_x_proc) {
 		int free_pos = find_free_pos_cache();
 		if (free_pos < 0) {
 			free_pos = find_cache_victim(n_adm_table->pid);
 		}
 
 		t_cache* n_cache = list_get(cache_list, free_pos);
-		n_cache->adm_table->frame = n_adm_table->frame;
-		n_cache->adm_table->pag = n_adm_table->pag;
-		n_cache->adm_table->pid = n_adm_table->pid;
-		n_cache->lru = -1; //TODO no deberia ser 0?
-		update_administrative_register_cache(n_cache, free_pos);
-	}else{
-		int free_pos = find_cache_victim(n_adm_table->pid);
-		t_cache* n_cache = list_get(cache_list, free_pos);
-		n_cache->adm_table->frame = n_adm_table->frame;
-		n_cache->adm_table->pag = n_adm_table->pag;
-		n_cache->adm_table->pid = n_adm_table->pid;
-		n_cache->lru = -1; //TODO no deberia ser 0?
+		if(n_cache != NULL) {
+			n_cache->adm_table->frame = n_adm_table->frame;
+			n_cache->adm_table->pag = n_adm_table->pag;
+			n_cache->adm_table->pid = n_adm_table->pid;
+			n_cache->lru = -1;
+			update_administrative_register_cache(n_cache, free_pos);
+		}
 	}
 	pthread_mutex_unlock(&frames_cache_mutex);
-	increase_cache_lru(); //TODO esto no deberia mandarle el pid y pagina ? <- Here
-}
-
-//TODO nadie me la llama tampoco
-char* read_bytes_cache(int pid, int page, int offset, int size) {
-	log_debug(logger,
-			"read_bytes_cache: pid: '%d, page: '%d', offset: '%d', size: '%d'",
-			pid, page, offset, size);
-	pthread_mutex_lock(&frames_cache_mutex);
-	t_adm_table* adm_table = get_from_cache(pid, page);
-
-	int start = frame_size * adm_table->frame + offset;
-	int end = start + size;
-	char* buffer = string_substring(frames_cache, start, end);
-	pthread_mutex_unlock(&frames_cache_mutex);
-	return buffer;
-}
-//TODO esta funcion no se llama de ningun lado pa ke esta jaja salu2
-void store_bytes_cache(int pid, int page, int offset, int size, char* buffer) {
-	log_debug(logger,
-			"store_bytes_cache: pid: '%d, page: '%d', offset: '%d', size: '%d', buffer: '%s'",
-			pid, page, offset, size, buffer);
-	pthread_mutex_lock(&frames_cache_mutex);
-	t_adm_table* adm_table = get_from_cache(pid, page);
-
-	int start = frame_size * adm_table->frame + offset;
-	int end = start + size;
-
-	int i, b = 0;
-	for (i = start; i < end; i++) {
-		frames_cache[i] = buffer[b];
-		b++;
-	}
-	pthread_mutex_unlock(&frames_cache_mutex);
+	increase_cache_lru();
 }
 
 char* read_bytes(int pid, int page, int offset, int size) {
@@ -342,7 +297,6 @@ char* read_bytes(int pid, int page, int offset, int size) {
 	log_debug(logger, "read_bytes: Page: '%d' is_cache: '%s', cache_size: '%d'", page,  is_cache ? "YES" : "NO", cache_size);
 	if (is_cache) {
 		adm_table = get_from_cache(pid, page);
-		//TODO incrementar lru? <- Here
 	} else {
 		// HASH
 		int frame_pos = hash(pid, page);
@@ -381,7 +335,6 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 	log_debug(logger, "store_bytes: Page: '%d' is_cache: '%s', cache_size: '%d'", page,  is_cache ? "YES" : "NO", cache_size);
 	if (is_cache) {
 		adm_table = get_from_cache(pid, page);
-		//TODO incrementar lru? <- Here
 	} else {
 		// HASH
 		int frame_pos = hash(pid, page);

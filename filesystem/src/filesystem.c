@@ -45,25 +45,22 @@ bool add_blocks_if_needed(char* path, int offset, int size) {
 
 	char** blocks_arr = config_get_array_value(config_file, BLOQUES);
 
-	int start_block = offset / block_size;
 	int end_block = (offset + size) / block_size;
 
 	int asigned_blocks = 0;
-	while (blocks_arr[++asigned_blocks] != NULL)
-		;
-	int total_blocks_needed = end_block - start_block;
-	int blocks_to_add = total_blocks_needed - asigned_blocks;
-	if (blocks_to_add > 0) {
-		int i;
-		for (i = 0; i < blocks_to_add; i++) {
-			int new_block_pos = create_block();
+	while (blocks_arr[asigned_blocks] != NULL)
+		asigned_blocks++;
 
-			if (new_block_pos < 0) {
-				log_debug(logger, "add_blocks_if_needed: bool=%d", false);
-				return false;
-			} else
-				string_append_with_format(&buffer_blocks_array, ",%d", new_block_pos);
-		}
+	while(asigned_blocks < end_block) {
+		int new_block_pos = create_block();
+
+		if (new_block_pos < 0) {
+			log_debug(logger, "add_blocks_if_needed: bool=%d", false);
+			return false;
+		} else
+			string_append_with_format(&buffer_blocks_array, ",%d", new_block_pos);
+
+		asigned_blocks++;
 	}
 	string_append(&buffer_blocks_array, "]");
 
