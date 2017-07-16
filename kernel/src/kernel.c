@@ -64,10 +64,11 @@ int find_pcb_pos_in_list(t_list* list, int pid) {
 	int i;
 	for (i = 0; i < list_size(list); i++) {
 		pcb* f_pcb = list_get(list, i);
+		log_debug(logger, "find_pcb_pos_in_list: f_pcb->pid: '%d', pid: '%d'", f_pcb->pid, pid);
 		if (f_pcb->pid == pid)
 			return i;
 	}
-
+	log_debug(logger, "find_pcb_pos_in_list: return -1");
 	return -1;
 }
 
