@@ -115,6 +115,7 @@ t_cpu* find_cpu_by_socket(int socket) {
 
 pcb* find_pcb_by_pid(int pid) {
 	log_debug(logger, "find_pcb_by_pid");
+
 	pthread_mutex_lock(&socket_pcb_mutex);
 	bool find(void* element) {
 		t_socket_pcb* n_pcb = element;
@@ -122,6 +123,13 @@ pcb* find_pcb_by_pid(int pid) {
 	}
 
 	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find);
+
+	if (socket_pcb == NULL){
+		log_debug(logger, "find_pcb_by_pid: socket_pcb: NULL");
+		pthread_mutex_unlock(&socket_pcb_mutex);
+		return NULL;
+	}
+	log_debug(logger, "find_pcb_by_pid: socket_pcb->pid: '%d', socket_pcb->socket: '%d', socket_pcb->state: '%d'", socket_pcb->pid, socket_pcb->socket, socket_pcb->state);
 
 	pthread_mutex_lock(&pcb_list_mutex);
 	int pos;
@@ -1283,9 +1291,10 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 void stop_process(int pid) {
 	log_debug(logger, "stop_process");
 	pcb* l_pcb = find_pcb_by_pid(pid);
-
-	if(l_pcb == NULL)
+	if(l_pcb == NULL){
+		log_debug(logger, "stop_process doesnt exist pid %d", pid);
 		return;
+	}
 
 	l_pcb->exit_code = FINALIZADO_KERNEL;
 
