@@ -1083,15 +1083,16 @@ void print_menu() {
 
 	show_title("KERNEL - MAIN MENU");
 	println("Enter your choice:");
-	println("> ACTIVE_PROCESS");
-	println("> INFO");
-	println("> FILE_TABLE");
-	println("> MULTIPROGRAMMING");
-	println("> STOP_PROCESS");
+	println("> (A)CTIVE PROCESS");
+	println("> SHARED (V)ARS & SEMS");
+	println("> (I)NFO");
+	println("> (F)ILE_TABLE");
+	println("> (M)ULTIPROGRAMMING");
+	println("> (S)TOP PROCESS");
 	if (planning_running)
-		println("> STOP_PLANIFICATION\n");
+		println("> STOP (P)LANIFICATION\n");
 	else
-		println("> CONTINUE_PLANIFICATION\n");
+		println("> CONTINUE (P)LANIFICATION\n");
 }
 
 void ask_option(char *sel) {
@@ -1246,6 +1247,40 @@ void show_info(int pid) {
 	show_free(pid);
 
 	wait_any_key();
+}
+
+void shared_vars_and_sems() {
+	int i = 0;
+	clear_screen();
+	printf("SHARED VARS:\n");
+
+	pthread_mutex_lock(&shared_vars_mutex);
+
+	for(i = 0; i < list_size(shared_vars); i++) {
+		t_shared_var* shared_var = list_get(shared_vars, i);
+		printf("\t%s = %d\n", shared_var->var, shared_var->value);
+	}
+
+	pthread_mutex_unlock(&shared_vars_mutex);
+
+	printf("\nSEMS:\n");
+
+	pthread_mutex_lock(&sems_mutex);
+
+	for(i = 0; i < list_size(sem_ids); i++) {
+		t_sem* sem = list_get(sem_ids, i);
+		printf("\t%s = %d --> %s\n", sem->id, sem->value, sem->blocked_pids);
+	}
+
+	pthread_mutex_unlock(&sems_mutex);
+
+	wait_any_key();
+}
+
+void do_shared_vars_and_sems(char* sel) {
+	if (!strcmp(sel, "V")) {
+		shared_vars_and_sems();
+	}
 }
 
 void do_show_info(char* sel) {
@@ -1414,6 +1449,7 @@ int main(int argc, char *argv[]) {
 	ask_option(sel);
 	do {
 		do_show_active_process(sel);
+		do_shared_vars_and_sems(sel);
 		do_show_info(sel);
 		do_show_file_table(sel);
 		do_change_multiprogramming(sel);

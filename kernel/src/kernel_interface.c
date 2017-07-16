@@ -283,7 +283,7 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 	free(id_sem);
 }
 
-int get_last(char* blocked_pids) {
+int get_first(char* blocked_pids) {
 	log_debug(logger, "get_last");
 	char** arr = string_get_string_as_array(blocked_pids);
 
@@ -292,18 +292,16 @@ int get_last(char* blocked_pids) {
 	return -1;
 }
 
-char* remove_last(char* blocked_pids) {
+char* remove_first(char* blocked_pids) {
 	log_debug(logger, "remove_last");
 	char** arr = string_get_string_as_array(blocked_pids);
 	char* res = string_new();
 
-	int i = 0;
-	while (arr[i] != NULL)
-		if (arr[++i] != NULL) {
-			string_append_with_format(&res, "%s,", arr[--i]);
-			i++;
-		} else
-			break;
+	int i = 1;
+	while (arr[i] != NULL) {
+		string_append_with_format(&res, "%s,", arr[i]);
+		i++;
+	}
 
 	if (string_length(res) > 0)
 		res = string_substring_until(res, string_length(res) - 1);
@@ -334,8 +332,8 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 	sem_curr->value++;
 
 	if (sem_curr->value <= 0) {
-		int process = get_last(sem_curr->blocked_pids);
-		char* temp = remove_last(sem_curr->blocked_pids);
+		int process = get_first(sem_curr->blocked_pids);
+		char* temp = remove_first(sem_curr->blocked_pids);
 		sem_curr->blocked_pids = string_new();
 		string_append(&sem_curr->blocked_pids, temp);
 		if (process >= 0) {
