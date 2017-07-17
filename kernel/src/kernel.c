@@ -1165,10 +1165,33 @@ void show_active_process(char option) {
 
 	clear_screen();
 	printf("%s", list_name);
+	char* pcb_state = string_new();
 	for (i = 0; i < list_size(list); i++) {
 		pcb* n_pcb = list_get(list, i);
 		printf("%d ", n_pcb->pid);
+
+		if(option == 'A') {
+			switch(n_pcb->state) {
+				case 1:
+					string_append(&pcb_state, "N ");
+					break;
+				case 2:
+					string_append(&pcb_state, "R ");
+					break;
+				case 3:
+					string_append(&pcb_state, "E ");
+					break;
+				case 4:
+					string_append(&pcb_state, "X ");
+					break;
+				case 5:
+					string_append(&pcb_state, "B ");
+					break;
+			}
+		}
 	}
+	if(option == 'A')
+		printf("\n%s\n", pcb_state);
 
 	pthread_mutex_unlock(&pcb_list_mutex);
 	wait_any_key();
