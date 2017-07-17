@@ -399,6 +399,7 @@ void init_console() {
 	dictionary_put(message_map, string_itoa(STACK_OVERFLOW), "Stack overflow.");
 	dictionary_put(message_map, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE), "File not opened.");
 	dictionary_put(message_map, string_itoa(ERROR_LEER_ARCHIVO), "Won't read file.");
+	dictionary_put(message_map, string_itoa(ERROR_ESCRIBIR_ARCHIVO), "Won't write file.");
 
 	dictionary_put(message_map, string_itoa(ERROR_SINTAXIS), "Syntax error in the Script.");
 

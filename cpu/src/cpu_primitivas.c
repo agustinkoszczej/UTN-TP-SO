@@ -590,7 +590,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 	log_debug(logger, "CPU Escribir en FD: '%d'", kernel_fd);
 
 	if (kernel_fd < 0) {
-		pcb_actual->exit_code = kernel_fd;
+		pcb_actual->exit_code = ERROR_ESCRIBIR_ARCHIVO;
 		cpu_finalizar();
 	}
 

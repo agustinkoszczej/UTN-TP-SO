@@ -6,7 +6,7 @@ void update_bitmap_file() {
 	log_debug(logger, "update_bitmap_file: void");
 
 	FILE* bitmap_f = fopen(string_from_format("%s/Metadata/Bitmap.bin", mount_point), "w");
-	fputs(bitmap->bitarray, bitmap_f);
+	fputs(string_substring(bitmap->bitarray, 0, block_quantity / 8), bitmap_f);
 	fclose(bitmap_f);
 
 	log_debug(logger, "update_bitmap_file: void");
@@ -16,8 +16,8 @@ int create_block() {
 	log_debug(logger, "create_block: void");
 
 	int i;
-	for (i = 0; i < bitmap->size; i++) {
-		if (!bitarray_test_bit(bitmap, i)) {
+	for (i = 0; i < bitmap->size * 8; i++) {
+		if (bitarray_test_bit(bitmap, i) == 0) {
 			bitarray_set_bit(bitmap, i);
 			FILE* f = fopen(string_from_format("%s/Bloques/%d.bin", mount_point, i), "w");
 			if (f == NULL)
@@ -325,10 +325,10 @@ void init_bitmap() {
 	fread(buffer, size, 1, bitmap_f);
 	buffer = string_substring_until(buffer, size);
 
-	string_append(&buffer, string_repeat('\0', block_quantity / 8 - size));
-	bitmap = bitarray_create_with_mode(buffer, block_quantity, MSB_FIRST);
+	//string_append(&buffer, string_repeat('\0', block_quantity / 8 - size));
+	bitmap = bitarray_create(buffer, block_quantity / 8);
 
-	free(buffer);
+	//free(buffer);
 	fclose(bitmap_f);
 
 	log_debug(logger, "init_bitmap: void");
