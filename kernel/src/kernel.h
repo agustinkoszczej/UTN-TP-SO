@@ -184,7 +184,6 @@ t_list* socket_pcb_list;
 pthread_mutex_t p_counter_mutex;
 pthread_mutex_t console_mutex;
 pthread_mutex_t pcb_list_mutex;
-pthread_mutex_t socket_pcb_mutex;
 pthread_mutex_t planning_mutex;
 pthread_mutex_t cpu_mutex;
 pthread_mutex_t process_in_memory_mutex;
@@ -222,6 +221,8 @@ void signal_response(pthread_mutex_t* mutex);
 char* get_path_by_fd_and_pid(int fd, int pid);
 int malloc_memory(int pid, int size);
 void free_memory(int pid, int pointer);
+
+void remove_from_list_sems(int pid);
 
 /*
  * FILESYSTEM
