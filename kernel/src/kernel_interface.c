@@ -408,13 +408,13 @@ void cpu_open_file(socket_connection* connection, char** args) {
 		runFunction(fs_socket, "kernel_create_file", 1, path);
 		wait_response(&fs_mutex);
 		if (fs_response == 0) {
-			//TODO aca llega cuando create_file = false, que no se que significa del lado de FileSystem xd
+			send_dynamic_message(connection->socket, string_itoa(ERROR_CREAR_ARCHIVO));
 			log_debug(logger, "Error de cpu_open_file que nunca deberia llegar");
+			return;
 		}
 	}
 
 	int fd_assigned = open_file_in_process_table(path, flags, pid);
-
 	send_dynamic_message(connection->socket, string_itoa(fd_assigned));
 	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd_assigned));
 }
