@@ -1182,10 +1182,10 @@ void show_active_process(char option) {
 					string_append(&pcb_state, "E ");
 					break;
 				case 4:
-					string_append(&pcb_state, "X ");
+					string_append(&pcb_state, "B ");
 					break;
 				case 5:
-					string_append(&pcb_state, "B ");
+					string_append(&pcb_state, "X ");
 					break;
 			}
 		}
