@@ -106,10 +106,10 @@ void print_menu() {
 	println("");
 	show_title("CONSOLE - MAIN MENU");
 	println("Enter your choice:");
-	println("> START_PROGRAM");
-	println("> ABORT_PROGRAM");
-	println("> DISCONNECT_CONSOLE");
-	println("> CLEAR_MESSAGES\n");
+	println("> [S]TART_PROGRAM");
+	println("> [A]BORT_PROGRAM");
+	println("> [D]ISCONNECT_CONSOLE");
+	println("> [C]LEAR_MESSAGES\n");
 	pthread_mutex_unlock(&print_menu_mutex);
 
 	log_debug(logger, "print_menu: void");

@@ -49,10 +49,10 @@ void print_menu() {
 
 	show_title("MEMORY - MAIN MENU");
 	println("Enter your choice:");
-	println("> RETARD");
-	println("> DUMP");
-	println("> FLUSH");
-	println("> SIZE\n");
+	println("> [R]ETARD");
+	println("> [D]UMP");
+	println("> [F]LUSH");
+	println("> [S]IZE\n");
 }
 
 bool has_available_frames(int n_frames) {

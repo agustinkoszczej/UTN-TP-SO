@@ -1083,16 +1083,16 @@ void print_menu() {
 
 	show_title("KERNEL - MAIN MENU");
 	println("Enter your choice:");
-	println("> (A)CTIVE PROCESS");
-	println("> SHARED (V)ARS & SEMS");
-	println("> (I)NFO");
-	println("> (F)ILE_TABLE");
-	println("> (M)ULTIPROGRAMMING");
-	println("> (S)TOP PROCESS");
+	println("> [A]CTIVE PROCESS");
+	println("> SHARED [V]ARS & SEMS");
+	println("> [I]NFO");
+	println("> [F]ILE_TABLE");
+	println("> [M]ULTIPROGRAMMING");
+	println("> [S]TOP PROCESS");
 	if (planning_running)
-		println("> STOP (P)LANIFICATION\n");
+		println("> STOP [P]LANIFICATION\n");
 	else
-		println("> CONTINUE (P)LANIFICATION\n");
+		println("> CONTINUE [P]LANIFICATION\n");
 }
 
 void ask_option(char *sel) {
