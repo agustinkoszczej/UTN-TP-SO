@@ -1389,15 +1389,16 @@ void stop_process(int pid) {
 	l_pcb->exit_code = FINALIZADO_KERNEL;
 
 	if (l_pcb->state != EXEC_LIST) {
-		if(l_pcb->state == BLOCK_LIST) {
+		if(l_pcb->state == BLOCK_LIST)
 			remove_from_list_sems(l_pcb->pid);
-			t_socket_pcb* socket_pcb = find_socket_by_pid(pid);
-			runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(pid), string_itoa(FINALIZADO_KERNEL));
-		}
+
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 		move_to_list(l_pcb, EXIT_LIST);
 	}
+
+	t_socket_pcb* socket_pcb = find_socket_by_pid(pid);
+	runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(pid), string_itoa(FINALIZADO_KERNEL));
 }
 
 void do_stop_process(char* sel) {
