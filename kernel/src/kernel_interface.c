@@ -336,19 +336,17 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 	if(sem_curr->value < 1)
 		sem_curr->value++;
 
-	if (sem_curr->value <= 0) {
-		int process = get_first(sem_curr->blocked_pids);
-		if(process > -1) {
-			pcb* _pcb = find_pcb_by_pid(process);
-			if(_pcb->state == BLOCK_LIST) {
-				char* temp = remove_first(sem_curr->blocked_pids);
-				sem_curr->blocked_pids = string_new();
-				string_append(&sem_curr->blocked_pids, temp);
-				if (process >= 0) {
-					log_debug(logger, "cpu_signal_sem: _pcb is null? %s", _pcb == NULL ? "true" : "false");
-					move_to_list(_pcb, READY_LIST);
-					short_planning();
-				}
+	int process = get_first(sem_curr->blocked_pids);
+	if(process > -1) {
+		pcb* _pcb = find_pcb_by_pid(process);
+		if(_pcb->state == BLOCK_LIST) {
+			char* temp = remove_first(sem_curr->blocked_pids);
+			sem_curr->blocked_pids = string_new();
+			string_append(&sem_curr->blocked_pids, temp);
+			if (process >= 0) {
+				log_debug(logger, "cpu_signal_sem: _pcb is null? %s", _pcb == NULL ? "true" : "false");
+				move_to_list(_pcb, READY_LIST);
+				short_planning();
 			}
 		}
 	}
