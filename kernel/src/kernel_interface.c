@@ -173,7 +173,6 @@ void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 	*o_pcb = n_pcb;
 }
 void cpu_task_finished(socket_connection* connection, char** args) {
-	pthread_mutex_lock(&sems_mutex);
 	log_debug(logger, "cpu_task_finished");
 	//printf("");
 	pcb* n_pcb = string_to_pcb(args[0]);
@@ -205,6 +204,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 		} else if (is_locked) {
 			move_to_list(o_pcb, BLOCK_LIST);
+			pthread_mutex_unlock(&sems_mutex);
 		} else {
 			int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
 			list_remove_and_destroy_element(process_heap_pages, pos, &free_heap);
@@ -228,7 +228,6 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 		}
 	}
 
-	pthread_mutex_unlock(&sems_mutex);
 	short_planning();
 }
 
@@ -268,10 +267,9 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 	t_sem* sem_curr = list_find(sem_ids, &find_sem);
 	log_debug(logger, "cpu_wait_sem: sem_curr is null? %s", sem_curr == NULL ? "true" : "false");
 
-	sem_curr->value--;
 
 	bool is_locked = false;
-	if (sem_curr->value < 0) {
+	if (sem_curr->value <= 0) {
 		pcb* p = find_pcb_by_pid(process_pid);
 		if(p->state != EXIT_LIST) {
 			char* temp = add_blocked_process(sem_curr->blocked_pids, process_pid);
@@ -279,11 +277,15 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 			string_append(&sem_curr->blocked_pids, temp);
 		}
 		is_locked = true;
+		send_dynamic_message(connection->socket, string_itoa(is_locked));
+		sem_curr->value--;
+	} else {
+		send_dynamic_message(connection->socket, string_itoa(is_locked));
+		sem_curr->value--;
+		pthread_mutex_unlock(&sems_mutex);
 	}
 
-	send_dynamic_message(connection->socket, string_itoa(is_locked));
 	log_debug(logger, "cpu_wait_sem: exit");
-	pthread_mutex_unlock(&sems_mutex);
 	free(id_sem);
 }
 
@@ -333,8 +335,7 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 	t_sem* sem_curr = list_find(sem_ids, &find_sem);
 	log_debug(logger, "cpu_signal_sem: sem_curr is null? %s", sem_curr == NULL ? "true" : "false");
 
-	if(sem_curr->value < 1)
-		sem_curr->value++;
+	sem_curr->value++;
 
 	int process = get_first(sem_curr->blocked_pids);
 	if(process > -1) {
@@ -350,9 +351,6 @@ void cpu_signal_sem(socket_connection* connection, char** args) {
 			}
 		}
 	}
-
-	if(sem_curr->value == 0)
-		sem_curr->value++;
 
 	send_dynamic_message(connection->socket, string_itoa(NO_ERRORES));
 	pthread_mutex_unlock(&sems_mutex);
