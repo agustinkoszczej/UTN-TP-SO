@@ -204,7 +204,6 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 		} else if (is_locked) {
 			move_to_list(o_pcb, BLOCK_LIST);
-			pthread_mutex_unlock(&sems_mutex);
 		} else {
 			int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
 			list_remove_and_destroy_element(process_heap_pages, pos, &free_heap);
@@ -227,6 +226,9 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 		}
 	}
+
+	if(is_locked)
+		pthread_mutex_unlock(&sems_mutex);
 
 	short_planning();
 }
