@@ -126,7 +126,7 @@ pcb* find_pcb_by_pid(int pid) {
 
 	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find);
 
-	if (socket_pcb == NULL){
+	if (socket_pcb == NULL) {
 		log_debug(logger, "find_pcb_by_pid: socket_pcb: NULL");
 		pthread_mutex_unlock(&pcb_list_mutex);
 		return NULL;
@@ -222,6 +222,24 @@ void add_process_in_memory() {
 	pthread_mutex_unlock(&process_in_memory_mutex);
 }
 
+void remove_sem_pid_list(int pid) {
+	int i, j;
+	for(i = 0; i < list_size(sem_pid_list); i++) {
+		t_sem_pid* sem_pid = list_get(sem_pid_list, i);
+
+		if(sem_pid->pid == pid) {
+			for(j = 0; j < list_size(sem_ids); j++) {
+				t_sem* sem = list_get(sem_ids, j);
+
+				if(strcmp(sem->id, sem_pid->sem) == 0 && sem->value < sem->init_value)
+					sem->value++;
+			}
+
+			list_remove(sem_pid_list, i);
+		}
+	}
+}
+
 void move_to_list(pcb* pcb, int list_name) {
 	bool find_pcb(void* element) {
 		t_socket_pcb* p = element;
@@ -272,6 +290,7 @@ void move_to_list(pcb* pcb, int list_name) {
 			break;
 		case EXIT_LIST:
 			queue_push(exit_queue, pcb);
+			remove_sem_pid_list(pcb->pid);
 			break;
 	}
 	pcb->state = list_name;
@@ -1003,6 +1022,8 @@ void init_kernel(t_config* config) {
 	pthread_mutex_init(&process_in_memory_mutex, NULL);
 	pthread_mutex_init(&shared_vars_mutex, NULL);
 	pthread_mutex_init(&sems_mutex, NULL);
+	pthread_mutex_init(&sem_pid_mutex, NULL);
+	pthread_mutex_init(&sems_blocked_list, NULL);
 
 	pthread_mutex_init(&mem_response, NULL);
 	pthread_mutex_init(&fs_mutex, NULL);
@@ -1035,6 +1056,7 @@ void init_kernel(t_config* config) {
 		t_sem* sem = malloc(sizeof(t_sem));
 		sem->id = sem_ids_arr[i];
 		sem->value = atoi(sem_vals_arr[i]);
+		sem->init_value = atoi(sem_vals_arr[i]);
 		sem->blocked_pids = "[]";
 		list_add(sem_ids, sem);
 		i++;
@@ -1060,6 +1082,8 @@ void init_kernel(t_config* config) {
 	exit_queue = queue_create();
 
 	socket_pcb_list = list_create();
+
+	sem_pid_list = list_create();
 
 	cpu_list = list_create();
 
@@ -1289,14 +1313,10 @@ void shared_vars_and_sems() {
 
 	printf("\nSEMS:\n");
 
-	pthread_mutex_lock(&sems_mutex);
-
 	for(i = 0; i < list_size(sem_ids); i++) {
 		t_sem* sem = list_get(sem_ids, i);
 		printf("\t%s = %d --> %s\n", sem->id, sem->value, sem->blocked_pids);
 	}
-
-	pthread_mutex_unlock(&sems_mutex);
 
 	wait_any_key();
 }
@@ -1349,7 +1369,7 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 }
 
 void remove_from_list_sems(int pid) {
-	pthread_mutex_lock(&sems_mutex);
+	pthread_mutex_lock(&sems_blocked_list);
 
 	int i, j;
 	for(i = 0; i < list_size(sem_ids); i++) {
@@ -1359,8 +1379,14 @@ void remove_from_list_sems(int pid) {
 
 		j = 0;
 		while(list_blocked_pids[j] != NULL) {
-			if(atoi(list_blocked_pids[j]) != pid)
-				string_append_with_format(&temp, "%s,", list_blocked_pids[j]);
+			if(atoi(list_blocked_pids[j]) != pid) {
+				pcb* p = find_pcb_by_pid(atoi(list_blocked_pids[j]));
+				if(p->state != EXIT_LIST)
+					string_append_with_format(&temp, "%s,", list_blocked_pids[j]);
+				else if(sem->value < sem->init_value)
+					sem->value++;
+			} else if(sem->value < sem->init_value)
+				sem->value++;
 
 			free(list_blocked_pids[j]);
 			j++;
@@ -1375,7 +1401,7 @@ void remove_from_list_sems(int pid) {
 		free(list_blocked_pids);
 	}
 
-	pthread_mutex_unlock(&sems_mutex);
+	pthread_mutex_unlock(&sems_blocked_list);
 }
 
 void stop_process(int pid) {

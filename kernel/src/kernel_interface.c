@@ -95,8 +95,7 @@ void console_abort_program(socket_connection* connection, char** args) {
 	l_pcb->exit_code = FINALIZADO_CONSOLA;
 
 	if (l_pcb->state != EXEC_LIST) {
-		if(l_pcb->state == BLOCK_LIST)
-			remove_from_list_sems(l_pcb->pid);
+		remove_from_list_sems(l_pcb->pid);
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 		move_to_list(l_pcb, EXIT_LIST);
@@ -210,13 +209,13 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			move_to_list(n_pcb, EXIT_LIST);
 			substract_process_in_memory();
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
-			if (n_pcb->exit_code != FINALIZADO_CONSOLA || n_pcb->exit_code == FINALIZADO_KERNEL) {
+			if (n_pcb->exit_code != FINALIZADO_CONSOLA && n_pcb->exit_code != FINALIZADO_KERNEL) {
 				t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
 				runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
 			}
 		}
 	} else {
-		if (n_pcb->exit_code != FINALIZADO_CONSOLA || n_pcb->exit_code == FINALIZADO_KERNEL) {
+		if (n_pcb->exit_code != FINALIZADO_CONSOLA && n_pcb->exit_code != FINALIZADO_KERNEL) {
 			move_to_list(o_pcb, READY_LIST);
 		} else {
 			int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
@@ -234,6 +233,8 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 }
 
 char* add_blocked_process(char* blocked_pids, int process_pid) {
+	pthread_mutex_lock(&sems_blocked_list);
+
 	log_debug(logger, "add_blocked_process");
 	char** arr = string_get_string_as_array(blocked_pids);
 	char* res = string_new();
@@ -242,7 +243,24 @@ char* add_blocked_process(char* blocked_pids, int process_pid) {
 		string_append_with_format(&res, "%s,", arr[i++]);
 	string_append_with_format(&res, "%d]", process_pid);
 
+	pthread_mutex_unlock(&sems_blocked_list);
 	return string_from_format("[%s", res);
+}
+
+void add_sem_pid_list(char* id_sem, int pid) {
+	bool find_sem_pid(void* e) {
+		t_sem_pid* s = e;
+		return s->pid == pid && !strcmp(s->sem, id_sem);
+	}
+
+	t_sem_pid* f = list_find(sem_pid_list, &find_sem_pid);
+
+	if(f == NULL) {
+		t_sem_pid* sem_pid = malloc(sizeof(t_sem_pid));
+		sem_pid->pid = pid;
+		sem_pid->sem = string_from_format("%s", id_sem);
+		list_add(sem_pid_list, sem_pid);
+	}
 }
 
 void cpu_wait_sem(socket_connection* connection, char** args) {
@@ -282,6 +300,7 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 		send_dynamic_message(connection->socket, string_itoa(is_locked));
 		sem_curr->value--;
 	} else {
+		add_sem_pid_list(id_sem, process_pid);
 		send_dynamic_message(connection->socket, string_itoa(is_locked));
 		sem_curr->value--;
 		pthread_mutex_unlock(&sems_mutex);
@@ -302,6 +321,7 @@ int get_first(char* blocked_pids) {
 
 char* remove_first(char* blocked_pids) {
 	log_debug(logger, "remove_last");
+	pthread_mutex_lock(&sems_blocked_list);
 	char** arr = string_get_string_as_array(blocked_pids);
 	char* res = string_new();
 
@@ -313,6 +333,7 @@ char* remove_first(char* blocked_pids) {
 
 	if (string_length(res) > 0)
 		res = string_substring_until(res, string_length(res) - 1);
+	pthread_mutex_unlock(&sems_blocked_list);
 	return string_from_format("[%s]", res);
 }
 

@@ -84,6 +84,7 @@ t_list* shared_vars;
 typedef struct {
 	char* id;
 	int value;
+	int init_value;
 	char* blocked_pids;
 } t_sem;
 t_list* sem_ids;
@@ -181,6 +182,13 @@ typedef struct {
 t_socket_pcb process_struct;
 t_list* socket_pcb_list;
 
+typedef struct {
+	int pid;
+	char* sem;
+} t_sem_pid;
+
+t_list* sem_pid_list;
+
 pthread_mutex_t p_counter_mutex;
 pthread_mutex_t console_mutex;
 pthread_mutex_t pcb_list_mutex;
@@ -190,6 +198,8 @@ pthread_mutex_t process_in_memory_mutex;
 pthread_mutex_t shared_vars_mutex;
 pthread_mutex_t sems_mutex;
 pthread_mutex_t abort_console_mutex;
+pthread_mutex_t sem_pid_mutex;
+pthread_mutex_t sems_blocked_list;
 
 pthread_mutex_t mem_response;
 
