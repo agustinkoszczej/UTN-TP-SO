@@ -1379,7 +1379,7 @@ void remove_from_list_sems(int pid) {
 }
 
 void stop_process(int pid) {
-	log_debug(logger, "stop_process");
+	//log_debug(logger, "stop_process");
 	pcb* l_pcb = find_pcb_by_pid(pid);
 	if(l_pcb == NULL){
 		log_debug(logger, "stop_process doesnt exist pid %d", pid);
@@ -1387,7 +1387,7 @@ void stop_process(int pid) {
 	}
 
 	l_pcb->exit_code = FINALIZADO_KERNEL;
-
+	log_debug(logger, "stop_process: pid: '%d', state: '%d", pid, l_pcb->state);
 	if (l_pcb->state != EXEC_LIST) {
 		if(l_pcb->state == BLOCK_LIST)
 			remove_from_list_sems(l_pcb->pid);

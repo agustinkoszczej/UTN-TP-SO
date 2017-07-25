@@ -216,7 +216,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			}
 		}
 	} else {
-		if (n_pcb->exit_code != FINALIZADO_CONSOLA || n_pcb->exit_code == FINALIZADO_KERNEL) {
+		if (n_pcb->exit_code != FINALIZADO_CONSOLA && n_pcb->exit_code != FINALIZADO_KERNEL) {
 			move_to_list(o_pcb, READY_LIST);
 		} else {
 			int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
