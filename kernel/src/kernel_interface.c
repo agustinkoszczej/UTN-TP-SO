@@ -410,7 +410,8 @@ void cpu_free(socket_connection* connection, char** args) {
 void cpu_validate_file(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_validate_file");
 	char* path = args[0];
-	bool validate = validate_file_from_fs(path);
+	int pid = atoi(args[1]);
+	bool validate = validate_file_from_fs(path, pid);
 
 	//runFunction(connection->socket, "kernel_response_validate_file", 1, string_itoa(validate));
 	send_dynamic_message(connection->socket, string_itoa(validate));
@@ -424,7 +425,7 @@ void cpu_open_file(socket_connection* connection, char** args) {
 	int pid = atoi(args[3]);
 
 	if (!validate && string_contains(flags, "c")) {
-		runFunction(fs_socket, "kernel_create_file", 1, path);
+		runFunction(fs_socket, "kernel_create_file", 2, path, string_itoa(pid));
 		wait_response(&fs_mutex);
 		if (fs_response == 0) {
 			send_dynamic_message(connection->socket, string_itoa(ERROR_CREAR_ARCHIVO));
@@ -452,7 +453,7 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 		return;
 	}
 
-	runFunction(fs_socket, "kernel_delete_file", 1, path);
+	runFunction(fs_socket, "kernel_delete_file", 2, path, string_itoa(pid));
 	wait_response(&fs_mutex);
 	if (fs_response == 0) {
 		//TODO aca llega cuando delete_file = false, que no se que significa del lado de FileSystem xd
@@ -532,7 +533,7 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	int offset = process->pointer;
 
 	if (is_allowed(pid, fd, flags)) {
-		runFunction(fs_socket, "kernel_get_data", 3, path, string_itoa(offset), string_itoa(size));
+		runFunction(fs_socket, "kernel_get_data", 4, path, string_itoa(offset), string_itoa(size), string_itoa(pid));
 		wait_response(&fs_mutex);
 		runFunction(mem_socket, "i_get_page_from_pointer", 1, string_itoa(direccion_variable));
 		wait_response(&mem_response);

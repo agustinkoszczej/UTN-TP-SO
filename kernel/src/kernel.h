@@ -237,7 +237,7 @@ void remove_from_list_sems(int pid);
 /*
  * FILESYSTEM
  */
-bool validate_file_from_fs(char* path);
+bool validate_file_from_fs(char* path, int pid);
 
 //CAPA FILE SYSTEM
 int open_file_in_process_table(char* path, char* flag, int pid);

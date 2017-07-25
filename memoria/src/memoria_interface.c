@@ -124,7 +124,7 @@ void i_add_pages_to_program(socket_connection* connection, char** args) {
 		runFunction(connection->socket, "memory_response_heap", 1, response);
 		free(response);
 	} else{
-		char* response = string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS);
+		char* response = string_itoa(NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS);
 		runFunction(connection->socket, "memory_response_heap", 1, response);
 		free(response);
 	}

@@ -310,17 +310,11 @@ void move_to_list(pcb* pcb, int list_name) {
  * CPU-FILESYSTEM
  */
 
-bool validate_file_from_fs(char* path) {
+bool validate_file_from_fs(char* path, int pid) {
 	log_debug(logger, "validate_file_from_fs");
-	runFunction(fs_socket, "kernel_validate_file", 1, path);
+	runFunction(fs_socket, "kernel_validate_file", 2, path, string_itoa(pid));
 	wait_response(&fs_mutex);
 	return fs_response;
-}
-
-void create_file_from_fs(char* path) {
-	log_debug(logger, "create_file_from_fs");
-	runFunction(fs_socket, "kernel_create_file", 1, path);
-	wait_response(&fs_mutex);
 }
 
 //GETTERS TABLA GLOBAL
@@ -594,12 +588,10 @@ int write_file(int fd_write, int pid, char* info, int size) {
 	if (is_allowed(pid, fd_write, "w")) {
 		char* path = get_path_by_gfd(process->gfd);
 		int offset = process->pointer;
-		runFunction(fs_socket, "kernel_save_data", 4, path, string_itoa(offset), string_itoa(size), info);
+		runFunction(fs_socket, "kernel_save_data", 5, path, string_itoa(offset), string_itoa(size), info, string_itoa(pid));
 		wait_response(&fs_mutex);
 		if (!fs_response) {
-			//TODO overflow al escribir? en FILESYSTEM (esto llega aca cuando save_data = false)
-			log_debug(logger, "Error de write_file que nunca deberias pasar");
-			return ERROR_SIN_DEFINIR;
+			return ERROR_ESCRIBIR_ARCHIVO;
 		}
 
 		return NO_ERRORES;
@@ -804,8 +796,8 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	log_debug(logger, "add_heap_page");
 	runFunction(mem_socket, "i_add_pages_to_program", 2, string_itoa(pid), string_itoa(page));
 	wait_response(&mem_response);
-	if (memory_response == NO_SE_PUEDEN_RESERVAR_RECURSOS) {
-		return NO_SE_PUEDEN_RESERVAR_RECURSOS;
+	if (memory_response == NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS) {
+		return NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS;
 	}
 	t_heap_page* n_heap_page = malloc(sizeof(t_heap_page));
 	n_heap_page->free_size = mem_page_size - (heap_metadata_size * 2) - space;
@@ -1281,6 +1273,7 @@ void show_syscalls(int pid) {
 void show_info(int pid) {
 	log_debug(logger, "show_info");
 	pcb* n_pcb = find_pcb_by_pid(pid);
+	if (n_pcb == NULL) return;
 	char* info = string_new();
 	string_append_with_format(&info, "PID: %d\n", n_pcb->pid);
 	string_append_with_format(&info, "\nRAFAGAS EJECUTADAS: %d", n_pcb->statistics.cycles);

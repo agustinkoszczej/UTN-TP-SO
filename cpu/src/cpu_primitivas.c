@@ -412,7 +412,7 @@ t_puntero kernel_reservar(t_valor_variable espacio) {
 
 	log_debug(logger, "|PRIMITIVA| Reservar '%d' bytes en '%d'", espacio, malloc_pointer);
 	if (malloc_pointer < 0) {
-		pcb_actual->exit_code = NO_SE_PUEDEN_RESERVAR_RECURSOS;
+		pcb_actual->exit_code = malloc_pointer;
 		cpu_finalizar();
 	}
 
@@ -452,7 +452,7 @@ t_descriptor_archivo kernel_abrir(t_direccion_archivo direccion, t_banderas flag
 
 	char* n_flag = get_flag(flags);
 
-	runFunction(kernel_socket, "cpu_validate_file", 1, direccion);
+	runFunction(kernel_socket, "cpu_validate_file", 2, direccion, string_itoa(pcb_actual->pid));
 	bool validate_file = atoi(receive_dynamic_message(kernel_socket));
 
 	if (!validate_file && !flags.creacion) {
@@ -590,7 +590,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 	log_debug(logger, "CPU Escribir en FD: '%d'", kernel_fd);
 
 	if (kernel_fd < 0) {
-		pcb_actual->exit_code = ERROR_ESCRIBIR_ARCHIVO;
+		pcb_actual->exit_code = kernel_fd;
 		cpu_finalizar();
 	}
 
