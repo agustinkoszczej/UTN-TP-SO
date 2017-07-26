@@ -247,12 +247,19 @@ void move_to_list(pcb* pcb, int list_name) {
 	}
 
 	pthread_mutex_lock(&pcb_list_mutex);
-	log_debug(logger, "move_to_list");
+
 	int pos;
 
 	t_socket_pcb* p = list_find(socket_pcb_list, &find_pcb);
 	if(p != NULL && p->state != pcb->state)
 		pcb->state = p->state;
+
+	log_debug(logger, "move_to_list pid: %d, from %d to %d -> [NEW_LIST = 1, READY_LIST = 2, EXEC_LIST = 3, BLOCK_LIST = 4, EXIT_LIST = 5]", pcb->pid, pcb->state, list_name);
+
+	if (pcb->state == list_name){
+		pthread_mutex_unlock(&pcb_list_mutex);
+		return;
+	}
 
 	switch (pcb->state) {
 		case NEW_LIST:
