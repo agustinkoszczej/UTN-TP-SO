@@ -161,6 +161,52 @@ pcb* find_pcb_by_pid(int pid) {
 	return n_pcb;
 }
 
+pcb* find_pcb_by_pid2(int pid) {
+	log_debug(logger, "find_pcb_by_pid2");
+
+	pthread_mutex_lock(&pcb_list_mutex);
+	bool find(void* element) {
+		t_socket_pcb* n_pcb = element;
+		return n_pcb->pid == pid;
+	}
+
+	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find);
+
+	if (socket_pcb == NULL) {
+		log_debug(logger, "find_pcb_by_pid: socket_pcb: NULL");
+		pthread_mutex_unlock(&pcb_list_mutex);
+		return NULL;
+	}
+
+	int pos;
+	pcb* n_pcb = malloc(sizeof(pcb));
+	switch (socket_pcb->state) {
+		case NEW_LIST:
+			pos = find_pcb_pos_in_list(new_queue->elements, socket_pcb->pid);
+			n_pcb = list_get(new_queue->elements, pos);
+			break;
+		case READY_LIST:
+			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
+			n_pcb = list_get(ready_list, pos);
+			break;
+		case EXEC_LIST:
+			pos = find_pcb_pos_in_list(exec_list, socket_pcb->pid);
+			n_pcb = list_get(exec_list, pos);
+			break;
+		case BLOCK_LIST:
+			pos = find_pcb_pos_in_list(block_list, socket_pcb->pid);
+			n_pcb = list_get(block_list, pos);
+			break;
+		case EXIT_LIST:
+			pos = find_pcb_pos_in_list(exit_queue->elements, socket_pcb->pid);
+			n_pcb = list_get(exit_queue->elements, pos);
+			break;
+	}
+	pthread_mutex_unlock(&pcb_list_mutex);
+
+	return n_pcb;
+}
+
 pcb* find_pcb_by_socket(int socket) {
 	log_debug(logger, "find_pcb_by_socket");
 	pthread_mutex_lock(&pcb_list_mutex);
@@ -1299,7 +1345,7 @@ void show_syscalls(int pid) {
 
 void show_info(int pid) {
 	log_debug(logger, "show_info");
-	pcb* n_pcb = find_pcb_by_pid(pid);
+	pcb* n_pcb = find_pcb_by_pid2(pid);
 	if (n_pcb == NULL) return;
 	char* info = string_new();
 	string_append_with_format(&info, "PID: %d\n", n_pcb->pid);
