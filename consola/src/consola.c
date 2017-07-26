@@ -191,7 +191,7 @@ void start_program(char* location) {
 	list_add(process_list, process);
 	pthread_mutex_unlock(&process_list_mutex);
 
-	runFunction(process->socket, "console_load_program", 1, buffer);
+	runFunction(process->socket, "console_load_program", 2, buffer, string_itoa(list_size(process_list) - 1));
 	log_debug(logger, "start_program: void");
 }
 

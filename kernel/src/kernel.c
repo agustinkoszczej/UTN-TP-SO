@@ -1023,12 +1023,15 @@ void init_kernel(t_config* config) {
 	pthread_mutex_init(&sems_mutex, NULL);
 	pthread_mutex_init(&sem_pid_mutex, NULL);
 	pthread_mutex_init(&sems_blocked_list, NULL);
+	pthread_mutex_init(&program_list_mutex, NULL);
 
 	pthread_mutex_init(&mem_response, NULL);
 	pthread_mutex_init(&fs_mutex, NULL);
 
 	pthread_mutex_lock(&mem_response);
 	pthread_mutex_lock(&fs_mutex);
+
+	can_check_programs = false;
 
 	port_con = config_get_int_value(config, PUERTO_PROG);
 	port_cpu = config_get_int_value(config, PUERTO_CPU);
@@ -1069,6 +1072,8 @@ void init_kernel(t_config* config) {
 		planning_alg = RR;
 		quantum = config_get_int_value(config, QUANTUM) - 1;
 	}
+
+	program_list = list_create();
 
 	p_counter = 0;
 	process_in_memory = 0;

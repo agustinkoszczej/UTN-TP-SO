@@ -1,16 +1,31 @@
 #include "kernel_interface.h"
 
-/*
- * CONSOLE
- */
+void check_new_list() {
+	if(queue_size(new_queue) > 0) {
+		pcb* new_pcb = queue_peek(new_queue);
+		int i;
+		for(i = 0; i < list_size(program_list); i++) {
+			t_program* program = list_get(program_list, i);
+			if(program->pid == new_pcb->pid) {
+				process_struct.socket = program->socket;
+				process_struct.pid = new_pcb->pid;
+				process_struct.state = new_pcb->state;
+				process_struct.list_pos = program->list_pos;
+
+				runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program->program);
+				list_remove(program_list, i);
+				break;
+			}
+		}
+	} else
+		can_check_programs = true;
+}
+
 void console_load_program(socket_connection* connection, char** args) {
 	log_debug(logger, "console_load_program");
+	pthread_mutex_lock(&console_mutex);
 	char* program = args[0];
-
-	if (process_in_memory + 1 > multiprog) {
-		runFunction(connection->socket, "kernel_response_load_program", 2, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), string_itoa(-1));
-		return;
-	}
+	int list_pos = atoi(args[1]);
 
 	pcb* new_pcb = malloc(sizeof(pcb));
 
@@ -39,16 +54,6 @@ void console_load_program(socket_connection* connection, char** args) {
 	new_pcb->pc = metadata->instruccion_inicio;
 	int i;
 
-	/*if (metadata->cantidad_de_etiquetas + metadata->cantidad_de_funciones > 0) {
-	 char** labels = string_split(metadata->etiquetas, "\0");
-	 for (i = 0; i < metadata->cantidad_de_etiquetas + metadata->cantidad_de_funciones; i++) {
-	 char* label = labels[i];
-	 t_puntero_instruccion* instruction = malloc(sizeof(t_puntero_instruccion));
-	 *instruction = metadata_buscar_etiqueta(label, metadata->etiquetas, metadata->etiquetas_size); //aca rompia con Program3, por el cantidad_de_etiquetas
-	 dictionary_put(new_pcb->i_label, label, instruction);
-	 }
-	 }*/
-
 	char* label = string_new();
 	for (i = 0; i < metadata->etiquetas_size; i++) {
 		if (metadata->etiquetas[i] != '\0') {
@@ -71,8 +76,6 @@ void console_load_program(socket_connection* connection, char** args) {
 
 	metadata_destruir(metadata);
 
-	pthread_mutex_lock(&console_mutex);
-
 	pthread_mutex_lock(&pcb_list_mutex);
 	queue_push(new_queue, new_pcb);
 
@@ -82,11 +85,22 @@ void console_load_program(socket_connection* connection, char** args) {
 	socket_pcb->socket = connection->socket;
 	list_add(socket_pcb_list, socket_pcb);
 
-	process_struct.socket = connection->socket;
-	process_struct.pid = new_pcb->pid;
-	process_struct.state = new_pcb->state;
 	pthread_mutex_unlock(&pcb_list_mutex);
-	runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program);
+
+	pthread_mutex_lock(&program_list_mutex);
+	t_program* new_program = malloc(sizeof(new_program));
+	new_program->pid = new_pcb->pid;
+	new_program->list_pos = list_pos;
+	new_program->socket = connection->socket;
+	new_program->program = string_new();
+	new_program->program = string_from_format("%s", program);
+	list_add(program_list, new_program);
+	pthread_mutex_unlock(&program_list_mutex);
+
+	if (process_in_memory + 1 <= multiprog)
+		check_new_list();
+
+	pthread_mutex_unlock(&console_mutex);
 }
 void console_abort_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -230,6 +244,11 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 		pthread_mutex_unlock(&sems_mutex);
 
 	short_planning();
+
+	if (can_check_programs && process_in_memory + 1 <= multiprog) {
+		can_check_programs = false;
+		check_new_list();
+	}
 }
 
 char* add_blocked_process(char* blocked_pids, int process_pid) {
@@ -592,8 +611,12 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 		move_to_list(n_pcb, EXIT_LIST);
 	}
 
-	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
-	pthread_mutex_unlock(&console_mutex);
+	runFunction(process_struct.socket, "kernel_response_load_program", 3, string_itoa(response), string_itoa(process_struct.pid), string_itoa(process_struct.list_pos));
+
+	if (process_in_memory + 1 <= multiprog)
+		check_new_list();
+	 else
+		can_check_programs = true;
 }
 void memory_page_size(socket_connection* connection, char** args) {
 	log_debug(logger, "memory_response_start_program");

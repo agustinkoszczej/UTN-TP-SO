@@ -66,6 +66,14 @@ int stack_size;
 int quantum_sleep;
 int planning_alg;
 
+typedef struct {
+	int pid;
+	int socket;
+	int list_pos;
+	char* program;
+} t_program;
+
+t_list* program_list;
 
 //inotify
 int fd_inotify, watch_descriptor, max_fd;
@@ -179,7 +187,14 @@ typedef struct {
 	int state;
 } t_socket_pcb;
 
-t_socket_pcb process_struct;
+typedef struct {
+	int socket;
+	int pid;
+	int state;
+	int list_pos
+} t_socket_pcb_ext;
+
+t_socket_pcb_ext process_struct;
 t_list* socket_pcb_list;
 
 typedef struct {
@@ -200,6 +215,7 @@ pthread_mutex_t sems_mutex;
 pthread_mutex_t abort_console_mutex;
 pthread_mutex_t sem_pid_mutex;
 pthread_mutex_t sems_blocked_list;
+pthread_mutex_t program_list_mutex;
 
 pthread_mutex_t mem_response;
 
@@ -212,6 +228,8 @@ t_log* logger;
 
 int mem_page_size;
 int process_in_memory;
+
+bool can_check_programs;
 
 void move_to_list(pcb* pcb, int list_name);
 pcb* find_pcb_by_socket(int socket);
