@@ -66,6 +66,14 @@ int stack_size;
 int quantum_sleep;
 int planning_alg;
 
+typedef struct {
+	int pid;
+	int socket;
+	int list_pos;
+	char* program;
+} t_program;
+
+t_list* program_list;
 
 //inotify
 int fd_inotify, watch_descriptor, max_fd;
@@ -84,6 +92,7 @@ t_list* shared_vars;
 typedef struct {
 	char* id;
 	int value;
+	int init_value;
 	char* blocked_pids;
 } t_sem;
 t_list* sem_ids;
@@ -178,8 +187,22 @@ typedef struct {
 	int state;
 } t_socket_pcb;
 
-t_socket_pcb process_struct;
+typedef struct {
+	int socket;
+	int pid;
+	int state;
+	int list_pos
+} t_socket_pcb_ext;
+
+t_socket_pcb_ext process_struct;
 t_list* socket_pcb_list;
+
+typedef struct {
+	int pid;
+	char* sem;
+} t_sem_pid;
+
+t_list* sem_pid_list;
 
 pthread_mutex_t p_counter_mutex;
 pthread_mutex_t console_mutex;
@@ -190,6 +213,10 @@ pthread_mutex_t process_in_memory_mutex;
 pthread_mutex_t shared_vars_mutex;
 pthread_mutex_t sems_mutex;
 pthread_mutex_t abort_console_mutex;
+pthread_mutex_t sem_pid_mutex;
+pthread_mutex_t sems_blocked_list;
+pthread_mutex_t program_list_mutex;
+pthread_mutex_t json_mutex;
 
 pthread_mutex_t mem_response;
 
@@ -202,6 +229,8 @@ t_log* logger;
 
 int mem_page_size;
 int process_in_memory;
+
+bool can_check_programs;
 
 void move_to_list(pcb* pcb, int list_name);
 pcb* find_pcb_by_socket(int socket);
@@ -223,11 +252,12 @@ int malloc_memory(int pid, int size);
 void free_memory(int pid, int pointer);
 
 void remove_from_list_sems(int pid);
+void check_new_list();
 
 /*
  * FILESYSTEM
  */
-bool validate_file_from_fs(char* path);
+bool validate_file_from_fs(char* path, int pid);
 
 //CAPA FILE SYSTEM
 int open_file_in_process_table(char* path, char* flag, int pid);

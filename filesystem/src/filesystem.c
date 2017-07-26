@@ -16,7 +16,7 @@ int create_block() {
 	log_debug(logger, "create_block: void");
 
 	int i;
-	for (i = 0; i < bitmap->size * 8; i++) {
+	for (i = 0; i < bitmap->size * 8; i++) { //TODO quis isto xd?
 		if (bitarray_test_bit(bitmap, i) == 0) {
 			bitarray_set_bit(bitmap, i);
 			FILE* f = fopen(string_from_format("%s/Bloques/%d.bin", mount_point, i), "w");
@@ -51,7 +51,7 @@ bool add_blocks_if_needed(char* path, int offset, int size) {
 	while (blocks_arr[asigned_blocks] != NULL)
 		asigned_blocks++;
 
-	while(asigned_blocks < end_block) {
+	while(asigned_blocks <= end_block) {
 		int new_block_pos = create_block();
 
 		if (new_block_pos < 0) {
@@ -136,13 +136,13 @@ bool save_data(char* path, int offset, int size, char* buffer) {
 	int len = (size > block_size) ? block_size : size;
 	len -= offset2;
 	write_block(atoi(blocks_arr[start_block]), offset2, len, string_substring_until(buffer, len));
-	free(blocks_arr[start_block]);
+	free(blocks_arr[start_block]); //TODO si aca hago siempre free nunca me va a caer en el while de abajo ?
 	start_block++;
 	size -= len;
 
 	int written_chars = len;
-
-	while (start_block < end_block && blocks_arr[start_block] != NULL) {
+					//TODO deberia ser <= ?
+	while (start_block < end_block && blocks_arr[start_block] != NULL) { //TODO aca?
 		int b_len = (size > block_size) ? block_size : size;
 
 		write_block(atoi(blocks_arr[start_block]), 0, b_len, string_substring(buffer, written_chars, b_len));

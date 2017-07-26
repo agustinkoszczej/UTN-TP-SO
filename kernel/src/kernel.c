@@ -42,7 +42,9 @@ void short_planning() {
 		free_cpu->busy = true;
 		free_cpu->xpid = _pcb->pid;
 
+		pthread_mutex_lock(&json_mutex);
 		char* pcb_string = pcb_to_string(_pcb);
+		pthread_mutex_unlock(&json_mutex);
 
 		config_destroy(config);
 		config = malloc(sizeof(t_config));
@@ -126,12 +128,11 @@ pcb* find_pcb_by_pid(int pid) {
 
 	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find);
 
-	if (socket_pcb == NULL){
+	if (socket_pcb == NULL) {
 		log_debug(logger, "find_pcb_by_pid: socket_pcb: NULL");
 		pthread_mutex_unlock(&pcb_list_mutex);
 		return NULL;
 	}
-	log_debug(logger, "find_pcb_by_pid: socket_pcb->pid: '%d', socket_pcb->socket: '%d', socket_pcb->state: '%d'", socket_pcb->pid, socket_pcb->socket, socket_pcb->state);
 
 	int pos;
 	pcb* n_pcb = malloc(sizeof(pcb));
@@ -222,6 +223,37 @@ void add_process_in_memory() {
 	pthread_mutex_unlock(&process_in_memory_mutex);
 }
 
+void remove_sem_pid_list(int pid) {
+	int i, j;
+	for(i = 0; i < list_size(sem_pid_list); i++) {
+		t_sem_pid* sem_pid = list_get(sem_pid_list, i);
+
+		if(sem_pid->pid == pid) {
+			for(j = 0; j < list_size(sem_ids); j++) {
+				t_sem* sem = list_get(sem_ids, j);
+
+				if(strcmp(sem->id, sem_pid->sem) == 0 && sem->value < sem->init_value)
+					sem->value++;
+				if(strcmp(sem->id, sem_pid->sem) == 0) {
+					int process = get_first(sem->blocked_pids);
+					if(process > -1) {
+						pcb* _pcb = find_pcb_by_pid(process);
+						if(_pcb->state == BLOCK_LIST) {
+							char* temp = remove_first(sem->blocked_pids);
+							sem->blocked_pids = string_new();
+							string_append(&sem->blocked_pids, temp);
+							move_to_list(_pcb, READY_LIST);
+							short_planning();
+						}
+					}
+				}
+			}
+
+			list_remove(sem_pid_list, i);
+		}
+	}
+}
+
 void move_to_list(pcb* pcb, int list_name) {
 	bool find_pcb(void* element) {
 		t_socket_pcb* p = element;
@@ -229,12 +261,17 @@ void move_to_list(pcb* pcb, int list_name) {
 	}
 
 	pthread_mutex_lock(&pcb_list_mutex);
-	log_debug(logger, "move_to_list");
+
 	int pos;
 
 	t_socket_pcb* p = list_find(socket_pcb_list, &find_pcb);
 	if(p != NULL && p->state != pcb->state)
 		pcb->state = p->state;
+
+	if (pcb->state == list_name){
+		pthread_mutex_unlock(&pcb_list_mutex);
+		return;
+	}
 
 	switch (pcb->state) {
 		case NEW_LIST:
@@ -285,23 +322,20 @@ void move_to_list(pcb* pcb, int list_name) {
 		}
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
+
+	if(list_name == EXIT_LIST)
+		remove_sem_pid_list(pcb->pid);
 }
 
 /*
  * CPU-FILESYSTEM
  */
 
-bool validate_file_from_fs(char* path) {
+bool validate_file_from_fs(char* path, int pid) {
 	log_debug(logger, "validate_file_from_fs");
-	runFunction(fs_socket, "kernel_validate_file", 1, path);
+	runFunction(fs_socket, "kernel_validate_file", 2, path, string_itoa(pid));
 	wait_response(&fs_mutex);
 	return fs_response;
-}
-
-void create_file_from_fs(char* path) {
-	log_debug(logger, "create_file_from_fs");
-	runFunction(fs_socket, "kernel_create_file", 1, path);
-	wait_response(&fs_mutex);
 }
 
 //GETTERS TABLA GLOBAL
@@ -575,12 +609,10 @@ int write_file(int fd_write, int pid, char* info, int size) {
 	if (is_allowed(pid, fd_write, "w")) {
 		char* path = get_path_by_gfd(process->gfd);
 		int offset = process->pointer;
-		runFunction(fs_socket, "kernel_save_data", 4, path, string_itoa(offset), string_itoa(size), info);
+		runFunction(fs_socket, "kernel_save_data", 5, path, string_itoa(offset), string_itoa(size), info, string_itoa(pid));
 		wait_response(&fs_mutex);
 		if (!fs_response) {
-			//TODO overflow al escribir? en FILESYSTEM (esto llega aca cuando save_data = false)
-			log_debug(logger, "Error de write_file que nunca deberias pasar");
-			return ERROR_SIN_DEFINIR;
+			return ERROR_ESCRIBIR_ARCHIVO;
 		}
 
 		return NO_ERRORES;
@@ -785,8 +817,8 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	log_debug(logger, "add_heap_page");
 	runFunction(mem_socket, "i_add_pages_to_program", 2, string_itoa(pid), string_itoa(page));
 	wait_response(&mem_response);
-	if (memory_response == NO_SE_PUEDEN_RESERVAR_RECURSOS) {
-		return NO_SE_PUEDEN_RESERVAR_RECURSOS;
+	if (memory_response == NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS) {
+		return NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS;
 	}
 	t_heap_page* n_heap_page = malloc(sizeof(t_heap_page));
 	n_heap_page->free_size = mem_page_size - (heap_metadata_size * 2) - space;
@@ -1003,12 +1035,18 @@ void init_kernel(t_config* config) {
 	pthread_mutex_init(&process_in_memory_mutex, NULL);
 	pthread_mutex_init(&shared_vars_mutex, NULL);
 	pthread_mutex_init(&sems_mutex, NULL);
+	pthread_mutex_init(&sem_pid_mutex, NULL);
+	pthread_mutex_init(&sems_blocked_list, NULL);
+	pthread_mutex_init(&program_list_mutex, NULL);
+	pthread_mutex_init(&json_mutex, NULL);
 
 	pthread_mutex_init(&mem_response, NULL);
 	pthread_mutex_init(&fs_mutex, NULL);
 
 	pthread_mutex_lock(&mem_response);
 	pthread_mutex_lock(&fs_mutex);
+
+	can_check_programs = false;
 
 	port_con = config_get_int_value(config, PUERTO_PROG);
 	port_cpu = config_get_int_value(config, PUERTO_CPU);
@@ -1035,6 +1073,7 @@ void init_kernel(t_config* config) {
 		t_sem* sem = malloc(sizeof(t_sem));
 		sem->id = sem_ids_arr[i];
 		sem->value = atoi(sem_vals_arr[i]);
+		sem->init_value = atoi(sem_vals_arr[i]);
 		sem->blocked_pids = "[]";
 		list_add(sem_ids, sem);
 		i++;
@@ -1049,6 +1088,8 @@ void init_kernel(t_config* config) {
 		quantum = config_get_int_value(config, QUANTUM) - 1;
 	}
 
+	program_list = list_create();
+
 	p_counter = 0;
 	process_in_memory = 0;
 	planning_running = true;
@@ -1060,6 +1101,8 @@ void init_kernel(t_config* config) {
 	exit_queue = queue_create();
 
 	socket_pcb_list = list_create();
+
+	sem_pid_list = list_create();
 
 	cpu_list = list_create();
 
@@ -1257,6 +1300,7 @@ void show_syscalls(int pid) {
 void show_info(int pid) {
 	log_debug(logger, "show_info");
 	pcb* n_pcb = find_pcb_by_pid(pid);
+	if (n_pcb == NULL) return;
 	char* info = string_new();
 	string_append_with_format(&info, "PID: %d\n", n_pcb->pid);
 	string_append_with_format(&info, "\nRAFAGAS EJECUTADAS: %d", n_pcb->statistics.cycles);
@@ -1289,14 +1333,10 @@ void shared_vars_and_sems() {
 
 	printf("\nSEMS:\n");
 
-	pthread_mutex_lock(&sems_mutex);
-
 	for(i = 0; i < list_size(sem_ids); i++) {
 		t_sem* sem = list_get(sem_ids, i);
 		printf("\t%s = %d --> %s\n", sem->id, sem->value, sem->blocked_pids);
 	}
-
-	pthread_mutex_unlock(&sems_mutex);
 
 	wait_any_key();
 }
@@ -1324,6 +1364,27 @@ void do_show_file_table(char* sel) {
 	}
 }
 
+void check_new_list() {
+	if(queue_size(new_queue) > 0) {
+		pcb* new_pcb = queue_peek(new_queue);
+		int i;
+		for(i = 0; i < list_size(program_list); i++) {
+			t_program* program = list_get(program_list, i);
+			if(program->pid == new_pcb->pid) {
+				process_struct.socket = program->socket;
+				process_struct.pid = new_pcb->pid;
+				process_struct.state = new_pcb->state;
+				process_struct.list_pos = program->list_pos;
+
+				runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program->program);
+				list_remove(program_list, i);
+				break;
+			}
+		}
+	} else
+		can_check_programs = true;
+}
+
 void do_change_multiprogramming(char* sel) {
 	if (!strcmp(sel, "M")) {
 		char multi[255];
@@ -1332,6 +1393,9 @@ void do_change_multiprogramming(char* sel) {
 		strtok(multi, "\n");
 
 		multiprog = atoi(multi);
+
+		if (process_in_memory + 1 <= multiprog)
+			check_new_list();
 	}
 }
 
@@ -1349,18 +1413,23 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 }
 
 void remove_from_list_sems(int pid) {
-	pthread_mutex_lock(&sems_mutex);
-
 	int i, j;
 	for(i = 0; i < list_size(sem_ids); i++) {
+		pthread_mutex_lock(&sems_blocked_list);
 		t_sem* sem = list_get(sem_ids, i);
 		char** list_blocked_pids = string_get_string_as_array(sem->blocked_pids);
 		char* temp = string_new();
 
 		j = 0;
 		while(list_blocked_pids[j] != NULL) {
-			if(atoi(list_blocked_pids[j]) != pid)
-				string_append_with_format(&temp, "%s,", list_blocked_pids[j]);
+			if(atoi(list_blocked_pids[j]) != pid) {
+				pcb* p = find_pcb_by_pid(atoi(list_blocked_pids[j]));
+				if(p->state != EXIT_LIST)
+					string_append_with_format(&temp, "%s,", list_blocked_pids[j]);
+				else if(sem->value < sem->init_value)
+					sem->value++;
+			} else if(sem->value < sem->init_value)
+				sem->value++;
 
 			free(list_blocked_pids[j]);
 			j++;
@@ -1373,13 +1442,26 @@ void remove_from_list_sems(int pid) {
 		string_append_with_format(&sem->blocked_pids, "[%s]", temp);
 
 		free(list_blocked_pids);
-	}
+		pthread_mutex_unlock(&sems_blocked_list);
 
-	pthread_mutex_unlock(&sems_mutex);
+		pthread_mutex_lock(&sems_mutex);
+		int process = get_first(sem->blocked_pids);
+		if(process > -1) {
+			pcb* _pcb = find_pcb_by_pid(process);
+			if(_pcb->state == BLOCK_LIST) {
+				char* temp = remove_first(sem->blocked_pids);
+				sem->blocked_pids = string_new();
+				string_append(&sem->blocked_pids, temp);
+				move_to_list(_pcb, READY_LIST);
+				short_planning();
+			}
+		}
+		pthread_mutex_unlock(&sems_mutex);
+	}
 }
 
 void stop_process(int pid) {
-	log_debug(logger, "stop_process");
+	//log_debug(logger, "stop_process");
 	pcb* l_pcb = find_pcb_by_pid(pid);
 	if(l_pcb == NULL){
 		log_debug(logger, "stop_process doesnt exist pid %d", pid);
@@ -1387,7 +1469,7 @@ void stop_process(int pid) {
 	}
 
 	l_pcb->exit_code = FINALIZADO_KERNEL;
-
+	log_debug(logger, "stop_process: pid: '%d', state: '%d", pid, l_pcb->state);
 	if (l_pcb->state != EXEC_LIST) {
 		if(l_pcb->state == BLOCK_LIST)
 			remove_from_list_sems(l_pcb->pid);

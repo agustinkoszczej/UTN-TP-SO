@@ -191,7 +191,7 @@ void start_program(char* location) {
 	list_add(process_list, process);
 	pthread_mutex_unlock(&process_list_mutex);
 
-	runFunction(process->socket, "console_load_program", 1, buffer);
+	runFunction(process->socket, "console_load_program", 2, buffer, string_itoa(list_size(process_list) - 1));
 	log_debug(logger, "start_program: void");
 }
 
@@ -383,27 +383,23 @@ void init_console() {
 	message_map = dictionary_create();
 
 	dictionary_put(message_map, string_itoa(NO_ERRORES), "Successful exit.");
-	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), "Can not reserve resources.");
+	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), "Can't reserve resources.");
 	dictionary_put(message_map, string_itoa(ERROR_SIN_DEFINIR), "Unknown error.");
 	dictionary_put(message_map, string_itoa(DESCONEXION_CONSOLA), "Console disconnected.");
 	dictionary_put(message_map, string_itoa(FINALIZADO_CONSOLA), "Aborted by console.");
-
 	dictionary_put(message_map, string_itoa(FINALIZADO_KERNEL), "Aborted by kernel.");
-
 	dictionary_put(message_map, string_itoa(NO_EXISTE_ARCHIVO), "File does not exist.");
 	dictionary_put(message_map, string_itoa(LEER_SIN_PERMISOS), "File read denied.");
 	dictionary_put(message_map, string_itoa(ESCRIBIR_SIN_PERMISOS), "File write denied.");
 	dictionary_put(message_map, string_itoa(EXCEPCION_MEMORIA), "Memory exception.");
-	dictionary_put(message_map, string_itoa(RESERVAR_MAS_MEMORIA_TAMANIO_PAGINA), "Malloc overflow.");
-	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS), "Pages overflow.");
+	dictionary_put(message_map, string_itoa(RESERVAR_MAS_MEMORIA_TAMANIO_PAGINA), "Malloc exceeded page size.");
+	dictionary_put(message_map, string_itoa(NO_SE_PUEDEN_ASIGNAR_MAS_PAGINAS), "Can't reserve more pages.");
 	dictionary_put(message_map, string_itoa(STACK_OVERFLOW), "Stack overflow.");
 	dictionary_put(message_map, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE), "File not opened.");
-	dictionary_put(message_map, string_itoa(ERROR_LEER_ARCHIVO), "Won't read file.");
-	dictionary_put(message_map, string_itoa(ERROR_ESCRIBIR_ARCHIVO), "Won't write file.");
-	dictionary_put(message_map, string_itoa(ERROR_CREAR_ARCHIVO), "Won't create file.");
-
+	dictionary_put(message_map, string_itoa(ERROR_LEER_ARCHIVO), "Error reading file.");
+	dictionary_put(message_map, string_itoa(ERROR_ESCRIBIR_ARCHIVO), "Error writing file.");
+	dictionary_put(message_map, string_itoa(ERROR_CREAR_ARCHIVO), "Error creating file.");
 	dictionary_put(message_map, string_itoa(ERROR_SINTAXIS), "Syntax error in the Script.");
-
 	dictionary_put(message_map, string_itoa(ARCHIVO_ABIERTO_POR_OTROS), "Can't delete file in use.");
 
 	log_debug(logger, "init_console: void");

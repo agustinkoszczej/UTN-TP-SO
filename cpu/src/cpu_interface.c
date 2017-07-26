@@ -127,7 +127,11 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 		runFunction(kernel_socket, "cpu_has_quantum_changed", 0);
 		quantum_sleep = atoi(receive_dynamic_message(kernel_socket));
 
-		usleep(quantum_sleep * 1000);
+		//TODO sleeps
+		sleep(quantum_sleep / 1000); //v1.0
+		//usleep(quantum_sleep * 1000);	//v2.0
+		//nanosleep(quantum_sleep * 1000000); //v3.0 //work in progress xd
+
 		free(mem_buffer);
 	}
 

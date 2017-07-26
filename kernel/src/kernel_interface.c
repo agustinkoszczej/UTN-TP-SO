@@ -1,16 +1,10 @@
 #include "kernel_interface.h"
 
-/*
- * CONSOLE
- */
 void console_load_program(socket_connection* connection, char** args) {
 	log_debug(logger, "console_load_program");
+	pthread_mutex_lock(&console_mutex);
 	char* program = args[0];
-
-	if (process_in_memory + 1 > multiprog) {
-		runFunction(connection->socket, "kernel_response_load_program", 2, string_itoa(NO_SE_PUEDEN_RESERVAR_RECURSOS), string_itoa(-1));
-		return;
-	}
+	int list_pos = atoi(args[1]);
 
 	pcb* new_pcb = malloc(sizeof(pcb));
 
@@ -39,16 +33,6 @@ void console_load_program(socket_connection* connection, char** args) {
 	new_pcb->pc = metadata->instruccion_inicio;
 	int i;
 
-	/*if (metadata->cantidad_de_etiquetas + metadata->cantidad_de_funciones > 0) {
-	 char** labels = string_split(metadata->etiquetas, "\0");
-	 for (i = 0; i < metadata->cantidad_de_etiquetas + metadata->cantidad_de_funciones; i++) {
-	 char* label = labels[i];
-	 t_puntero_instruccion* instruction = malloc(sizeof(t_puntero_instruccion));
-	 *instruction = metadata_buscar_etiqueta(label, metadata->etiquetas, metadata->etiquetas_size); //aca rompia con Program3, por el cantidad_de_etiquetas
-	 dictionary_put(new_pcb->i_label, label, instruction);
-	 }
-	 }*/
-
 	char* label = string_new();
 	for (i = 0; i < metadata->etiquetas_size; i++) {
 		if (metadata->etiquetas[i] != '\0') {
@@ -71,8 +55,6 @@ void console_load_program(socket_connection* connection, char** args) {
 
 	metadata_destruir(metadata);
 
-	pthread_mutex_lock(&console_mutex);
-
 	pthread_mutex_lock(&pcb_list_mutex);
 	queue_push(new_queue, new_pcb);
 
@@ -82,11 +64,22 @@ void console_load_program(socket_connection* connection, char** args) {
 	socket_pcb->socket = connection->socket;
 	list_add(socket_pcb_list, socket_pcb);
 
-	process_struct.socket = connection->socket;
-	process_struct.pid = new_pcb->pid;
-	process_struct.state = new_pcb->state;
 	pthread_mutex_unlock(&pcb_list_mutex);
-	runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program);
+
+	pthread_mutex_lock(&program_list_mutex);
+	t_program* new_program = malloc(sizeof(t_program));
+	new_program->pid = new_pcb->pid;
+	new_program->list_pos = list_pos;
+	new_program->socket = connection->socket;
+	new_program->program = string_new();
+	new_program->program = string_from_format("%s", program);
+	list_add(program_list, new_program);
+	pthread_mutex_unlock(&program_list_mutex);
+
+	if (process_in_memory + 1 <= multiprog)
+		check_new_list();
+
+	pthread_mutex_unlock(&console_mutex);
 }
 void console_abort_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
@@ -95,8 +88,7 @@ void console_abort_program(socket_connection* connection, char** args) {
 	l_pcb->exit_code = FINALIZADO_CONSOLA;
 
 	if (l_pcb->state != EXEC_LIST) {
-		if(l_pcb->state == BLOCK_LIST)
-			remove_from_list_sems(l_pcb->pid);
+		remove_from_list_sems(l_pcb->pid);
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 		move_to_list(l_pcb, EXIT_LIST);
@@ -174,8 +166,10 @@ void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 }
 void cpu_task_finished(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_task_finished");
-	//printf("");
+
+	pthread_mutex_lock(&json_mutex);
 	pcb* n_pcb = string_to_pcb(args[0]);
+	pthread_mutex_unlock(&json_mutex);
 	bool finished = atoi(args[1]);
 	bool is_locked = atoi(args[2]);
 	bool is_abrupted = atoi(args[3]);
@@ -210,13 +204,13 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			move_to_list(n_pcb, EXIT_LIST);
 			substract_process_in_memory();
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
-			if (n_pcb->exit_code != FINALIZADO_CONSOLA || n_pcb->exit_code == FINALIZADO_KERNEL) {
+			if (n_pcb->exit_code != FINALIZADO_CONSOLA && n_pcb->exit_code != FINALIZADO_KERNEL) {
 				t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
 				runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(n_pcb->pid), string_itoa(n_pcb->exit_code));
 			}
 		}
 	} else {
-		if (n_pcb->exit_code != FINALIZADO_CONSOLA || n_pcb->exit_code == FINALIZADO_KERNEL) {
+		if (n_pcb->exit_code != FINALIZADO_CONSOLA && n_pcb->exit_code != FINALIZADO_KERNEL) {
 			move_to_list(o_pcb, READY_LIST);
 		} else {
 			int pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
@@ -231,9 +225,16 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 		pthread_mutex_unlock(&sems_mutex);
 
 	short_planning();
+
+	if (can_check_programs && process_in_memory + 1 <= multiprog) {
+		can_check_programs = false;
+		check_new_list();
+	}
 }
 
 char* add_blocked_process(char* blocked_pids, int process_pid) {
+	pthread_mutex_lock(&sems_blocked_list);
+
 	log_debug(logger, "add_blocked_process");
 	char** arr = string_get_string_as_array(blocked_pids);
 	char* res = string_new();
@@ -242,7 +243,24 @@ char* add_blocked_process(char* blocked_pids, int process_pid) {
 		string_append_with_format(&res, "%s,", arr[i++]);
 	string_append_with_format(&res, "%d]", process_pid);
 
+	pthread_mutex_unlock(&sems_blocked_list);
 	return string_from_format("[%s", res);
+}
+
+void add_sem_pid_list(char* id_sem, int pid) {
+	bool find_sem_pid(void* e) {
+		t_sem_pid* s = e;
+		return s->pid == pid && !strcmp(s->sem, id_sem);
+	}
+
+	t_sem_pid* f = list_find(sem_pid_list, &find_sem_pid);
+
+	if(f == NULL) {
+		t_sem_pid* sem_pid = malloc(sizeof(t_sem_pid));
+		sem_pid->pid = pid;
+		sem_pid->sem = string_from_format("%s", id_sem);
+		list_add(sem_pid_list, sem_pid);
+	}
 }
 
 void cpu_wait_sem(socket_connection* connection, char** args) {
@@ -282,6 +300,7 @@ void cpu_wait_sem(socket_connection* connection, char** args) {
 		send_dynamic_message(connection->socket, string_itoa(is_locked));
 		sem_curr->value--;
 	} else {
+		add_sem_pid_list(id_sem, process_pid);
 		send_dynamic_message(connection->socket, string_itoa(is_locked));
 		sem_curr->value--;
 		pthread_mutex_unlock(&sems_mutex);
@@ -302,6 +321,7 @@ int get_first(char* blocked_pids) {
 
 char* remove_first(char* blocked_pids) {
 	log_debug(logger, "remove_last");
+	pthread_mutex_lock(&sems_blocked_list);
 	char** arr = string_get_string_as_array(blocked_pids);
 	char* res = string_new();
 
@@ -313,6 +333,7 @@ char* remove_first(char* blocked_pids) {
 
 	if (string_length(res) > 0)
 		res = string_substring_until(res, string_length(res) - 1);
+	pthread_mutex_unlock(&sems_blocked_list);
 	return string_from_format("[%s]", res);
 }
 
@@ -389,7 +410,8 @@ void cpu_free(socket_connection* connection, char** args) {
 void cpu_validate_file(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_validate_file");
 	char* path = args[0];
-	bool validate = validate_file_from_fs(path);
+	int pid = atoi(args[1]);
+	bool validate = validate_file_from_fs(path, pid);
 
 	//runFunction(connection->socket, "kernel_response_validate_file", 1, string_itoa(validate));
 	send_dynamic_message(connection->socket, string_itoa(validate));
@@ -403,7 +425,7 @@ void cpu_open_file(socket_connection* connection, char** args) {
 	int pid = atoi(args[3]);
 
 	if (!validate && string_contains(flags, "c")) {
-		runFunction(fs_socket, "kernel_create_file", 1, path);
+		runFunction(fs_socket, "kernel_create_file", 2, path, string_itoa(pid));
 		wait_response(&fs_mutex);
 		if (fs_response == 0) {
 			send_dynamic_message(connection->socket, string_itoa(ERROR_CREAR_ARCHIVO));
@@ -431,7 +453,7 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 		return;
 	}
 
-	runFunction(fs_socket, "kernel_delete_file", 1, path);
+	runFunction(fs_socket, "kernel_delete_file", 2, path, string_itoa(pid));
 	wait_response(&fs_mutex);
 	if (fs_response == 0) {
 		//TODO aca llega cuando delete_file = false, que no se que significa del lado de FileSystem xd
@@ -511,7 +533,7 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	int offset = process->pointer;
 
 	if (is_allowed(pid, fd, flags)) {
-		runFunction(fs_socket, "kernel_get_data", 3, path, string_itoa(offset), string_itoa(size));
+		runFunction(fs_socket, "kernel_get_data", 4, path, string_itoa(offset), string_itoa(size), string_itoa(pid));
 		wait_response(&fs_mutex);
 		runFunction(mem_socket, "i_get_page_from_pointer", 1, string_itoa(direccion_variable));
 		wait_response(&mem_response);
@@ -570,8 +592,12 @@ void memory_response_start_program(socket_connection* connection, char** args) {
 		move_to_list(n_pcb, EXIT_LIST);
 	}
 
-	runFunction(process_struct.socket, "kernel_response_load_program", 2, string_itoa(response), string_itoa(p_counter));
-	pthread_mutex_unlock(&console_mutex);
+	runFunction(process_struct.socket, "kernel_response_load_program", 3, string_itoa(response), string_itoa(process_struct.pid), string_itoa(process_struct.list_pos));
+
+	if (process_in_memory + 1 <= multiprog)
+		check_new_list();
+	 else
+		can_check_programs = true;
 }
 void memory_page_size(socket_connection* connection, char** args) {
 	log_debug(logger, "memory_response_start_program");

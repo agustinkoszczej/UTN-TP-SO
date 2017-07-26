@@ -308,7 +308,10 @@ char* read_bytes(int pid, int page, int offset, int size) {
 			adm_table = list_find(adm_list, &find);
 		}
 		log_debug(logger, "read_bytes: mem_delay: '%d'", mem_delay);
-		usleep(mem_delay * 1000);
+		//TODO sleeps
+		sleep(mem_delay / 1000); //v1.0
+		//usleep(mem_delay * 1000); //v2.0
+		//nanosleep(mem_delay * 1000000); //v3.0 //work in progress xd
 	}
 
 	int start = frame_size * adm_table->frame + offset;
@@ -346,7 +349,10 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 			adm_table = list_find(adm_list, &find);
 		}
 		log_debug(logger, "store_bytes: mem_delay: '%d'", mem_delay);
-		usleep(mem_delay * 1000);
+		//TODO sleeps
+		sleep(mem_delay / 1000); //v1.0
+		//usleep(mem_delay * 1000); //v2.0
+		//nanosleep(mem_delay * 1000000); //v3.0 //work in progress xd
 	}
 
 	int start, end;
