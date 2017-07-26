@@ -87,8 +87,16 @@ void console_abort_program(socket_connection* connection, char** args) {
 	pcb* l_pcb = find_pcb_by_pid(pid);
 	l_pcb->exit_code = FINALIZADO_CONSOLA;
 
+	void free_heap(void* element) {
+		t_heap_manage* heap = element;
+		free(heap);
+	}
+
 	if (l_pcb->state != EXEC_LIST) {
 		remove_from_list_sems(l_pcb->pid);
+		int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, l_pcb->pid);
+		list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
+		close_all_files_by_pid(l_pcb->pid);
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 		move_to_list(l_pcb, EXIT_LIST);
