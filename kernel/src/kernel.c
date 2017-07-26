@@ -369,8 +369,9 @@ void move_to_list(pcb* pcb, int list_name) {
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
 
-	if(list_name == EXIT_LIST)
+	if(list_name == EXIT_LIST){
 		remove_sem_pid_list(pcb->pid);
+	}
 }
 
 /*
@@ -667,6 +668,16 @@ int write_file(int fd_write, int pid, char* info, int size) {
 	return ESCRIBIR_SIN_PERMISOS;
 }
 
+void close_all_files_by_pid(int pid){
+	int i;
+	t_process_file_table* process = get_process_file_by_pid(pid);
+	if (process == NULL) return;
+	int size = list_size(process->open_files);
+	for (i=3; i < size; i++){
+		close_file(i, pid);
+	}
+}
+
 void show_global_file_table() {
 	log_debug(logger, "show_global_file_table");
 	clear_screen();
@@ -880,7 +891,7 @@ int add_heap_page(int pid, t_heap_manage* heap_manage, int page, int space) {
 	HeapMetadata* heap = malloc(sizeof(HeapMetadata));
 	heap->isFree = true;
 	heap->size = mem_page_size - heap_metadata_size;
-	mem_read_buffer = string_repeat('#', mem_page_size); //TODO hago esto porque volé en memoria lo de settiar con hashtag por los putitos con su escribir
+	mem_read_buffer = string_repeat('#', mem_page_size);
 	write_HeapMetadata(heap, 0, mem_read_buffer);
 	//free(heap);
 	it_fits_malloc(mem_read_buffer, space);

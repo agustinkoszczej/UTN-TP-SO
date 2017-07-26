@@ -165,15 +165,6 @@ typedef struct {
 
 int heap_metadata_size;
 
-/*
- typedef struct {
- int socket;
- //	char* program;
- //	pthread_t thread_info;
- pcb* pcb;
- } t_program;
- */
-//int last_socket;
 typedef struct {
 	bool busy;
 	int socket;
@@ -191,7 +182,7 @@ typedef struct {
 	int socket;
 	int pid;
 	int state;
-	int list_pos
+	int list_pos;
 } t_socket_pcb_ext;
 
 t_socket_pcb_ext process_struct;
@@ -272,6 +263,8 @@ bool set_pointer(int n_pointer, int fd, int pid);
 t_open_file* get_open_file_by_fd_and_pid(int fd, int pid);
 char* get_path_by_gfd(int gfd);
 int add_file_in_global_table(char* path);
+
+void close_all_files_by_pid(int pid);
 
 //SHOWS
 void show_global_file_table();
