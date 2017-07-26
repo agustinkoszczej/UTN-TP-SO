@@ -233,6 +233,19 @@ void remove_sem_pid_list(int pid) {
 
 				if(strcmp(sem->id, sem_pid->sem) == 0 && sem->value < sem->init_value)
 					sem->value++;
+				if(strcmp(sem->id, sem_pid->sem) == 0) {
+					int process = get_first(sem->blocked_pids);
+					if(process > -1) {
+						pcb* _pcb = find_pcb_by_pid(process);
+						if(_pcb->state == BLOCK_LIST) {
+							char* temp = remove_first(sem->blocked_pids);
+							sem->blocked_pids = string_new();
+							string_append(&sem->blocked_pids, temp);
+							move_to_list(_pcb, READY_LIST);
+							short_planning();
+						}
+					}
+				}
 			}
 
 			list_remove(sem_pid_list, i);
@@ -297,7 +310,6 @@ void move_to_list(pcb* pcb, int list_name) {
 			break;
 		case EXIT_LIST:
 			queue_push(exit_queue, pcb);
-			remove_sem_pid_list(pcb->pid);
 			break;
 	}
 	pcb->state = list_name;
@@ -311,6 +323,9 @@ void move_to_list(pcb* pcb, int list_name) {
 		}
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
+
+	if(list_name == EXIT_LIST)
+		remove_sem_pid_list(pcb->pid);
 }
 
 /*
@@ -1374,10 +1389,9 @@ t_socket_pcb* find_socket_by_pid(int pid) {
 }
 
 void remove_from_list_sems(int pid) {
-	pthread_mutex_lock(&sems_blocked_list);
-
 	int i, j;
 	for(i = 0; i < list_size(sem_ids); i++) {
+		pthread_mutex_lock(&sems_blocked_list);
 		t_sem* sem = list_get(sem_ids, i);
 		char** list_blocked_pids = string_get_string_as_array(sem->blocked_pids);
 		char* temp = string_new();
@@ -1404,9 +1418,22 @@ void remove_from_list_sems(int pid) {
 		string_append_with_format(&sem->blocked_pids, "[%s]", temp);
 
 		free(list_blocked_pids);
-	}
+		pthread_mutex_unlock(&sems_blocked_list);
 
-	pthread_mutex_unlock(&sems_blocked_list);
+		pthread_mutex_lock(&sems_mutex);
+		int process = get_first(sem->blocked_pids);
+		if(process > -1) {
+			pcb* _pcb = find_pcb_by_pid(process);
+			if(_pcb->state == BLOCK_LIST) {
+				char* temp = remove_first(sem->blocked_pids);
+				sem->blocked_pids = string_new();
+				string_append(&sem->blocked_pids, temp);
+				move_to_list(_pcb, READY_LIST);
+				short_planning();
+			}
+		}
+		pthread_mutex_unlock(&sems_mutex);
+	}
 }
 
 void stop_process(int pid) {
