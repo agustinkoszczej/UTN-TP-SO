@@ -1372,6 +1372,9 @@ void do_change_multiprogramming(char* sel) {
 		strtok(multi, "\n");
 
 		multiprog = atoi(multi);
+
+		if (process_in_memory + 1 <= multiprog)
+			check_new_list();
 	}
 }
 
