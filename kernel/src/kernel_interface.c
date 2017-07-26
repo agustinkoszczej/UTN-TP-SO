@@ -1,26 +1,5 @@
 #include "kernel_interface.h"
 
-void check_new_list() {
-	if(queue_size(new_queue) > 0) {
-		pcb* new_pcb = queue_peek(new_queue);
-		int i;
-		for(i = 0; i < list_size(program_list); i++) {
-			t_program* program = list_get(program_list, i);
-			if(program->pid == new_pcb->pid) {
-				process_struct.socket = program->socket;
-				process_struct.pid = new_pcb->pid;
-				process_struct.state = new_pcb->state;
-				process_struct.list_pos = program->list_pos;
-
-				runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program->program);
-				list_remove(program_list, i);
-				break;
-			}
-		}
-	} else
-		can_check_programs = true;
-}
-
 void console_load_program(socket_connection* connection, char** args) {
 	log_debug(logger, "console_load_program");
 	pthread_mutex_lock(&console_mutex);
@@ -88,7 +67,7 @@ void console_load_program(socket_connection* connection, char** args) {
 	pthread_mutex_unlock(&pcb_list_mutex);
 
 	pthread_mutex_lock(&program_list_mutex);
-	t_program* new_program = malloc(sizeof(new_program));
+	t_program* new_program = malloc(sizeof(t_program));
 	new_program->pid = new_pcb->pid;
 	new_program->list_pos = list_pos;
 	new_program->socket = connection->socket;
@@ -187,8 +166,10 @@ void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 }
 void cpu_task_finished(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_task_finished");
-	//printf("");
+
+	pthread_mutex_lock(&json_mutex);
 	pcb* n_pcb = string_to_pcb(args[0]);
+	pthread_mutex_unlock(&json_mutex);
 	bool finished = atoi(args[1]);
 	bool is_locked = atoi(args[2]);
 	bool is_abrupted = atoi(args[3]);

@@ -95,6 +95,7 @@ pcb* string_to_pcb(char* str) {
 		list_add(n_pcb->i_stack, stack);
 	}
 
+	cJSON_Delete(root);
 	return n_pcb;
 }
 
@@ -199,5 +200,8 @@ char* pcb_to_string(pcb* n_pcb) {
 		cJSON_AddItemToObject(root, "i_stack", stack_arr);
 	}
 
-	return cJSON_Print(root);
+	char* result = cJSON_Print(root);
+	cJSON_Delete(root);
+
+	return result;
 }

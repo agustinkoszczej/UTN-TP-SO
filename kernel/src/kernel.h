@@ -216,6 +216,7 @@ pthread_mutex_t abort_console_mutex;
 pthread_mutex_t sem_pid_mutex;
 pthread_mutex_t sems_blocked_list;
 pthread_mutex_t program_list_mutex;
+pthread_mutex_t json_mutex;
 
 pthread_mutex_t mem_response;
 
@@ -251,6 +252,7 @@ int malloc_memory(int pid, int size);
 void free_memory(int pid, int pointer);
 
 void remove_from_list_sems(int pid);
+void check_new_list();
 
 /*
  * FILESYSTEM

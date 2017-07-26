@@ -42,7 +42,9 @@ void short_planning() {
 		free_cpu->busy = true;
 		free_cpu->xpid = _pcb->pid;
 
+		pthread_mutex_lock(&json_mutex);
 		char* pcb_string = pcb_to_string(_pcb);
+		pthread_mutex_unlock(&json_mutex);
 
 		config_destroy(config);
 		config = malloc(sizeof(t_config));
@@ -131,7 +133,6 @@ pcb* find_pcb_by_pid(int pid) {
 		pthread_mutex_unlock(&pcb_list_mutex);
 		return NULL;
 	}
-	log_debug(logger, "find_pcb_by_pid: socket_pcb->pid: '%d', socket_pcb->socket: '%d', socket_pcb->state: '%d'", socket_pcb->pid, socket_pcb->socket, socket_pcb->state);
 
 	int pos;
 	pcb* n_pcb = malloc(sizeof(pcb));
@@ -266,8 +267,6 @@ void move_to_list(pcb* pcb, int list_name) {
 	t_socket_pcb* p = list_find(socket_pcb_list, &find_pcb);
 	if(p != NULL && p->state != pcb->state)
 		pcb->state = p->state;
-
-	log_debug(logger, "move_to_list pid: %d, from %d to %d -> [NEW_LIST = 1, READY_LIST = 2, EXEC_LIST = 3, BLOCK_LIST = 4, EXIT_LIST = 5]", pcb->pid, pcb->state, list_name);
 
 	if (pcb->state == list_name){
 		pthread_mutex_unlock(&pcb_list_mutex);
@@ -1039,6 +1038,7 @@ void init_kernel(t_config* config) {
 	pthread_mutex_init(&sem_pid_mutex, NULL);
 	pthread_mutex_init(&sems_blocked_list, NULL);
 	pthread_mutex_init(&program_list_mutex, NULL);
+	pthread_mutex_init(&json_mutex, NULL);
 
 	pthread_mutex_init(&mem_response, NULL);
 	pthread_mutex_init(&fs_mutex, NULL);
@@ -1362,6 +1362,27 @@ void do_show_file_table(char* sel) {
 	if (!strcmp(sel, "F")) {
 		show_global_file_table();
 	}
+}
+
+void check_new_list() {
+	if(queue_size(new_queue) > 0) {
+		pcb* new_pcb = queue_peek(new_queue);
+		int i;
+		for(i = 0; i < list_size(program_list); i++) {
+			t_program* program = list_get(program_list, i);
+			if(program->pid == new_pcb->pid) {
+				process_struct.socket = program->socket;
+				process_struct.pid = new_pcb->pid;
+				process_struct.state = new_pcb->state;
+				process_struct.list_pos = program->list_pos;
+
+				runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program->program);
+				list_remove(program_list, i);
+				break;
+			}
+		}
+	} else
+		can_check_programs = true;
 }
 
 void do_change_multiprogramming(char* sel) {
