@@ -104,7 +104,7 @@ t_puntero cpu_obtenerPosicionVariable(t_nombre_variable identificador_variable) 
 		}
 	}
 
-	//TODO me llega aca cuando aparece una variable tipo puntero como pasa con *a, no me la detecta
+	log_debug(logger, "cpu_obtenerPosicionVariable: no existe la variable");
 	pcb_actual->exit_code = ERROR_SIN_DEFINIR;
 	cpu_finalizar();
 
