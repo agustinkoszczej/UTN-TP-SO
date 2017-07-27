@@ -536,11 +536,11 @@ int remove_open_file_by_fd_and_pid(int fd, int pid) {
 	log_debug(logger, "remove_open_file_by_fd_and_pid");
 	t_process_file_table* files = get_process_file_by_pid(pid);
 	if (files == NULL)
-		return -1; //El proceso no abrio nunca un archivo
+		return ARCHIVO_SIN_ABRIR_PREVIAMENTE; //El proceso no abrio nunca un archivo
 
 	int pos = get_pos_open_file_by_fd(files->open_files, fd);
 	if (pos == -1)
-		return -1; // El proceso no tiene ese fd asignado
+		return ARCHIVO_SIN_ABRIR_PREVIAMENTE; // El proceso no tiene ese fd asignado
 
 	t_open_file* file_to_remove = list_get(files->open_files, pos);
 	int gfd = file_to_remove->gfd;
@@ -555,17 +555,17 @@ int remove_open_file_by_fd_and_pid(int fd, int pid) {
 	return gfd;
 }
 
-bool close_file(int fd_close, int pid) {
+int close_file(int fd_close, int pid) {
 	log_debug(logger, "close_file");
 	if (is_default(fd_close))
-		return false;
+		return NO_EXISTE_ARCHIVO;
 
 	int gfd = remove_open_file_by_fd_and_pid(fd_close, pid);
 
 	t_global_file_table* global_file_to_decrement = get_global_file_by_gfd(gfd);
 
 	if (global_file_to_decrement == NULL)
-		return false;
+		return NO_EXISTE_ARCHIVO;
 
 	global_file_to_decrement->open--;
 
@@ -576,7 +576,7 @@ bool close_file(int fd_close, int pid) {
 	else
 		list_replace(fs_global_table, pos_gfd, global_file_to_decrement);
 
-	return true;
+	return NO_ERRORES;
 }
 
 int delete_file_from_global_table(int gfd) {

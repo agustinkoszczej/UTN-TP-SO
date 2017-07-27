@@ -482,16 +482,8 @@ void cpu_close_file(socket_connection* connection, char** args) {
 	int fd_close = atoi(args[0]);
 	int pid = atoi(args[1]);
 
-	bool result = close_file(fd_close, pid);
-	if (result) {
-		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd_close));
-		send_dynamic_message(connection->socket, string_itoa(fd_close));
-		return;
-	}
-
-	send_dynamic_message(connection->socket, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
-	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
-
+	int result = close_file(fd_close, pid);
+	send_dynamic_message(connection->socket, string_itoa(result));
 }
 
 void cpu_seek_file(socket_connection* connection, char** args) {
