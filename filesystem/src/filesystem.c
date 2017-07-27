@@ -45,7 +45,7 @@ bool add_blocks_if_needed(char* path, int offset, int size) {
 
 	char** blocks_arr = config_get_array_value(config_file, BLOQUES);
 
-	int end_block = (offset + size) / block_size;
+	int end_block = ceil((double) (offset + size) / (double) block_size) - 1;
 
 	int asigned_blocks = 0;
 	while (blocks_arr[asigned_blocks] != NULL)
@@ -142,7 +142,7 @@ bool save_data(char* path, int offset, int size, char* buffer) {
 
 	int written_chars = len;
 					//TODO deberia ser <= ?
-	while (start_block < end_block && blocks_arr[start_block] != NULL) { //TODO aca?
+	while (start_block <= end_block && blocks_arr[start_block] != NULL) { //TODO aca?
 		int b_len = (size > block_size) ? block_size : size;
 
 		write_block(atoi(blocks_arr[start_block]), 0, b_len, string_substring(buffer, written_chars, b_len));
