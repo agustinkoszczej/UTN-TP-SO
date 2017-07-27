@@ -589,7 +589,7 @@ int delete_file_from_global_table(int gfd) {
 	else if (g_file->open > 1)
 		return ARCHIVO_ABIERTO_POR_OTROS;
 
-	list_remove_and_destroy_element(fs_global_table, pos, &free); // lo borro de la global
+	//list_remove_and_destroy_element(fs_global_table, pos, &free); // lo borro de la global
 
 	return NO_ERRORES;
 }
