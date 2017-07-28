@@ -170,6 +170,7 @@ void cpu_asignar(t_puntero direccion_variable, t_valor_variable valor) {
 			buffer[i] = '#';
 		}
 	}
+	buffer[i] = '\0';
 	//char* size = string_itoa(string_length(buffer));
 
 	runFunction(mem_socket, "i_store_bytes_in_page", 5, pid, page, offset, size, buffer);
