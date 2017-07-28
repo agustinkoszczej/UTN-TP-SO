@@ -990,21 +990,25 @@ void signal_response(pthread_mutex_t* mutex) {
 	pthread_mutex_unlock(mutex);
 }
 
-void remove_program_code_by_pid(int pid){
+bool remove_program_code_by_pid(int pid){
 	log_debug(logger, "remove_program_code_by_pid: start");
 	void free_program(void* element) {
 		t_program* program = element;
 			free(program);
 	}
+	bool result = false;
 	int i;
 	for(i = 0; i < list_size(program_list); i++) {
-			t_program* program = list_get(program_list, i);
-			if(program->pid == pid) {
-				list_remove_and_destroy_element(program_list, i, &free_program);
-				break;
-			}
+		t_program* program = list_get(program_list, i);
+		if(program->pid == pid) {
+			list_remove_and_destroy_element(program_list, i, &free_program);
+			result = true;
+			break;
+		}
 	}
 	log_debug(logger, "remove_program_code_by_pid: end");
+
+	return result;
 }
 
 void create_function_dictionary() {

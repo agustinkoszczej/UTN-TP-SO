@@ -35,6 +35,7 @@ typedef struct {
 	char* name;
 	char* time_start;
 	char* time_finish;
+	bool loaded;
 } t_process;
 
 typedef struct {

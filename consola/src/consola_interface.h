@@ -16,6 +16,7 @@ int port;
 
 void server_connectionClosed(socket_connection * connection);
 void kernel_print_message(socket_connection * connection, char ** args);
+void kernel_response_pid(socket_connection* connection, char** args);
 void kernel_response_load_program(socket_connection * connection, char ** args);
 void kernel_stop_process(socket_connection* connection, char** args);
 

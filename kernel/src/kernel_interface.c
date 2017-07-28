@@ -76,6 +76,9 @@ void console_load_program(socket_connection* connection, char** args) {
 	list_add(program_list, new_program);
 	pthread_mutex_unlock(&program_list_mutex);
 
+	runFunction(connection->socket, "kernel_response_pid", 2, string_itoa(new_pcb->pid), string_itoa(list_pos));
+	receive_dynamic_message(connection->socket);
+
 	if (process_in_memory + 1 <= multiprog)
 		check_new_list();
 
@@ -83,7 +86,6 @@ void console_load_program(socket_connection* connection, char** args) {
 }
 void console_abort_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
-	bool closed_console = atoi(args[1]);
 
 	pthread_mutex_lock(&abort_console_mutex);
 	pcb* l_pcb = find_pcb_by_pid(pid);
@@ -97,10 +99,12 @@ void console_abort_program(socket_connection* connection, char** args) {
 	if (l_pcb->state != EXEC_LIST) {
 		remove_from_list_sems(l_pcb->pid);
 		int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, l_pcb->pid);
-		list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
+		if(heap_pos >= 0)
+			list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
 		close_all_files_by_pid(l_pcb->pid);
-		remove_program_code_by_pid(l_pcb->pid);
-		substract_process_in_memory();
+		bool not_loaded = remove_program_code_by_pid(l_pcb->pid);
+		if(!not_loaded)
+			substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 		move_to_list(l_pcb, EXIT_LIST);
 	}
@@ -204,21 +208,25 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 	if (finished) {
 		if (n_pcb->exit_code == FINALIZADO_CONSOLA || n_pcb->exit_code == FINALIZADO_KERNEL) {
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
-			list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
+			if(heap_pos >= 0)
+				list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
 			close_all_files_by_pid(n_pcb->pid);
-			remove_program_code_by_pid(n_pcb->pid);
+			bool not_loaded = remove_program_code_by_pid(n_pcb->pid);
+			if(!not_loaded)
+				substract_process_in_memory();
 			move_to_list(o_pcb, EXIT_LIST);
-			substract_process_in_memory();
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 		} else if (is_locked) {
 			move_to_list(o_pcb, BLOCK_LIST);
 		} else {
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
-			list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
+			if(heap_pos >= 0)
+				list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
 			close_all_files_by_pid(n_pcb->pid);
-			remove_program_code_by_pid(n_pcb->pid);
+			bool not_loaded = remove_program_code_by_pid(n_pcb->pid);
+			if(!not_loaded)
+				substract_process_in_memory();
 			move_to_list(n_pcb, EXIT_LIST);
-			substract_process_in_memory();
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 			if (n_pcb->exit_code != FINALIZADO_CONSOLA && n_pcb->exit_code != FINALIZADO_KERNEL) {
 				t_socket_pcb* socket_pcb = find_socket_by_pid(n_pcb->pid);
@@ -230,11 +238,13 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			move_to_list(o_pcb, READY_LIST);
 		} else {
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
-			list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
+			if(heap_pos >= 0)
+				list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
 			close_all_files_by_pid(n_pcb->pid);
-			remove_program_code_by_pid(n_pcb->pid);
+			bool not_loaded = remove_program_code_by_pid(n_pcb->pid);
+			if(!not_loaded)
+				substract_process_in_memory();
 			move_to_list(o_pcb, EXIT_LIST);
-			substract_process_in_memory();
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 		}
 	}
@@ -481,7 +491,6 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 	runFunction(fs_socket, "kernel_delete_file", 2, path, string_itoa(pid));
 	wait_response(&fs_mutex);
 	if (fs_response == 0) {
-		//TODO aca llega cuando delete_file = false, que no se que significa del lado de FileSystem xd
 		log_debug(logger, "Error de cpu_delete_file que nunca deberia llegar");
 		send_dynamic_message(connection->socket, string_itoa(ERROR_SIN_DEFINIR));
 		pthread_mutex_unlock(&fs_request_mutex);

@@ -31,6 +31,16 @@ void kernel_print_message(socket_connection* connection, char** args) {
 	}
 }
 
+void kernel_response_pid(socket_connection* connection, char** args) {
+	int pid = atoi(args[0]);
+	int list_pos = atoi(args[1]);
+
+	t_process* process = list_get(process_list, list_pos);
+	process->pid = pid;
+
+	send_dynamic_message(connection->socket, "");
+}
+
 void kernel_response_load_program(socket_connection* connection, char** args) {
 	int response = atoi(args[0]);
 	int pid = atoi(args[1]);
@@ -44,6 +54,7 @@ void kernel_response_load_program(socket_connection* connection, char** args) {
 		p_counter++;
 		pthread_mutex_unlock(&p_counter_mutex);
 
+		process->loaded = true;
 		process->pid = pid;
 		char* time_start = temporal_get_string_time();
 		process->time_start = malloc(string_length(time_start));

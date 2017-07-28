@@ -146,6 +146,7 @@ void create_function_dictionary() {
 	fns = dictionary_create();
 
 	dictionary_put(fns, "kernel_print_message", &kernel_print_message);
+	dictionary_put(fns, "kernel_response_pid", &kernel_response_pid);
 	dictionary_put(fns, "kernel_response_load_program", &kernel_response_load_program);
 	dictionary_put(fns, "kernel_stop_process", &kernel_stop_process);
 
@@ -171,6 +172,8 @@ void start_program(char* location) {
 
 	process->c_message = 0;
 	process->pid = -1;
+
+	process->loaded = false;
 
 	if ((process->socket = connectServer(ip, port, fns, &server_connectionClosed, NULL)) == -1) {
 		log_error(logger, "Error at connecting to KERNEL. IP = %s, Port = %d.", ip, port);
@@ -206,13 +209,12 @@ void ask_option(char *sel) {
 }
 void disconnect_console(){
 	int i;
-	bool closed_console = false;
 	for (i = 0; i < list_size(process_list); i++) {
 	pthread_mutex_lock(&process_list_mutex);
 	t_process* process = list_get(process_list, i);
 	pthread_mutex_unlock(&process_list_mutex);
 	if (process->pid >= 0) {
-			runFunction(process->socket, "console_abort_program", 2, string_itoa(process->pid), string_itoa(closed_console));
+			runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
 			abort_program(process, FINALIZADO_CONSOLA);
 		}
 	}
@@ -221,7 +223,6 @@ void disconnect_console(){
 void exit_console(){
 	log_debug(logger, "exit_console");
 	int i;
-	bool closed_console = true;
 
 	pthread_mutex_lock(&kill_console_mutex);
 	for (i = 0; i < list_size(process_list); i++) {
@@ -229,7 +230,7 @@ void exit_console(){
 	t_process* process = list_get(process_list, i);
 	pthread_mutex_unlock(&process_list_mutex);
 	if (process->pid >= 0) {
-			runFunction(process->socket, "console_abort_program", 2, string_itoa(process->pid), string_itoa(closed_console));
+			runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
 			//abort_program(process, FINALIZADO_CONSOLA);
 		}
 	}
@@ -298,7 +299,7 @@ void abort_program(t_process* process, int exit_code) {
 
 	new_message(dictionary_get(message_map, string_itoa(exit_code)), process->pid);
 
-	if (process->pid > 0) {
+	if (process->pid > 0 && process->loaded) {
 		pthread_mutex_lock(&p_counter_mutex);
 		p_counter--;
 		pthread_mutex_unlock(&p_counter_mutex);
@@ -322,7 +323,6 @@ void abort_program(t_process* process, int exit_code) {
 
 void do_abort_program(char* sel) {
 	log_debug(logger, "do_abort_program: sel=%s", sel);
-	bool closed_console = false;
 
 	if (!strcmp(sel, "A")) {
 		char pid[255];
@@ -343,7 +343,7 @@ void do_abort_program(char* sel) {
 			pthread_mutex_unlock(&process_list_mutex);
 
 			if (!strcmp(string_itoa(process->pid), pid)) {
-				runFunction(process->socket, "console_abort_program", 2, string_itoa(process->pid), string_itoa(closed_console));
+				runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
 				abort_program(process, FINALIZADO_CONSOLA);
 				break;
 			}
