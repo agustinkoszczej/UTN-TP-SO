@@ -286,7 +286,6 @@ void store_in_cache(t_adm_table* n_adm_table) {
 }
 
 char* read_bytes(int pid, int page, int offset, int size) {
-	pthread_mutex_lock(&frames_mutex);
 	bool find(void* element) {
 		t_adm_table* adm_table = element;
 		return adm_table->pag == page && adm_table->pid == pid;
@@ -313,21 +312,23 @@ char* read_bytes(int pid, int page, int offset, int size) {
 		//usleep(mem_delay * 1000); //v2.0
 		//nanosleep(mem_delay * 1000000); //v3.0 //work in progress xd
 	}
-
+	pthread_mutex_lock(&frames_mutex);
+	char* buffer;
+	if (adm_table != NULL) {
 	int start = frame_size * adm_table->frame + offset;
-	char* buffer = string_substring(frames, start, size);
-
-	pthread_mutex_unlock(&frames_mutex);
+	buffer = string_substring(frames, start, size);
 
 	if (!is_cache && cache_size != 0) {
 		store_in_cache(adm_table);
 		//store_bytes_cache(pid, page, offset, size, buffer);
 	}
+	pthread_mutex_unlock(&frames_mutex);
+	}
 	return buffer;
 }
 
 int store_bytes(int pid, int page, int offset, int size, char* buffer) {
-	pthread_mutex_lock(&frames_mutex);
+
 	bool find(void* element) {
 		t_adm_table* adm_table = element;
 		return adm_table->pag == page && adm_table->pid == pid;
@@ -354,7 +355,7 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 		//usleep(mem_delay * 1000); //v2.0
 		//nanosleep(mem_delay * 1000000); //v3.0 //work in progress xd
 	}
-
+	pthread_mutex_lock(&frames_mutex);
 	int start, end;
 	if (adm_table != NULL) {
 		start = frame_size * adm_table->frame + offset;
@@ -368,11 +369,12 @@ int store_bytes(int pid, int page, int offset, int size, char* buffer) {
 				frames[i] = buffer[b];
 			b++;
 		}
-		pthread_mutex_unlock(&frames_mutex);
+
 		if (!is_cache && cache_size != 0) {
 			store_in_cache(adm_table);
 			//store_bytes_cache(pid, page, offset, size, buffer);
 		}
+		pthread_mutex_unlock(&frames_mutex);
 	}
 	return start;
 }

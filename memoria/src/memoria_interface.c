@@ -31,7 +31,7 @@ void i_start_program(socket_connection* connection, char** args) {
 	pthread_mutex_unlock(&mem_mutex);
 }
 void i_read_bytes_from_page(socket_connection* connection, char** args) {
-	pthread_mutex_lock(&mem_mutex);
+	//pthread_mutex_lock(&mem_mutex);
 	int pid = atoi(args[0]);
 	int page = atoi(args[1]);
 	int offset = atoi(args[2]);
@@ -42,10 +42,10 @@ void i_read_bytes_from_page(socket_connection* connection, char** args) {
 
 	runFunction(connection->socket, "memory_response_read_bytes_from_page", 1, buffer);
 	log_debug(logger, "memory_response_read_bytes_from_page: socket: '%d', pid: '%d', page: '%d', offset_rel: '%d', size: '%d', buffer: '%s'", connection->socket, pid, page, offset, size, buffer);
-	pthread_mutex_unlock(&mem_mutex);
+	//pthread_mutex_unlock(&mem_mutex);
 }
 void i_store_bytes_in_page(socket_connection* connection, char** args) {
-	pthread_mutex_lock(&mem_mutex);
+	//pthread_mutex_lock(&mem_mutex);
 	int pid = atoi(args[0]);
 	int page = atoi(args[1]);
 	int offset = atoi(args[2]);
@@ -59,7 +59,7 @@ void i_store_bytes_in_page(socket_connection* connection, char** args) {
 	log_debug(logger, "i_store_bytes_in_page: socket: '%d', pid: '%d', page: '%d', offset_rel: '%d', offset_abs: '%d', size: '%d'\nbuffer: '%s'", connection->socket, pid, page, offset, offset_abs, size, buffer);
 	free(response1);
 	free(response2);
-	pthread_mutex_unlock(&mem_mutex);
+	//pthread_mutex_unlock(&mem_mutex);
 }
 void i_add_pages_to_program(socket_connection* connection, char** args) {
 	pthread_mutex_lock(&mem_mutex);
