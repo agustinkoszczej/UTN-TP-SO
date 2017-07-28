@@ -314,7 +314,7 @@ char* read_bytes(int pid, int page, int offset, int size) {
 	}
 	pthread_mutex_lock(&frames_mutex);
 	char* buffer;
-	if (adm_table != NULL) {
+	if (adm_table == NULL) {
 	int start = frame_size * adm_table->frame + offset;
 	buffer = string_substring(frames, start, size);
 
