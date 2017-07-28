@@ -245,6 +245,7 @@ void free_memory(int pid, int pointer);
 
 void remove_from_list_sems(int pid);
 void check_new_list();
+void remove_program_code_by_pid(int pid);
 
 /*
  * FILESYSTEM

@@ -83,6 +83,8 @@ void console_load_program(socket_connection* connection, char** args) {
 }
 void console_abort_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
+	bool closed_console = atoi(args[1]);
+
 	pthread_mutex_lock(&abort_console_mutex);
 	pcb* l_pcb = find_pcb_by_pid(pid);
 	l_pcb->exit_code = FINALIZADO_CONSOLA;
@@ -97,10 +99,12 @@ void console_abort_program(socket_connection* connection, char** args) {
 		int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, l_pcb->pid);
 		list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
 		close_all_files_by_pid(l_pcb->pid);
+		remove_program_code_by_pid(l_pcb->pid);
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 		move_to_list(l_pcb, EXIT_LIST);
 	}
+
 	pthread_mutex_unlock(&abort_console_mutex);
 }
 
@@ -202,6 +206,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
 			list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
 			close_all_files_by_pid(n_pcb->pid);
+			remove_program_code_by_pid(n_pcb->pid);
 			move_to_list(o_pcb, EXIT_LIST);
 			substract_process_in_memory();
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
@@ -211,6 +216,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
 			list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
 			close_all_files_by_pid(n_pcb->pid);
+			remove_program_code_by_pid(n_pcb->pid);
 			move_to_list(n_pcb, EXIT_LIST);
 			substract_process_in_memory();
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
@@ -226,6 +232,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
 			list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
 			close_all_files_by_pid(n_pcb->pid);
+			remove_program_code_by_pid(n_pcb->pid);
 			move_to_list(o_pcb, EXIT_LIST);
 			substract_process_in_memory();
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));

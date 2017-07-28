@@ -104,7 +104,7 @@ t_puntero cpu_obtenerPosicionVariable(t_nombre_variable identificador_variable) 
 		}
 	}
 
-	log_debug(logger, "cpu_obtenerPosicionVariable: no existe la variable");
+	log_debug(logger, "|PRIMITIVA| Obtener Posicion Variable: No existe la variable '%c'", identificador_variable);
 	pcb_actual->exit_code = ERROR_SIN_DEFINIR;
 	cpu_finalizar();
 

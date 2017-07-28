@@ -990,6 +990,23 @@ void signal_response(pthread_mutex_t* mutex) {
 	pthread_mutex_unlock(mutex);
 }
 
+void remove_program_code_by_pid(int pid){
+	log_debug(logger, "remove_program_code_by_pid: start");
+	void free_program(void* element) {
+		t_program* program = element;
+			free(program);
+	}
+	int i;
+	for(i = 0; i < list_size(program_list); i++) {
+			t_program* program = list_get(program_list, i);
+			if(program->pid == pid) {
+				list_remove_and_destroy_element(program_list, i, &free_program);
+				break;
+			}
+	}
+	log_debug(logger, "remove_program_code_by_pid: end");
+}
+
 void create_function_dictionary() {
 	log_debug(logger, "create_function_dictionary");
 	fns = dictionary_create();
@@ -1423,6 +1440,10 @@ void do_show_file_table(char* sel) {
 }
 
 void check_new_list() {
+	void free_program(void* element) {
+			t_program* program = element;
+			free(program);
+	}
 	if(queue_size(new_queue) > 0) {
 		pcb* new_pcb = queue_peek(new_queue);
 		int i;
@@ -1435,7 +1456,7 @@ void check_new_list() {
 				process_struct.list_pos = program->list_pos;
 
 				runFunction(mem_socket, "i_start_program", 2, string_itoa(new_pcb->pid), program->program);
-				list_remove(program_list, i);
+				list_remove_and_destroy_element(program_list, i, &free_program);
 				break;
 			}
 		}

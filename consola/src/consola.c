@@ -206,12 +206,13 @@ void ask_option(char *sel) {
 }
 void disconnect_console(){
 	int i;
+	bool closed_console = false;
 	for (i = 0; i < list_size(process_list); i++) {
 	pthread_mutex_lock(&process_list_mutex);
 	t_process* process = list_get(process_list, i);
 	pthread_mutex_unlock(&process_list_mutex);
 	if (process->pid >= 0) {
-			runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
+			runFunction(process->socket, "console_abort_program", 2, string_itoa(process->pid), string_itoa(closed_console));
 			abort_program(process, FINALIZADO_CONSOLA);
 		}
 	}
@@ -219,12 +220,13 @@ void disconnect_console(){
 }
 void exit_console(){
 	int i;
+	bool closed_console = true;
 	for (i = 0; i < list_size(process_list); i++) {
 	pthread_mutex_lock(&process_list_mutex);
 	t_process* process = list_get(process_list, i);
 	pthread_mutex_unlock(&process_list_mutex);
 	if (process->pid >= 0) {
-			runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
+			runFunction(process->socket, "console_abort_program", 2, string_itoa(process->pid), string_itoa(closed_console));
 			abort_program(process, FINALIZADO_CONSOLA);
 		}
 	}
@@ -279,7 +281,7 @@ void do_start_program(char* sel) {
 
 void abort_program(t_process* process, int exit_code) {
 	log_debug(logger, "abort_program: exit_code=%d", exit_code);
-	log_debug(logger, "  process es nulo? %s", process == NULL ? "true" : "false");
+	log_debug(logger, "  process is null? %s", process == NULL ? "true" : "false");
 
 	if (process == NULL)
 		return;
@@ -314,6 +316,7 @@ void abort_program(t_process* process, int exit_code) {
 
 void do_abort_program(char* sel) {
 	log_debug(logger, "do_abort_program: sel=%s", sel);
+	bool closed_console = false;
 
 	if (!strcmp(sel, "A")) {
 		char pid[255];
@@ -334,7 +337,7 @@ void do_abort_program(char* sel) {
 			pthread_mutex_unlock(&process_list_mutex);
 
 			if (!strcmp(string_itoa(process->pid), pid)) {
-				runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
+				runFunction(process->socket, "console_abort_program", 2, string_itoa(process->pid), string_itoa(closed_console));
 				abort_program(process, FINALIZADO_CONSOLA);
 				break;
 			}
