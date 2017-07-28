@@ -147,9 +147,9 @@ void kernel_receive_pcb(socket_connection* connection, char** args) {
 
 	printf("Finished executing.\n\n");
 	log_debug(logger, "cpu_task_finished");
-	signal(SIGINT, abrupted_finish);
-	signal(SIGUSR1, abrupted_finish);
-	signal(SIGKILL, abrupted_finish);
+	signal(SIGINT, exit);
+	signal(SIGUSR1, exit);
+	signal(SIGKILL, exit);
 }
 void kernel_response_malloc_pointer(socket_connection* connection, char** args) {
 	log_debug(logger, "kernel_response_malloc_pointer: malloc_pointer=%s", args[0]);
