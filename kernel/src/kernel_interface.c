@@ -422,10 +422,12 @@ void cpu_validate_file(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_validate_file");
 	char* path = args[0];
 	int pid = atoi(args[1]);
+	pthread_mutex_lock(&fs_request_mutex);
 	bool validate = validate_file_from_fs(path, pid);
 
 	//runFunction(connection->socket, "kernel_response_validate_file", 1, string_itoa(validate));
 	send_dynamic_message(connection->socket, string_itoa(validate));
+	pthread_mutex_unlock(&fs_request_mutex);
 }
 
 void cpu_open_file(socket_connection* connection, char** args) {
@@ -435,18 +437,21 @@ void cpu_open_file(socket_connection* connection, char** args) {
 	bool validate = atoi(args[2]);
 	int pid = atoi(args[3]);
 
+	pthread_mutex_lock(&fs_request_mutex);
 	if (!validate && string_contains(flags, "c")) {
 		runFunction(fs_socket, "kernel_create_file", 2, path, string_itoa(pid));
 		wait_response(&fs_mutex);
 		if (fs_response == 0) {
 			send_dynamic_message(connection->socket, string_itoa(ERROR_CREAR_ARCHIVO));
 			log_debug(logger, "Error de cpu_open_file que nunca deberia llegar");
+			pthread_mutex_unlock(&fs_request_mutex);
 			return;
 		}
 	}
 
 	int fd_assigned = open_file_in_process_table(path, flags, pid);
 	send_dynamic_message(connection->socket, string_itoa(fd_assigned));
+	pthread_mutex_unlock(&fs_request_mutex);
 	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(fd_assigned));
 }
 
@@ -455,12 +460,14 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 	int fd_delete = atoi(args[0]);
 	int pid = atoi(args[1]);
 
+	pthread_mutex_lock(&fs_request_mutex);
 	t_open_file* open_file = get_open_file_by_fd_and_pid(fd_delete, pid);
 	char* path = get_path_by_gfd(open_file->gfd);
 
 	int result = delete_file_from_global_table(open_file->gfd);
 	if (result < 0) {
 		send_dynamic_message(connection->socket, string_itoa(result));
+		pthread_mutex_unlock(&fs_request_mutex);
 		return;
 	}
 
@@ -470,20 +477,24 @@ void cpu_delete_file(socket_connection* connection, char** args) {
 		//TODO aca llega cuando delete_file = false, que no se que significa del lado de FileSystem xd
 		log_debug(logger, "Error de cpu_delete_file que nunca deberia llegar");
 		send_dynamic_message(connection->socket, string_itoa(ERROR_SIN_DEFINIR));
+		pthread_mutex_unlock(&fs_request_mutex);
 		return;
 	}
 
 	//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(gfd_delete));
 	send_dynamic_message(connection->socket, string_itoa(fd_delete));
+	pthread_mutex_unlock(&fs_request_mutex);
 }
 
 void cpu_close_file(socket_connection* connection, char** args) {
 	log_debug(logger, "cpu_close_file");
+	pthread_mutex_lock(&fs_request_mutex);
 	int fd_close = atoi(args[0]);
 	int pid = atoi(args[1]);
 
 	int result = close_file(fd_close, pid);
 	send_dynamic_message(connection->socket, string_itoa(result));
+	pthread_mutex_unlock(&fs_request_mutex);
 }
 
 void cpu_seek_file(socket_connection* connection, char** args) {
@@ -492,6 +503,7 @@ void cpu_seek_file(socket_connection* connection, char** args) {
 	int pos = atoi(args[1]);
 	int pid = atoi(args[2]);
 
+	pthread_mutex_lock(&fs_request_mutex);
 	bool result = set_pointer(pos, fd, pid);
 	if (result) {
 		send_dynamic_message(connection->socket, string_itoa(fd));
@@ -500,6 +512,7 @@ void cpu_seek_file(socket_connection* connection, char** args) {
 		send_dynamic_message(connection->socket, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 	}
+	pthread_mutex_unlock(&fs_request_mutex);
 }
 
 void cpu_write_file(socket_connection* connection, char** args) {
@@ -509,6 +522,7 @@ void cpu_write_file(socket_connection* connection, char** args) {
 	int size = atoi(args[2]);
 	int pid = atoi(args[3]);
 
+	pthread_mutex_lock(&fs_request_mutex);
 	int result = write_file(fd, pid, info, size);
 
 	//char* path = string_from_format("%s", get_path_by_fd_and_pid(fd, pid));
@@ -521,6 +535,7 @@ void cpu_write_file(socket_connection* connection, char** args) {
 	send_dynamic_message(connection->socket, string_itoa(fd));
 
 	log_debug(logger, "runFunction a socket: '%d', Resultado Kernel Escribir '%d'", connection->socket, result);
+	pthread_mutex_unlock(&fs_request_mutex);
 }
 
 void cpu_read_file(socket_connection* connection, char** args) {
@@ -530,6 +545,7 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	int size = atoi(args[2]);
 	int pid = atoi(args[3]);
 
+	pthread_mutex_lock(&fs_request_mutex);
 	t_open_file* process = get_open_file_by_fd_and_pid(fd, pid);
 	char* path = get_path_by_gfd(process->gfd);
 	char* flags = process->flag;
@@ -558,6 +574,7 @@ void cpu_read_file(socket_connection* connection, char** args) {
 	send_dynamic_message(connection->socket, string_itoa(fd));
 
 	log_debug(logger, "cpu_read_file: fd: '%d', fs_read_buffer: '%s", fd, fs_read_buffer);
+	pthread_mutex_unlock(&fs_request_mutex);
 }
 
 /*

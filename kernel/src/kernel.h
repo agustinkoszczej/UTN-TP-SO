@@ -212,6 +212,7 @@ pthread_mutex_t json_mutex;
 pthread_mutex_t mem_response;
 
 pthread_mutex_t fs_mutex;
+pthread_mutex_t fs_request_mutex;
 
 bool planning_running;
 

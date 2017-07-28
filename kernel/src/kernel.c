@@ -1099,6 +1099,7 @@ void init_kernel(t_config* config) {
 
 	pthread_mutex_init(&mem_response, NULL);
 	pthread_mutex_init(&fs_mutex, NULL);
+	pthread_mutex_init(&fs_request_mutex, NULL);
 
 	pthread_mutex_lock(&mem_response);
 	pthread_mutex_lock(&fs_mutex);
