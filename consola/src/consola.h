@@ -54,6 +54,7 @@ pthread_mutex_t messages_list_mutex;
 pthread_mutex_t process_list_mutex;
 pthread_mutex_t p_counter_mutex;
 pthread_mutex_t print_menu_mutex;
+pthread_mutex_t kill_console_mutex;
 
 int p_counter;
 

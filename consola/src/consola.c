@@ -222,6 +222,8 @@ void exit_console(){
 	log_debug(logger, "exit_console");
 	int i;
 	bool closed_console = true;
+
+	pthread_mutex_lock(&kill_console_mutex);
 	for (i = 0; i < list_size(process_list); i++) {
 	pthread_mutex_lock(&process_list_mutex);
 	t_process* process = list_get(process_list, i);
@@ -231,6 +233,7 @@ void exit_console(){
 			//abort_program(process, FINALIZADO_CONSOLA);
 		}
 	}
+	pthread_mutex_unlock(&kill_console_mutex);
 	exit(EXIT_SUCCESS);
 }
 void do_disconnect_console(char* sel) {
@@ -384,6 +387,7 @@ void init_console() {
 	pthread_mutex_init(&process_list_mutex, NULL);
 	pthread_mutex_init(&messages_list_mutex, NULL);
 	pthread_mutex_init(&print_menu_mutex, NULL);
+	pthread_mutex_init(&kill_console_mutex, NULL);
 
 	messages_list = list_create();
 	process_list = list_create();
