@@ -284,7 +284,7 @@ void remove_sem_pid_list(int pid) {
 					int process = get_first(sem->blocked_pids);
 					if(process > -1) {
 						pcb* _pcb = find_pcb_by_pid(process);
-						if(_pcb->state == BLOCK_LIST) {
+						if(_pcb->state == BLOCK_LIST && sem->value >= 0) {
 							char* temp = remove_first(sem->blocked_pids);
 							sem->blocked_pids = string_new();
 							string_append(&sem->blocked_pids, temp);
@@ -1531,10 +1531,11 @@ void remove_from_list_sems(int pid) {
 		int process = get_first(sem->blocked_pids);
 		if(process > -1) {
 			pcb* _pcb = find_pcb_by_pid(process);
-			if(_pcb->state == BLOCK_LIST) {
+			if(_pcb->state == BLOCK_LIST && sem->value >= 0) {
 				char* temp = remove_first(sem->blocked_pids);
 				sem->blocked_pids = string_new();
 				string_append(&sem->blocked_pids, temp);
+				sem->value++;
 				move_to_list(_pcb, READY_LIST);
 				short_planning();
 			}
