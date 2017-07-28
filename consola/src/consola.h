@@ -61,5 +61,6 @@ void new_message(char* text, int pid);
 void abort_program(t_process* process, int exit_code);
 t_process* find_process_by_pid(int pid);
 t_process* find_process_by_socket(int socket);
+void exit_console();
 
 #endif /* CONSOLA_H_ */

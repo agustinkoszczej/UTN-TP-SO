@@ -219,6 +219,7 @@ void disconnect_console(){
 	//exit(EXIT_SUCCESS);
 }
 void exit_console(){
+	log_debug(logger, "exit_console");
 	int i;
 	bool closed_console = true;
 	for (i = 0; i < list_size(process_list); i++) {
@@ -227,7 +228,7 @@ void exit_console(){
 	pthread_mutex_unlock(&process_list_mutex);
 	if (process->pid >= 0) {
 			runFunction(process->socket, "console_abort_program", 2, string_itoa(process->pid), string_itoa(closed_console));
-			abort_program(process, FINALIZADO_CONSOLA);
+			//abort_program(process, FINALIZADO_CONSOLA);
 		}
 	}
 	exit(EXIT_SUCCESS);
@@ -275,7 +276,9 @@ void do_start_program(char* sel) {
 
 		start_program(list_get(files, atoi(pos) - 1));
 	}
-
+	signal(SIGINT, exit_console);
+	signal(SIGUSR1, exit_console);
+	signal(SIGKILL, exit_console);
 	log_debug(logger, "do_start_program: void");
 }
 
@@ -376,6 +379,7 @@ void init_console() {
 	log_debug(logger, "init_console: void");
 
 	p_counter = 0;
+
 	pthread_mutex_init(&p_counter_mutex, NULL);
 	pthread_mutex_init(&process_list_mutex, NULL);
 	pthread_mutex_init(&messages_list_mutex, NULL);
@@ -434,6 +438,8 @@ int main(int argc, char *argv[]) {
 		do_disconnect_console(sel);
 		do_clear_messages(sel);
 		signal(SIGINT, exit_console);
+		signal(SIGUSR1, exit_console);
+		signal(SIGKILL, exit_console);
 	} while (true);
 
 	return EXIT_SUCCESS;
