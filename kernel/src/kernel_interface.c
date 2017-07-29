@@ -86,7 +86,7 @@ void console_load_program(socket_connection* connection, char** args) {
 }
 void console_abort_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
-
+	log_debug(logger, "console_abort_program: pid %d", pid);
 	pthread_mutex_lock(&abort_console_mutex);
 	pcb* l_pcb = find_pcb_by_pid(pid);
 	l_pcb->exit_code = FINALIZADO_CONSOLA;

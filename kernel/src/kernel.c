@@ -135,7 +135,7 @@ pcb* find_pcb_by_pid(int pid) {
 	}
 
 	int pos;
-	pcb* n_pcb = malloc(sizeof(pcb));
+	pcb* n_pcb;// = malloc(sizeof(pcb));
 	switch (socket_pcb->state) {
 		case NEW_LIST:
 			pos = find_pcb_pos_in_list(new_queue->elements, socket_pcb->pid);
