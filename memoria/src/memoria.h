@@ -46,6 +46,7 @@ pthread_mutex_t frames_cache_mutex;
 pthread_mutex_t mem_mutex;
 
 t_log* logger;
+t_log* dumper;
 
 char* frames_cache;
 char* frames;

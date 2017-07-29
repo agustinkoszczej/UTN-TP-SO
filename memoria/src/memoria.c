@@ -754,9 +754,10 @@ void dump(int pid) {
 
 	pthread_mutex_unlock(&frames_mutex);
 
-	log_debug(logger, "Content dumped: %s\n\n", dump_total);
+	log_debug(logger, "Content dumped -> Check dump.log");
 	clear_screen();
 	printf("%s\n", dump_total);
+	log_debug(dumper, "\n>PID: %d\n\n%s\n", pid, dump_total);
 
 	/*list_clean_and_destroy_elements(active_process, free);
 	 list_clean_and_destroy_elements(active_process_no_duplicates, free);*/
@@ -894,7 +895,10 @@ int main(int argc, char *argv[]) {
 	t_config* config = malloc(sizeof(t_config));
 
 	remove("log");
+	remove("dump");
 	logger = log_create("log", "MEMORY", false, LOG_LEVEL_DEBUG);
+	dumper = log_create("dump", "MEMORY", false, LOG_LEVEL_DEBUG);
+
 	create_function_dictionary();
 
 	load_config(&config, argc, argv[1]);
