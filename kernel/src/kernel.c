@@ -1546,7 +1546,7 @@ void remove_from_list_sems(int pid) {
 
 void stop_process(int pid) {
 	//log_debug(logger, "stop_process");
-	pcb* l_pcb = find_pcb_by_pid(pid);
+	pcb* l_pcb = find_pcb_by_pid2(pid);
 	if(l_pcb == NULL){
 		log_debug(logger, "stop_process doesnt exist pid %d", pid);
 		return;
