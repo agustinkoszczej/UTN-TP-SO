@@ -138,7 +138,8 @@ pcb* find_pcb_by_pid(int pid) {
 	pcb* n_pcb = malloc(sizeof(pcb));
 	switch (socket_pcb->state) {
 		case NEW_LIST:
-			n_pcb = queue_peek(new_queue);
+			pos = find_pcb_pos_in_list(new_queue->elements, socket_pcb->pid);
+			n_pcb = list_get(new_queue->elements, pos);
 			break;
 		case READY_LIST:
 			pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
@@ -153,7 +154,8 @@ pcb* find_pcb_by_pid(int pid) {
 			n_pcb = list_get(block_list, pos);
 			break;
 		case EXIT_LIST:
-			n_pcb = queue_peek(exit_queue);
+			pos = find_pcb_pos_in_list(exit_queue->elements, socket_pcb->pid);
+			n_pcb = list_get(exit_queue->elements, pos);
 			break;
 	}
 	pthread_mutex_unlock(&pcb_list_mutex);
@@ -221,7 +223,8 @@ pcb* find_pcb_by_socket(int socket) {
 		pcb* n_pcb = malloc(sizeof(pcb));
 		switch (socket_pcb->state) {
 			case NEW_LIST:
-				n_pcb = queue_peek(new_queue);
+				pos = find_pcb_pos_in_list(new_queue->elements, socket_pcb->pid);
+				n_pcb = list_get(new_queue->elements, pos);
 				break;
 			case READY_LIST:
 				pos = find_pcb_pos_in_list(ready_list, socket_pcb->pid);
@@ -236,7 +239,8 @@ pcb* find_pcb_by_socket(int socket) {
 				n_pcb = list_get(block_list, pos);
 				break;
 			case EXIT_LIST:
-				n_pcb = queue_peek(exit_queue);
+				pos = find_pcb_pos_in_list(exit_queue->elements, socket_pcb->pid);
+				n_pcb = list_get(exit_queue->elements, pos);
 				break;
 		}
 		pthread_mutex_unlock(&pcb_list_mutex);
@@ -321,7 +325,8 @@ void move_to_list(pcb* pcb, int list_name) {
 
 	switch (pcb->state) {
 		case NEW_LIST:
-			queue_pop(new_queue);
+			pos = find_pcb_pos_in_list(new_queue->elements, pcb->pid);
+			list_remove(new_queue->elements, pos);
 			break;
 		case READY_LIST:
 			pos = find_pcb_pos_in_list(ready_list, pcb->pid);
@@ -336,7 +341,8 @@ void move_to_list(pcb* pcb, int list_name) {
 			list_remove(block_list, pos);
 			break;
 		case EXIT_LIST:
-			queue_pop(exit_queue);
+			pos = find_pcb_pos_in_list(exit_queue->elements, pcb->pid);
+			list_remove(exit_queue->elements, pos);
 			break;
 	}
 
