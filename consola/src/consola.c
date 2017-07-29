@@ -177,7 +177,7 @@ void start_program(char* location) {
 
 	if ((process->socket = connectServer(ip, port, fns, &server_connectionClosed, NULL)) == -1) {
 		log_error(logger, "Error at connecting to KERNEL. IP = %s, Port = %d.", ip, port);
-		new_message("Error at creating process.", -1);
+		//new_message("Error at creating process.", -1);
 		return;
 	}
 	//log_debug(logger, "Connected to KERNEL. Socket = %d, IP = %s, Port = %d.", process->socket, ip, port);
