@@ -207,6 +207,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 
 	if (finished) {
 		if (n_pcb->exit_code == FINALIZADO_CONSOLA || n_pcb->exit_code == FINALIZADO_KERNEL) {
+			remove_from_list_sems(n_pcb->pid);
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
 			if(heap_pos >= 0)
 				list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
@@ -219,6 +220,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 		} else if (is_locked) {
 			move_to_list(o_pcb, BLOCK_LIST);
 		} else {
+			remove_from_list_sems(n_pcb->pid);
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
 			if(heap_pos >= 0)
 				list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
@@ -237,6 +239,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 		if (n_pcb->exit_code != FINALIZADO_CONSOLA && n_pcb->exit_code != FINALIZADO_KERNEL) {
 			move_to_list(o_pcb, READY_LIST);
 		} else {
+			remove_from_list_sems(n_pcb->pid);
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
 			if(heap_pos >= 0)
 				list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
