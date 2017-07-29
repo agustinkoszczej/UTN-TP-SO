@@ -66,6 +66,8 @@ int stack_size;
 int quantum_sleep;
 int planning_alg;
 
+t_list* pending_process_to_kill;
+
 typedef struct {
 	int pid;
 	int socket;
@@ -246,6 +248,7 @@ void free_memory(int pid, int pointer);
 void remove_from_list_sems(int pid);
 void check_new_list();
 bool remove_program_code_by_pid(int pid);
+void kill_pending_process();
 
 /*
  * FILESYSTEM

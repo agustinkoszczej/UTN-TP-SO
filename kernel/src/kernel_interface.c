@@ -88,6 +88,9 @@ void console_abort_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
 
 	pthread_mutex_lock(&abort_console_mutex);
+	list_add(pending_process_to_kill, pid);
+	log_debug(logger, "added to pending_process_to_kill pid %d", pid);
+
 	pcb* l_pcb = find_pcb_by_pid(pid);
 	l_pcb->exit_code = FINALIZADO_CONSOLA;
 
@@ -217,10 +220,10 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			bool not_loaded = remove_program_code_by_pid(n_pcb->pid);
 			if(!not_loaded)
 				substract_process_in_memory();
-			move_to_list(o_pcb, EXIT_LIST);
+			move_to_list(n_pcb, EXIT_LIST);
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 		} else if (is_locked) {
-			move_to_list(o_pcb, BLOCK_LIST);
+			move_to_list(n_pcb, BLOCK_LIST);
 		} else {
 			remove_from_list_sems(n_pcb->pid);
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
@@ -239,7 +242,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 		}
 	} else {
 		if (n_pcb->exit_code != FINALIZADO_CONSOLA && n_pcb->exit_code != FINALIZADO_KERNEL) {
-			move_to_list(o_pcb, READY_LIST);
+			move_to_list(n_pcb, READY_LIST);
 		} else {
 			remove_from_list_sems(n_pcb->pid);
 			int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, n_pcb->pid);
@@ -249,7 +252,7 @@ void cpu_task_finished(socket_connection* connection, char** args) {
 			bool not_loaded = remove_program_code_by_pid(n_pcb->pid);
 			if(!not_loaded)
 				substract_process_in_memory();
-			move_to_list(o_pcb, EXIT_LIST);
+			move_to_list(n_pcb, EXIT_LIST);
 			runFunction(mem_socket, "i_finish_program", 1, string_itoa(n_pcb->pid));
 		}
 	}

@@ -33,6 +33,7 @@ t_cpu* get_cpu_free() {
 
 void short_planning() {
 	log_debug(logger, "short_planning");
+	kill_pending_process();
 	pthread_mutex_lock(&planning_mutex);
 	if (planning_running && is_cpu_free() && list_size(ready_list) > 0) {
 		t_cpu* free_cpu = get_cpu_free();
@@ -1193,6 +1194,7 @@ void init_kernel(t_config* config) {
 
 	fs_process_table = list_create();
 	fs_global_table = list_create();
+	pending_process_to_kill = list_create();
 
 	heap_stats_list = list_create();
 	process_heap_pages = list_create();
@@ -1474,6 +1476,19 @@ void check_new_list() {
 		can_check_programs = true;
 }
 
+void kill_pending_process(){
+	int i;
+	for (i=0; list_size(pending_process_to_kill);i++){
+		int pid = list_get(pending_process_to_kill, i);
+		log_debug(logger, "kill_pending_process: pid: %d", pid);
+		stop_process(pid);
+		list_remove(pending_process_to_kill, i);
+		i--;
+		pcb* n_pcb = find_pcb_by_pid(pid);
+		n_pcb->exit_code = FINALIZADO_CONSOLA;
+	}
+}
+
 void do_change_multiprogramming(char* sel) {
 	if (!strcmp(sel, "M")) {
 		char multi[255];
@@ -1569,7 +1584,8 @@ void stop_process(int pid) {
 		if(l_pcb->state == BLOCK_LIST)
 			remove_from_list_sems(l_pcb->pid);
 		int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, l_pcb->pid);
-		list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
+		if(heap_pos >= 0)
+			list_remove_and_destroy_element(process_heap_pages, heap_pos, &free_heap);
 		close_all_files_by_pid(l_pcb->pid);
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
