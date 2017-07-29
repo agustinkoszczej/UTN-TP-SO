@@ -159,7 +159,7 @@ void start_program(char* location) {
 	FILE* file = fopen(string_from_format("resources/%s", location), "r");
 	if (file == NULL) {
 		log_error(logger, "Couldn't open file %s", location);
-		new_message("Couldn't open file", -1);
+		//new_message("Couldn't open file", -1);
 		return;
 	}
 
