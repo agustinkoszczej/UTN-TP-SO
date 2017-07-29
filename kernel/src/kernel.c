@@ -1478,12 +1478,11 @@ void check_new_list() {
 
 void kill_pending_process(){
 	int i;
-	for (i=0; list_size(pending_process_to_kill);i++){
+	for (i=0; i < list_size(pending_process_to_kill); i++){
 		int pid = list_get(pending_process_to_kill, i);
 		log_debug(logger, "kill_pending_process: pid: %d", pid);
 		stop_process(pid);
 		list_remove(pending_process_to_kill, i);
-		i--;
 		pcb* n_pcb = find_pcb_by_pid(pid);
 		n_pcb->exit_code = FINALIZADO_CONSOLA;
 	}
