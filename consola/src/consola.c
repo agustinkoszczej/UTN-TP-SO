@@ -209,13 +209,13 @@ void ask_option(char *sel) {
 }
 void disconnect_console(){
 	int i;
-	for (i = 0; i < list_size(process_list); i++) {
-	pthread_mutex_lock(&process_list_mutex);
-	t_process* process = list_get(process_list, i);
-	pthread_mutex_unlock(&process_list_mutex);
-	if (process->pid >= 0) {
-			runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
-			abort_program(process, FINALIZADO_CONSOLA);
+	for (i = list_size(process_list) - 1; i >= 0; i--) {
+		pthread_mutex_lock(&process_list_mutex);
+		t_process* process = list_get(process_list, i);
+		pthread_mutex_unlock(&process_list_mutex);
+		if (process->pid >= 0) {
+				runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
+				abort_program(process, FINALIZADO_CONSOLA);
 		}
 	}
 	//exit(EXIT_SUCCESS);
@@ -225,14 +225,12 @@ void exit_console(){
 	int i;
 
 	pthread_mutex_lock(&kill_console_mutex);
-	for (i = 0; i < list_size(process_list); i++) {
-	pthread_mutex_lock(&process_list_mutex);
-	t_process* process = list_get(process_list, i);
-	pthread_mutex_unlock(&process_list_mutex);
-	if (process->pid >= 0) {
+	for (i = list_size(process_list) - 1; i >= 0; i--) {
+		pthread_mutex_lock(&process_list_mutex);
+		t_process* process = list_get(process_list, i);
+		pthread_mutex_unlock(&process_list_mutex);
+		if (process->pid >= 0)
 			runFunction(process->socket, "console_abort_program", 1, string_itoa(process->pid));
-			//abort_program(process, FINALIZADO_CONSOLA);
-		}
 	}
 	pthread_mutex_unlock(&kill_console_mutex);
 	exit(EXIT_SUCCESS);
