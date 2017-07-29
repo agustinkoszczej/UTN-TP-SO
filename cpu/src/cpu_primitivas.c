@@ -596,7 +596,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 	}
 
 	//free(informacion);
-	free(buffer);
+	//free(buffer);
 	free(fd);
 	free(size);
 	free(pid);
@@ -631,7 +631,5 @@ void kernel_leer(t_descriptor_archivo descriptor_archivo, t_puntero informacion,
 	if (descriptor_archivo < 0) {
 		pcb_actual->exit_code = descriptor_archivo;
 		cpu_finalizar();
-	}else{
-
 	}
 }
