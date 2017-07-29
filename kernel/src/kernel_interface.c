@@ -109,6 +109,9 @@ void console_abort_program(socket_connection* connection, char** args) {
 		move_to_list(l_pcb, EXIT_LIST);
 	}
 
+	if (process_in_memory + 1 <= multiprog)
+		check_new_list();
+
 	pthread_mutex_unlock(&abort_console_mutex);
 }
 

@@ -566,11 +566,11 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 
 	char* buffer = string_new();
 	//memcpy(buffer, informacion, tamanio);
-	if (descriptor_archivo == 1){
-		memcpy(buffer, informacion, tamanio);
-	}else{
+	//if (descriptor_archivo == 1){
+		//memcpy(buffer, informacion, tamanio);
+	//}else{
 		string_append(&buffer, string_substring_until((char*) informacion, tamanio));
-	}
+	//}
 
 	char* fd = string_itoa(descriptor_archivo);
 	char* size = string_itoa(tamanio);

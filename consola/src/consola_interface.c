@@ -18,8 +18,7 @@ void kernel_stop_process(socket_connection* connection, char** args) {
 }
 
 void kernel_print_message(socket_connection* connection, char** args) {
-	char* message = string_new();
-	strcpy(message, args[0]);
+	char* message = string_from_format("%s", args[0]);
 	int pid = atoi(args[1]);
 
 	log_debug(logger, "kernel_print_message: message=%s, pid=%d", message, pid);
