@@ -596,7 +596,7 @@ void kernel_escribir(t_descriptor_archivo descriptor_archivo, void* informacion,
 	}
 
 	//free(informacion);
-	//free(buffer);
+	free(buffer);
 	free(fd);
 	free(size);
 	free(pid);
