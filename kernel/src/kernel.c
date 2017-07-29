@@ -181,7 +181,7 @@ pcb* find_pcb_by_pid2(int pid) {
 	}
 
 	int pos;
-	pcb* n_pcb = malloc(sizeof(pcb));
+	pcb* n_pcb;// = malloc(sizeof(pcb));
 	switch (socket_pcb->state) {
 		case NEW_LIST:
 			pos = find_pcb_pos_in_list(new_queue->elements, socket_pcb->pid);
@@ -220,7 +220,7 @@ pcb* find_pcb_by_socket(int socket) {
 	t_socket_pcb* socket_pcb = list_find(socket_pcb_list, &find);
 	if (socket_pcb != NULL) {
 		int pos;
-		pcb* n_pcb = malloc(sizeof(pcb));
+		pcb* n_pcb;// = malloc(sizeof(pcb));
 		switch (socket_pcb->state) {
 			case NEW_LIST:
 				pos = find_pcb_pos_in_list(new_queue->elements, socket_pcb->pid);

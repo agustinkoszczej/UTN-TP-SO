@@ -86,7 +86,7 @@ void console_load_program(socket_connection* connection, char** args) {
 }
 void console_abort_program(socket_connection* connection, char** args) {
 	int pid = atoi(args[0]);
-	log_debug(logger, "console_abort_program: pid %d", pid);
+
 	pthread_mutex_lock(&abort_console_mutex);
 	pcb* l_pcb = find_pcb_by_pid(pid);
 	l_pcb->exit_code = FINALIZADO_CONSOLA;
@@ -95,7 +95,7 @@ void console_abort_program(socket_connection* connection, char** args) {
 		t_heap_manage* heap = element;
 		free(heap);
 	}
-
+	log_debug(logger, "console_abort_program: pid %d, l_pcb->pid: %d, l_pcb->state: %d", pid, l_pcb->pid, l_pcb->state);
 	if (l_pcb->state != EXEC_LIST) {
 		remove_from_list_sems(l_pcb->pid);
 		int heap_pos = find_heap_pages_pos_in_list(process_heap_pages, l_pcb->pid);
@@ -184,10 +184,9 @@ void set_new_pcb(pcb** o_pcb, pcb* n_pcb) {
 	*o_pcb = n_pcb;
 }
 void cpu_task_finished(socket_connection* connection, char** args) {
-	log_debug(logger, "cpu_task_finished");
-
 	pthread_mutex_lock(&json_mutex);
 	pcb* n_pcb = string_to_pcb(args[0]);
+	log_debug(logger, "cpu_task_finished: pid: %d", n_pcb->pid);
 	pthread_mutex_unlock(&json_mutex);
 	bool finished = atoi(args[1]);
 	bool is_locked = atoi(args[2]);
