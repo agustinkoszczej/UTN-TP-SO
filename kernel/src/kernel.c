@@ -1574,10 +1574,10 @@ void stop_process(int pid) {
 		substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 		move_to_list(l_pcb, EXIT_LIST);
-	}
 
-	if (process_in_memory + 1 <= multiprog)
-		check_new_list();
+		if (l_pcb->state != BLOCK_LIST && process_in_memory + 1 <= multiprog)
+			check_new_list();
+	}
 
 	t_socket_pcb* socket_pcb = find_socket_by_pid(pid);
 	runFunction(socket_pcb->socket, "kernel_stop_process", 2, string_itoa(pid), string_itoa(FINALIZADO_KERNEL));

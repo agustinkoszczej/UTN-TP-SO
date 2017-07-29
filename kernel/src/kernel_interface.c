@@ -107,10 +107,10 @@ void console_abort_program(socket_connection* connection, char** args) {
 			substract_process_in_memory();
 		runFunction(mem_socket, "i_finish_program", 1, string_itoa(l_pcb->pid));
 		move_to_list(l_pcb, EXIT_LIST);
-	}
 
-	if (process_in_memory + 1 <= multiprog)
-		check_new_list();
+		if (l_pcb->state != BLOCK_LIST && process_in_memory + 1 <= multiprog)
+			check_new_list();
+	}
 
 	pthread_mutex_unlock(&abort_console_mutex);
 }
