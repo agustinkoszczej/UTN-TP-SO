@@ -550,6 +550,7 @@ void cpu_write_file(socket_connection* connection, char** args) {
 	if (result < 0) {
 		//runFunction(connection->socket, "kernel_response_file", 1, string_itoa(ARCHIVO_SIN_ABRIR_PREVIAMENTE));
 		send_dynamic_message(connection->socket, string_itoa(result));
+		pthread_mutex_unlock(&fs_request_mutex);
 		return;
 	}
 	//runFunction(connection->socket, "kernel_response", 1, string_itoa(fd));
