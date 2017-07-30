@@ -9,6 +9,13 @@ make all
 cd ..
 cd ..
 
+cd config_maker
+cd Debug
+make clean
+make all
+cd ..
+cd ..
+
 cd consola
 cd Debug
 make clean
