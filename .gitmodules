@@ -3,4 +3,4 @@
 	url = https://github.com/sisoputnfrba/so-commons-library
 [submodule "ansisop-parser"]
 	path = ansisop-parser
-	url = https://github.com/sisoputnfrba/ansisop-parser/tree/09d009d0f52c5c7dc45e2a81b6ea118644864904
+	url = https://github.com/sisoputnfrba/ansisop-parser
