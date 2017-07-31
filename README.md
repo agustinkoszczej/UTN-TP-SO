@@ -1,7 +1,8 @@
 # **Sistemas Operativos UTN FRBA - TP 2017 1C:**
 # **Lords of the Strings**
  
- ![GitHub ESTher](/ESTher.png)
+![GitHub ESTher](/ESTher.png)
+ 
 ## **ESTheR: El Stack The Revenge**
 El trabajo práctico consiste en simular ciertos aspectos de un sistema multiprocesador, con la
 capacidad de interpretar la ejecución de scripts escritos en un lenguaje diseñado para el trabajo
@@ -22,7 +23,7 @@ manera persistente.
 Por último los procesos consola serán los encargados de enviar a ejecutar los programas AnSISOP al
 Kernel.
 
-![GitHub SystemArchitecture.png](/SystemArchitecture.png)
+![GitHub SystemArchitecture](/SystemArchitecture.png)
 
 ## **Integrantes:**
 
