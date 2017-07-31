@@ -71,7 +71,6 @@ void kernel() {
 	fprintf(f, "PUERTO_PROG=5000\n");
 	fprintf(f, "PUERTO_CPU=5001\n");
 	fprintf(f, "IP_MEMORIA=%s", ip_vm4);
-	fprintf(f, "IP_FILESYSTEM=%s", ip_vm3);
 	fprintf(f, "PUERTO_MEMORIA=5002\n");
 	fprintf(f, "IP_FS=%s", ip_vm3);
 	fprintf(f, "PUERTO_FS=5003\n");

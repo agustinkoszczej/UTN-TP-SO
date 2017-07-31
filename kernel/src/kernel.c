@@ -1,7 +1,7 @@
 #include "kernel.h"
 
 const char* CONFIG_FIELDS[] = { PUERTO_PROG, PUERTO_CPU,
-IP_MEMORIA, IP_FILESYSTEM, PUERTO_MEMORIA, IP_FS, PUERTO_FS, QUANTUM,
+IP_MEMORIA, PUERTO_MEMORIA, IP_FS, PUERTO_FS, QUANTUM,
 QUANTUM_SLEEP, ALGORITMO, GRADO_MULTIPROG, SEM_IDS, SEM_INIT,
 SHARED_VARS, STACK_SIZE };
 
@@ -1086,7 +1086,7 @@ void connect_to_server(t_config* config, char* name) {
 	int* socket;
 
 	if (!strcmp(name, FILESYSTEM)) {
-		ip_server = config_get_string_value(config, IP_FILESYSTEM);
+		ip_server = config_get_string_value(config, IP_FS);
 		port = config_get_int_value(config, PUERTO_FS);
 		socket = &fs_socket;
 	} else if (!strcmp(name, MEMORY)) {

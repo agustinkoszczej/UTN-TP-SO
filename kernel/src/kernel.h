@@ -42,7 +42,6 @@
 #define PUERTO_PROG "PUERTO_PROG"
 #define PUERTO_CPU "PUERTO_CPU"
 #define IP_MEMORIA "IP_MEMORIA"
-#define IP_FILESYSTEM "IP_FILESYSTEM"
 #define PUERTO_MEMORIA "PUERTO_MEMORIA"
 #define IP_FS "IP_FS"
 #define PUERTO_FS "PUERTO_FS"
@@ -54,7 +53,7 @@
 #define SEM_INIT "SEM_INIT"
 #define SHARED_VARS "SHARED_VARS"
 #define STACK_SIZE "STACK_SIZE"
-#define CONFIG_FIELDS_N 15
+#define CONFIG_FIELDS_N 14
 
 char* path_config;
 t_config *config;
