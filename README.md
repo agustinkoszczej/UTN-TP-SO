@@ -26,23 +26,21 @@ Kernel.
 
 ## **Integrantes:**
 
-| Apellido | Nombre | Github | Estado |
-| -------- | -------- | -------- | ---- |
-| Koszczej | Agustín | [agustinkoszczej](https://github.com/agustinkoszczej) | :white_check_mark: |
-| ~~Manchione~~ | ~~Bruno~~ | [~~BrunoManchione~~](https://github.com/BrunoManchione) | :x: |
-| ~~Ortiz~~ | ~~Marcos~~ | [~~ortizmarcosn~~](https://github.com/ortizmarcosn) | :x: |
-| Plawner | Sebastián | [sebaplawner](https://github.com/sebaplawner) | :white_check_mark: |
-| ~~Villalba~~ | ~~Matías~~ | [~~Matu96~~](https://github.com/Matu96) | :x: |
+| Apellido | Nombre | Github |
+| -------- | -------- | -------- |
+| Koszczej | Agustín | [agustinkoszczej](https://github.com/agustinkoszczej) |
+| Plawner | Sebastián | [sebaplawner](https://github.com/sebaplawner) |
 
 ## **Procesos:**
 
-* Consola
-* CPU
-* File System
-* Kernel
-* Memoria
+* [Consola](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/consola)
+* [CPU](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/cpu)
+* [File System](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/filesystem)
+* [Kernel](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/kernel)
+* [Memoria](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/memoria)
 
 ## **Checkpoints:**
+
 * ~~Checkpoint 1 - Obligatorio~~
   * ~~Fecha: 15/04/2017~~
   
@@ -106,4 +104,3 @@ Kernel.
     
 ## **Github:**
 * https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings
-
