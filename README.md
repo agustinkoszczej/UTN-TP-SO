@@ -22,7 +22,7 @@ manera persistente.
 Por último los procesos consola serán los encargados de enviar a ejecutar los programas AnSISOP al
 Kernel.
 
-![GitHub SystemArchitecture.png](/SystemArchitecture.png)
+![GitHub SystemArchitecture](/SystemArchitecture.png)
 
 ## **Integrantes:**
 
