@@ -73,7 +73,7 @@ Kernel.
 
     git clone https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings
     
-#### 3. Clonar e instalar las [so-commons-library](https://github.com/sisoputnfrba/so-commons-library) y el [ansisop-parser](https://github.com/sisoputnfrba/ansisop-parser)
+#### 3. Clonar e instalar las [so-commons-library](https://github.com/sisoputnfrba/so-commons-library/tree/1dd52d058e5c468f7dbe83ad8579a059d5c5ff38) y el [ansisop-parser](https://github.com/sisoputnfrba/ansisop-parser/tree/f390532f020c3b158932df8e745c75fa0ca10764)
 
      git submodule init 
      git submodule update
