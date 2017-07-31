@@ -1,4 +1,4 @@
-# Proceso Consola
+## Proceso Consola
 El proceso consola es el proceso encargado de enviar a ejecutar los Programas AnSISOP así como
 también funcionar como su interfaz tanto para recibir los mensajes que el programa necesite
 imprimir por pantalla, como los diferentes resultados de su ejecución. El proceso consola será capaz
