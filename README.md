@@ -94,15 +94,15 @@ Kernel.
     
 *RutaConfig: `config` por default*
 
-## **Comandos Útiles**
+### **Comandos Útiles**
 
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspace/tp-2017-1c-Lords-of-the-Strings/utils/Debug
+`export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspace/tp-2017-1c-Lords-of-the-Strings/utils/Debug` 
     
-    sudo chmod +x path.sh
+`sudo chmod +x path.sh`
+   
+`source path.sh`
     
-    source path.sh
-    
-    ifconfig
+`ifconfig`
     
 ## **Github:**
 * https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings
