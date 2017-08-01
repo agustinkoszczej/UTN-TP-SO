@@ -4,3 +4,4 @@
 * [Pruebas](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/blob/master/docs/1C2017-ESTheR-Pruebas.pdf)
 * [Fe de Erratas](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/blob/master/docs/errata.md)
 * [Foro de Issues](https://github.com/sisoputnfrba/foro/issues)
+* [Herramientas auxiliares (ansisop-parser/so-commons-library/cspec)](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/blob/master/docs/Tools.tar.gz)
