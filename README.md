@@ -34,11 +34,11 @@ Kernel.
 
 ## **Procesos:**
 
-* [Consola](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/consola)
-* [CPU](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/cpu)
-* [File System](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/filesystem)
-* [Kernel](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/kernel)
-* [Memoria](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/memoria)
+* [Consola](https://github.com/agustinkoszczej/UTN-TP-SO/tree/master/consola)
+* [CPU](https://github.com/agustinkoszczej/UTN-TP-SO/tree/master/cpu)
+* [File System](https://github.com/agustinkoszczej/UTN-TP-SO/tree/master/filesystem)
+* [Kernel](https://github.com/agustinkoszczej/UTN-TP-SO/tree/master/kernel)
+* [Memoria](https://github.com/agustinkoszczej/UTN-TP-SO/tree/master/memoria)
 
 ## **Checkpoints:**
 
@@ -82,7 +82,7 @@ Kernel.
 
      sh compile.sh
     
-#### 5. Importar para cada módulo las [librerías comunes](https://github.com/sisoputnfrba/tp-2017-1c-Lords-of-the-Strings/tree/master/utils)
+#### 5. Importar para cada módulo las [librerías comunes](https://github.com/agustinkoszczej/UTN-TP-SO/tree/master/utils)
 
      source import_libraries.sh
 
