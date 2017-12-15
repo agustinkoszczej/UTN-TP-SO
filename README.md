@@ -93,6 +93,14 @@ Kernel.
     
 *RutaConfig: `config` por default*
 
+#### Importante:
+Recordar que algunos módulos requieren que otros estén en ejecución para iniciar, este es el órden para arrancar los módulos:
+      
+     1. Memoria/File System
+     2. Kernel
+     3. CPU/s
+     4. Consola/s
+
 ### **Comandos Útiles**
 
 `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/workspace/tp-2017-1c-Lords-of-the-Strings/utils/Debug` 
